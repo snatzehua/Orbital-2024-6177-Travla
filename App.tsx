@@ -1,0 +1,61 @@
+import React, { useEffect } from "react";
+import Animated from "react-native-reanimated";
+import * as Font from "expo-font";
+import { StatusBar } from "expo-status-bar";
+import {
+  Button,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+import Login from "./src/screens/Login";
+import Homepage from "./src/screens/Homepage";
+
+const Stack = createNativeStackNavigator();
+
+export default function App() {
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        "Arimo-Bold": require("./assets/fonts/Arimo-Bold.ttf"),
+        "Arimo-Regular": require("./assets/fonts/Arimo-Regular.ttf"),
+      });
+    }
+
+    loadFonts();
+  }, []);
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Homepage" component={Homepage} />
+        <Stack.Screen name="Login" component={Login} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "column",
+    backgroundColor: "#EBEBEB",
+    alignItems: "flex-start",
+    padding: 20,
+  },
+  logo: {
+    flex: 1,
+    resizeMode: "contain",
+    width: 200,
+  },
+  title: {
+    fontSize: 36,
+    fontFamily: "Arimo-Bold",
+  },
+});
