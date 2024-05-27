@@ -16,6 +16,7 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 import CustomInput from "./components/CustomInput";
 import CustomButton from "./components/CustomButtom";
@@ -38,12 +39,36 @@ const Register = () => {
 
   // Defining hooks for email and password
   const [email, setEmail] = useState("");
-  const [password1, setPassword1] = useState("");
-  const [password2, setPassword2] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
   // Defining button press functions
-  const pressLoginButton = () => {
-    navigation.navigate("Login");
+  const handleSignUp = async () => {
+    // Check fields are filled
+    if (email == "" || password == "" || confirmPassword == "") {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    try {
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      setError("");
+      // Check for cases
+    } catch (error: any) {
+      setError(error.message);
+    }
   };
 
   const pressGoogleLoginButton = () => {
@@ -52,6 +77,10 @@ const Register = () => {
 
   const pressFacebookLoginButton = () => {
     console.warn("Google Login pressed");
+  };
+
+  const pressLoginButton = () => {
+    navigation.navigate("Login");
   };
 
   return (
@@ -79,6 +108,15 @@ const Register = () => {
             <View style={styles.title_container}>
               <Text style={styles.title_text}>Create an Account</Text>
             </View>
+            <View
+              style={
+                error == ""
+                  ? styles.error_container_empty
+                  : styles.error_container_full
+              }
+            >
+              <Text style={styles.error_text}>{error}</Text>
+            </View>
             <CustomInput
               value={email}
               setValue={setEmail}
@@ -86,22 +124,23 @@ const Register = () => {
               secureTextEntry={false}
             />
             <CustomInput
-              value={password1}
-              setValue={setPassword1}
+              value={password}
+              setValue={setPassword}
               placeholder="Create password"
               secureTextEntry={true}
             />
             <CustomInput
-              value={password2}
-              setValue={setPassword2}
+              value={confirmPassword}
+              setValue={setConfirmPassword}
               placeholder="Confirm password"
               secureTextEntry={true}
+              onSubmitEditing={handleSignUp}
             />
             <CustomButton
               text="Register"
-              onPress={pressLoginButton}
+              onPress={handleSignUp}
               containerStyle={styles.register_container}
-              textStyle={styles.login_text}
+              textStyle={styles.register_text}
             />
             <View
               style={{
@@ -174,25 +213,41 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   title_container: {
-    margin: 20,
+    margin: 10,
   },
   title_text: {
     fontFamily: "Arimo-Bold",
     fontSize: 28,
   },
-  login_text: {
-    fontFamily: "Arimo-Bold",
+  error_container_empty: {
+    minHeight: 20,
+    paddingVertical: 3,
+    marginBottom: 10,
+  },
+  error_container_full: {
+    backgroundColor: "#FFF3F3",
+    borderWidth: 1,
+    borderColor: "#FF1705",
+    borderRadius: 5,
+    alignItems: "center",
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    marginBottom: 10,
+  },
+  error_text: {
+    color: "#FF1705",
+    minHeight: 18,
   },
   register_container: {
     backgroundColor: "#FFB000",
     width: "90%",
-
-    borderColor: "#FFB000",
     borderRadius: 5,
     alignItems: "center",
-
     padding: 10,
-    marginTop: 15,
+    marginTop: 5,
+  },
+  register_text: {
+    fontFamily: "Arimo-Bold",
   },
   login_container: {},
   link_text: {

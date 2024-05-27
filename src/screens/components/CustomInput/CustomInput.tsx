@@ -6,6 +6,7 @@ interface CustomInputProps extends TextInputProps {
   setValue: (newValue: string) => void;
   placeholder: string;
   secureTextEntry: boolean;
+  onSubmitEditing: () => void;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -13,6 +14,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   setValue,
   placeholder,
   secureTextEntry,
+  onSubmitEditing,
 }) => {
   return (
     <View style={styles.container}>
@@ -22,6 +24,8 @@ const CustomInput: React.FC<CustomInputProps> = ({
         placeholder={placeholder}
         style={styles.input}
         secureTextEntry={secureTextEntry}
+        onSubmitEditing={onSubmitEditing}
+        autoCapitalize="none"
       />
     </View>
   );

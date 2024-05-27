@@ -16,6 +16,7 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 import CustomInput from "./components/CustomInput";
 import CustomButton from "./components/CustomButtom";
@@ -24,6 +25,7 @@ const Login = () => {
   // Typing for navigation
   type RootStackParamList = {
     Register: undefined;
+    Home: undefined;
   };
   const Stack = createNativeStackNavigator<RootStackParamList>();
   const navigation =
@@ -39,18 +41,34 @@ const Login = () => {
   // Defining hooks for email and password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   // Defining button press functions
-  const pressLoginButton = () => {
-    console.warn("Login pressed");
+  const handleLogin = async () => {
+    // Check fields are filled
+    if (email == "" || password == "") {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      setError("");
+      // Check for cases (so what is user?)
+      const user = userCredential.user;
+      navigation.navigate("Home");
+    } catch (error: any) {
+      setError(error.message);
+    }
   };
 
   const pressForgotPasswordButton = () => {
     console.warn("Forgot password pressed");
-  };
-
-  const pressRegisterButton = () => {
-    navigation.navigate("Register");
   };
 
   const pressGoogleLoginButton = () => {
@@ -59,6 +77,10 @@ const Login = () => {
 
   const pressFacebookLoginButton = () => {
     console.warn("Google Login pressed");
+  };
+
+  const pressRegisterButton = () => {
+    navigation.navigate("Register");
   };
 
   return (
@@ -87,6 +109,15 @@ const Login = () => {
               justifyContent: "center",
             }}
           >
+            <View
+              style={
+                error == ""
+                  ? styles.error_container_empty
+                  : styles.error_container_full
+              }
+            >
+              <Text style={styles.error_text}>{error}</Text>
+            </View>
             <CustomInput
               value={email}
               setValue={setEmail}
@@ -98,10 +129,11 @@ const Login = () => {
               setValue={setPassword}
               placeholder="Password"
               secureTextEntry={true}
+              onSubmitEditing={handleLogin}
             />
             <CustomButton
               text="Login"
-              onPress={pressLoginButton}
+              onPress={handleLogin}
               containerStyle={styles.login_container}
               textStyle={styles.login_text}
             />
@@ -186,16 +218,32 @@ const styles = StyleSheet.create({
     height: "20%",
     marginBottom: "5%",
   },
+  error_container_empty: {
+    minHeight: 20,
+    paddingVertical: 3,
+    marginBottom: 10,
+  },
+  error_container_full: {
+    backgroundColor: "#FFF3F3",
+    borderWidth: 1,
+    borderColor: "#FF1705",
+    borderRadius: 10,
+    alignItems: "center",
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    marginBottom: 10,
+  },
+  error_text: {
+    color: "#FF1705",
+    minHeight: 18,
+  },
   login_container: {
     backgroundColor: "#FFB000",
     width: "90%",
-
-    borderColor: "#FFB000",
     borderRadius: 5,
     alignItems: "center",
-
     padding: 10,
-    marginTop: 15,
+    marginTop: 5,
   },
   login_text: {
     fontFamily: "Arimo-Bold",

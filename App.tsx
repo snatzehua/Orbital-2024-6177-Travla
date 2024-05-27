@@ -13,12 +13,19 @@ import {
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { getApps, initializeApp } from "firebase/app";
+import { onAuthStateChanged } from "firebase/auth";
+import firebaseConfig from "./firebaseConfig";
 
 import Login from "./src/screens/Login";
 import Register from "./src/screens/Register";
 import Home from "./src/screens/Home";
 
 const Stack = createNativeStackNavigator();
+
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
 
 export default function App() {
   useEffect(() => {
