@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  View,
   useWindowDimensions,
 } from "react-native";
 
@@ -21,7 +20,11 @@ const pressForgotPasswordButton = () => {
   console.warn("Forgot password pressed");
 };
 
-const Login = () => {
+const pressRegisterButton = () => {
+  console.warn("Register pressed");
+};
+
+const Auth = () => {
   const { height } = useWindowDimensions();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -62,6 +65,11 @@ const Login = () => {
             onPress={pressForgotPasswordButton}
             textStyle={styles.forgotPassword_text}
           />
+          <CustomButton
+            text="Don't have an account? Register"
+            onPress={pressRegisterButton}
+            textStyle={styles.register_text}
+          />
         </SafeAreaView>
       </ScrollView>
     </ImageBackground>
@@ -96,7 +104,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     padding: 10,
-    marginTop: 15,
+    marginTop: 10,
   },
   login_text: {
     fontFamily: "Arimo-Bold",
@@ -105,6 +113,10 @@ const styles = StyleSheet.create({
     fontFamily: "Arimo-Regular",
     color: "#7D7D7D",
   },
+  register_text: {
+    fontFamily: "Arimo-Regular",
+    color: "black",
+  },
 });
 
-export default Login;
+export default Auth;
