@@ -12,12 +12,25 @@ import {
   createNativeStackNavigator,
   NativeStackScreenProps,
 } from "@react-navigation/native-stack";
+import { ScrollView } from "react-native-reanimated/lib/typescript/Animated";
 
 const Home = () => {
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.container}>
       <View style={styles.title_container}>
         <Text style={styles.title_text}>Home</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            marginHorizontal: "5%",
+            marginTop: 5,
+          }}
+        >
+          <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
+        </View>
+      </View>
+      <View style={{ flex: 1, backgroundColor: "gray" }}>
+        <Text>test</Text>
       </View>
     </SafeAreaView>
   );
@@ -30,7 +43,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title_container: {
-    height: "100%",
     alignItems: "center",
   },
   title_text: {

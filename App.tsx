@@ -14,11 +14,18 @@ import {
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { getApps, initializeApp } from "firebase/app";
-import { onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  setPersistence,
+  signInWithEmailAndPassword,
+  browserSessionPersistence,
+} from "firebase/auth";
 import firebaseConfig from "./firebaseConfig";
 
 import Login from "./src/screens/Login";
 import Register from "./src/screens/Register";
+import ResetPassword from "./src/screens/ResetPassword";
+import Authenticating from "./src/screens/Authenticating";
 import Home from "./src/screens/Home";
 
 const Stack = createNativeStackNavigator();
@@ -47,6 +54,8 @@ export default function App() {
       >
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Register" component={Register} />
+        <Stack.Screen name="ResetPassword" component={ResetPassword} />
+        <Stack.Screen name="Authenticating" component={Authenticating} />
         <Stack.Screen name="Home" component={Home} />
       </Stack.Navigator>
     </NavigationContainer>

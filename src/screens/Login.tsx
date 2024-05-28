@@ -25,6 +25,8 @@ const Login = () => {
   // Typing for navigation
   type RootStackParamList = {
     Register: undefined;
+    ResetPassword: undefined;
+    Authenticating: undefined;
     Home: undefined;
   };
   const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -53,6 +55,7 @@ const Login = () => {
 
     try {
       const auth = getAuth();
+      navigation.navigate("Authenticating");
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -68,7 +71,7 @@ const Login = () => {
   };
 
   const pressForgotPasswordButton = () => {
-    console.warn("Forgot password pressed");
+    navigation.navigate("ResetPassword");
   };
 
   const pressGoogleLoginButton = () => {
@@ -185,11 +188,11 @@ const Login = () => {
             </View>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text>Don't have an account? </Text>
+            <Text style={styles.redirect_text}>Don't have an account? </Text>
             <CustomButton
               text="Register"
               onPress={pressRegisterButton}
-              containerStyle={styles.register_container}
+              containerStyle={styles.redirect_container}
               textStyle={styles.link_text}
             />
           </View>
@@ -240,7 +243,6 @@ const styles = StyleSheet.create({
   login_container: {
     backgroundColor: "#FFB000",
     width: "90%",
-    borderRadius: 5,
     alignItems: "center",
     padding: 10,
     marginTop: 5,
@@ -248,9 +250,13 @@ const styles = StyleSheet.create({
   login_text: {
     fontFamily: "Arimo-Bold",
   },
-  register_container: {},
+  redirect_container: {},
+  redirect_text: {
+    fontFamily: "Arimo-Regular",
+  },
   link_text: {
     color: "blue",
+    fontFamily: "Arimo-Regular",
     textDecorationLine: "underline",
   },
 });

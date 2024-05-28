@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Dimensions,
-  Image,
   ImageBackground,
   SafeAreaView,
   ScrollView,
@@ -20,11 +19,13 @@ import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 import CustomInput from "./components/CustomInput";
 import CustomButton from "./components/CustomButtom";
+import { FirebaseError } from "firebase/app";
 
 const Register = () => {
   // Typing for navigation
   type RootStackParamList = {
     Login: undefined;
+    Authenticating: undefined;
   };
   const Stack = createNativeStackNavigator<RootStackParamList>();
   const navigation =
@@ -58,6 +59,7 @@ const Register = () => {
     }
 
     try {
+      navigation.navigate("Authenticating");
       const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -66,8 +68,21 @@ const Register = () => {
       );
       setError("");
       // Check for cases
+      navigation.navigate("Login");
     } catch (error: any) {
-      setError(error.message);
+      if (error instanceof FirebaseError) {
+        if (error.code === "auth/email-already-in-use") {
+          setError("Email is already registered");
+        } else if (error.code === "auth/invalid-email") {
+          setError("Invalid email used");
+        } else if (error.code === "auth/weak-password") {
+          setError("Password is too short (6 characters minimum)");
+        } else {
+          setError("Error: Firebase error occurred");
+        }
+      } else {
+        setError("Error: Unknown occurred");
+      }
     }
   };
 
@@ -189,7 +204,7 @@ const Register = () => {
             <CustomButton
               text="Login"
               onPress={pressLoginButton}
-              containerStyle={styles.login_container}
+              containerStyle={styles.redirect_container}
               textStyle={styles.link_text}
             />
           </View>
@@ -228,7 +243,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF3F3",
     borderWidth: 1,
     borderColor: "#FF1705",
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: "center",
     paddingVertical: 2,
     paddingHorizontal: 8,
@@ -249,9 +264,13 @@ const styles = StyleSheet.create({
   register_text: {
     fontFamily: "Arimo-Bold",
   },
-  login_container: {},
+  redirect_container: {},
+  redirect_text: {
+    fontFamily: "Arimo-Regular",
+  },
   link_text: {
     color: "blue",
+    fontFamily: "Arimo-Regular",
     textDecorationLine: "underline",
   },
 });

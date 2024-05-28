@@ -6,7 +6,7 @@ interface CustomInputProps extends TextInputProps {
   setValue: (newValue: string) => void;
   placeholder: string;
   secureTextEntry: boolean;
-  onSubmitEditing: () => void;
+  onSubmitEditing?: () => void;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
