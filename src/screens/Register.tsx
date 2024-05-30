@@ -81,7 +81,7 @@ const Register = () => {
           setError("Error: Firebase error occurred");
         }
       } else {
-        setError("Error: Unknown occurred");
+        setError(error.message);
       }
     }
   };
@@ -100,7 +100,7 @@ const Register = () => {
 
   return (
     <ImageBackground
-      source={require("../../assets/register_background.png")}
+      source={require("../../assets/images/register_background.png")}
       style={styles.page_background}
     >
       <ScrollView
@@ -204,6 +204,7 @@ const Register = () => {
             <CustomButton
               text="Login"
               onPress={pressLoginButton}
+              wrapperStyle={{}}
               containerStyle={styles.redirect_container}
               textStyle={styles.link_text}
             />

@@ -16,7 +16,12 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 
 import CustomInput from "./components/CustomInput";
 import CustomButton from "./components/CustomButtom";
@@ -74,8 +79,30 @@ const Login = () => {
     navigation.navigate("ResetPassword");
   };
 
-  const pressGoogleLoginButton = () => {
-    console.warn("Google Login pressed");
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    const auth = getAuth();
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+
+      // Check if credential exists before using it
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (credential) {
+        const token = credential.accessToken;
+        const user = result.user;
+        // Use the token and user information
+        // ...
+      } else {
+        // Handle the case where authentication failed
+        console.error("Google sign-in failed. No credential received.");
+      }
+    } catch (error: any) {
+      // Handle other errors here
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // ...
+    }
   };
 
   const pressFacebookLoginButton = () => {
@@ -88,7 +115,7 @@ const Login = () => {
 
   return (
     <ImageBackground
-      source={require("../../assets/login_background.png")}
+      source={require("../../assets/images/login_background.png")}
       style={styles.page_background}
     >
       <ScrollView
@@ -102,7 +129,7 @@ const Login = () => {
         <SafeAreaView style={styles.container}>
           <Image
             style={styles.logo}
-            source={require("../../assets/logo2.png")}
+            source={require("../../assets/images/logo.png")}
           />
           <View
             style={{
@@ -172,7 +199,7 @@ const Login = () => {
                 name="google"
                 color="white"
                 backgroundColor="#558AED"
-                onPress={pressGoogleLoginButton}
+                onPress={handleGoogleLogin}
               >
                 Login with Google
               </FontAwesome.Button>
@@ -192,6 +219,7 @@ const Login = () => {
             <CustomButton
               text="Register"
               onPress={pressRegisterButton}
+              wrapperStyle={{}}
               containerStyle={styles.redirect_container}
               textStyle={styles.link_text}
             />
@@ -243,6 +271,7 @@ const styles = StyleSheet.create({
   login_container: {
     backgroundColor: "#FFB000",
     width: "90%",
+    borderRadius: 5,
     alignItems: "center",
     padding: 10,
     marginTop: 5,

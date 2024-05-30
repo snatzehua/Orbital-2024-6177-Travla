@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Animated,
   Dimensions,
@@ -6,20 +6,16 @@ import {
   Image,
   ImageBackground,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
-import CustomInput from "./components/CustomInput";
 import CustomButton from "./components/CustomButtom";
 
 const Authenticating = () => {
@@ -42,7 +38,7 @@ const Authenticating = () => {
     spinValue.setValue(0);
     Animated.timing(spinValue, {
       toValue: 1,
-      duration: 1500,
+      duration: 500,
       easing: Easing.linear,
       useNativeDriver: true,
     }).start(() => spin());
@@ -57,7 +53,7 @@ const Authenticating = () => {
 
   return (
     <ImageBackground
-      source={require("../../assets/authentication_background.png")}
+      source={require("../../assets/images/authentication_background.png")}
       style={styles.page_background}
     >
       <SafeAreaView style={styles.container}>
@@ -66,7 +62,7 @@ const Authenticating = () => {
           <Animated.View style={{ transform: [{ rotate }] }}>
             <Image
               style={styles.loading}
-              source={require("../../assets/loadingCircle3.png")}
+              source={require("../../assets/images/loadingCircle.png")}
             />
           </Animated.View>
         </View>
@@ -75,6 +71,7 @@ const Authenticating = () => {
           <CustomButton
             text="Login"
             onPress={pressRedirectButton}
+            wrapperStyle={{}}
             containerStyle={styles.redirect_container}
             textStyle={styles.link_text}
           />
@@ -100,7 +97,7 @@ const styles = StyleSheet.create({
     fontFamily: "Arimo-Bold",
     fontSize: 28,
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 25,
   },
   loading: {
     resizeMode: "contain",

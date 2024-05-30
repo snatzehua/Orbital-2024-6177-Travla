@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Dimensions,
   ImageBackground,
   SafeAreaView,
@@ -14,10 +15,15 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import {
+  fetchSignInMethodsForEmail,
+  getAuth,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 
 import CustomInput from "./components/CustomInput";
 import CustomButton from "./components/CustomButtom";
+import { FirebaseError } from "firebase/app";
 
 const ResetPassword = () => {
   // Typing for navigation
@@ -46,14 +52,23 @@ const ResetPassword = () => {
       setError("Please fill in your email");
       return;
     }
-
     try {
       const auth = getAuth();
       const userCredential = await sendPasswordResetEmail(auth, email);
       setError("");
+      Alert.alert(
+        "Sent Reset Email",
+        "Password reset email has been sent.\nPlease check your inbox."
+      );
       // Check for cases
     } catch (error: any) {
-      setError(error.message);
+      if (error instanceof FirebaseError) {
+        if (error.code === "auth/invalid-email") {
+          setError("Invalid email used");
+        }
+      } else {
+        setError(error.message);
+      }
     }
   };
 
@@ -63,7 +78,7 @@ const ResetPassword = () => {
 
   return (
     <ImageBackground
-      source={require("../../assets/resetPassword_background.png")}
+      source={require("../../assets/images/resetPassword_background.png")}
       style={styles.page_background}
     >
       <ScrollView
@@ -118,6 +133,7 @@ const ResetPassword = () => {
             <CustomButton
               text="Login"
               onPress={pressLoginButton}
+              wrapperStyle={{}}
               containerStyle={styles.redirect_container}
               textStyle={styles.link_text}
             />

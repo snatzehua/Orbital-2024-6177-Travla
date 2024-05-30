@@ -1,25 +1,18 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Animated from "react-native-reanimated";
 import * as Font from "expo-font";
 import { StatusBar } from "expo-status-bar";
-import {
-  Button,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Dimensions, Image, ImageBackground, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { getApps, initializeApp } from "firebase/app";
 import {
-  getAuth,
+  initializeAuth,
+  onAuthStateChanged,
   setPersistence,
-  signInWithEmailAndPassword,
-  browserSessionPersistence,
 } from "firebase/auth";
+import * as firebaseAuth from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import firebaseConfig from "./firebaseConfig";
 
 import Login from "./src/screens/Login";
@@ -30,11 +23,50 @@ import Home from "./src/screens/Home";
 
 const Stack = createNativeStackNavigator();
 
-if (!getApps().length) {
-  initializeApp(firebaseConfig);
-}
+const reactNativePersistence = (firebaseAuth as any).getReactNativePersistence;
+
+// initialize auth
 
 export default function App() {
+  const [initializing, setInitializing] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [auth, setAuth] = useState<any>(null);
+
+  // Initialize Firebase
+  useEffect(() => {
+    if (!getApps().length) {
+      const app = initializeApp(firebaseConfig);
+      const auth = initializeAuth(app, {
+        persistence: reactNativePersistence(AsyncStorage),
+      });
+      setAuth(auth);
+    }
+  }, []);
+
+  // Handle Auth State Changes
+  useEffect(() => {
+    let unsubscribeAuth = () => {}; // Default empty function
+
+    if (auth) {
+      // Set Persistence
+      setPersistence(auth, reactNativePersistence(AsyncStorage)).catch(
+        (error) => {
+          console.error("Error setting persistence:", error);
+        }
+      );
+
+      // Listen for Auth State Changes
+      unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        // Only set initializing to false if a user is found or if it's determined there's no authenticated user
+        setInitializing(false);
+      });
+    }
+
+    return unsubscribeAuth; // Cleanup on unmount
+  }, [auth]);
+
+  // Load fonts
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
@@ -46,10 +78,25 @@ export default function App() {
     loadFonts();
   }, []);
 
+  // Conditional Rendering
+  if (initializing) {
+    return (
+      <ImageBackground
+        source={require("./assets/images/login_background.png")}
+        style={styles.page_background}
+      >
+        <Image
+          style={styles.logo}
+          source={require("./assets/images/logo.png")}
+        />
+      </ImageBackground>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName={user ? "Home" : "Login"}
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="Login" component={Login} />
@@ -63,6 +110,14 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  page_background: {
+    flex: 1,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    resizeMode: "cover",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flex: 1,
     flexDirection: "column",
@@ -71,9 +126,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    flex: 1,
     resizeMode: "contain",
-    width: 200,
+    width: "50%",
+    height: "20%",
+    marginBottom: "5%",
   },
   title: {
     fontSize: 36,
