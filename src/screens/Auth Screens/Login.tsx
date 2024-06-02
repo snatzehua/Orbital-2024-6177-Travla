@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Dimensions,
+  Image,
   ImageBackground,
   SafeAreaView,
   ScrollView,
@@ -15,17 +16,23 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 
-import CustomInput from "./components/CustomInput";
-import CustomButton from "./components/CustomButtom";
-import { FirebaseError } from "firebase/app";
+import CustomInput from "../components/CustomInput";
+import CustomButton from "../components/CustomButtom";
 
-const Register = () => {
+const Login = () => {
   // Typing for navigation
   type RootStackParamList = {
-    Login: undefined;
+    Register: undefined;
+    ResetPassword: undefined;
     Authenticating: undefined;
+    Home: undefined;
   };
   const Stack = createNativeStackNavigator<RootStackParamList>();
   const navigation =
@@ -41,66 +48,74 @@ const Register = () => {
   // Defining hooks for email and password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
   // Defining button press functions
-  const handleSignUp = async () => {
+  const handleLogin = async () => {
     // Check fields are filled
-    if (email == "" || password == "" || confirmPassword == "") {
+    if (email == "" || password == "") {
       setError("Please fill in all fields");
       return;
     }
 
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
     try {
-      navigation.navigate("Authenticating");
       const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(
+      navigation.navigate("Authenticating");
+      const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       );
       setError("");
-      // Check for cases
-      navigation.navigate("Login");
+      // Check for cases (so what is user?)
+      const user = userCredential.user;
+      navigation.navigate("Home");
     } catch (error: any) {
-      if (error instanceof FirebaseError) {
-        if (error.code === "auth/email-already-in-use") {
-          setError("Email is already registered");
-        } else if (error.code === "auth/invalid-email") {
-          setError("Invalid email used");
-        } else if (error.code === "auth/weak-password") {
-          setError("Password is too short (6 characters minimum)");
-        } else {
-          setError("Error: Firebase error occurred");
-        }
-      } else {
-        setError(error.message);
-      }
+      setError(error.message);
     }
   };
 
-  const pressGoogleLoginButton = () => {
-    console.warn("Google Login pressed");
+  const pressForgotPasswordButton = () => {
+    navigation.navigate("ResetPassword");
+  };
+
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    const auth = getAuth();
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+
+      // Check if credential exists before using it
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (credential) {
+        const token = credential.accessToken;
+        const user = result.user;
+        // Use the token and user information
+        // ...
+      } else {
+        // Handle the case where authentication failed
+        console.error("Google sign-in failed. No credential received.");
+      }
+    } catch (error: any) {
+      // Handle other errors here
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // ...
+    }
   };
 
   const pressFacebookLoginButton = () => {
     console.warn("Google Login pressed");
   };
 
-  const pressLoginButton = () => {
-    navigation.navigate("Login");
+  const pressRegisterButton = () => {
+    navigation.navigate("Register");
   };
 
   return (
     <ImageBackground
-      source={require("../../assets/images/register_background.png")}
+      source={require("../../../assets/images/login_background.png")}
       style={styles.page_background}
     >
       <ScrollView
@@ -112,6 +127,10 @@ const Register = () => {
         }}
       >
         <SafeAreaView style={styles.container}>
+          <Image
+            style={styles.logo}
+            source={require("../../../assets/images/logo.png")}
+          />
           <View
             style={{
               flexGrow: 1,
@@ -120,9 +139,6 @@ const Register = () => {
               justifyContent: "center",
             }}
           >
-            <View style={styles.title_container}>
-              <Text style={styles.title_text}>Create an Account</Text>
-            </View>
             <View
               style={
                 error == ""
@@ -141,21 +157,20 @@ const Register = () => {
             <CustomInput
               value={password}
               setValue={setPassword}
-              placeholder="Create password"
+              placeholder="Password"
               secureTextEntry={true}
-            />
-            <CustomInput
-              value={confirmPassword}
-              setValue={setConfirmPassword}
-              placeholder="Confirm password"
-              secureTextEntry={true}
-              onSubmitEditing={handleSignUp}
+              onSubmitEditing={handleLogin}
             />
             <CustomButton
-              text="Register"
-              onPress={handleSignUp}
-              containerStyle={styles.register_container}
-              textStyle={styles.register_text}
+              text="Login"
+              onPress={handleLogin}
+              containerStyle={styles.login_container}
+              textStyle={styles.login_text}
+            />
+            <CustomButton
+              text="Forgot password?"
+              onPress={pressForgotPasswordButton}
+              textStyle={styles.link_text}
             />
             <View
               style={{
@@ -184,7 +199,7 @@ const Register = () => {
                 name="google"
                 color="white"
                 backgroundColor="#558AED"
-                onPress={pressGoogleLoginButton}
+                onPress={handleGoogleLogin}
               >
                 Login with Google
               </FontAwesome.Button>
@@ -200,10 +215,10 @@ const Register = () => {
             </View>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text>Already have an account? </Text>
+            <Text style={styles.redirect_text}>Don't have an account? </Text>
             <CustomButton
-              text="Login"
-              onPress={pressLoginButton}
+              text="Register"
+              onPress={pressRegisterButton}
               wrapperStyle={{}}
               containerStyle={styles.redirect_container}
               textStyle={styles.link_text}
@@ -228,12 +243,11 @@ const styles = StyleSheet.create({
     height: Dimensions.get("window").height,
     resizeMode: "cover",
   },
-  title_container: {
-    margin: 10,
-  },
-  title_text: {
-    fontFamily: "Arimo-Bold",
-    fontSize: 28,
+  logo: {
+    resizeMode: "contain",
+    width: "50%",
+    height: "20%",
+    marginTop: "5%",
   },
   error_container_empty: {
     minHeight: 20,
@@ -254,7 +268,7 @@ const styles = StyleSheet.create({
     color: "#FF1705",
     minHeight: 18,
   },
-  register_container: {
+  login_container: {
     backgroundColor: "#FFB000",
     width: "90%",
     borderRadius: 5,
@@ -262,7 +276,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 5,
   },
-  register_text: {
+  login_text: {
     fontFamily: "Arimo-Bold",
   },
   redirect_container: {},
@@ -276,4 +290,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Register;
+export default Login;

@@ -6,7 +6,6 @@ import {
   PressableProps,
   StyleSheet,
   StyleProp,
-  View,
   ViewStyle,
   TextStyle,
 } from "react-native";

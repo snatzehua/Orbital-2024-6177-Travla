@@ -16,7 +16,7 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 
-import CustomButton from "./components/CustomButtom";
+import CustomButton from "../components/CustomButtom";
 
 const Authenticating = () => {
   // Typing for navigation
@@ -53,7 +53,7 @@ const Authenticating = () => {
 
   return (
     <ImageBackground
-      source={require("../../assets/images/authentication_background.png")}
+      source={require("../../../assets/images/authentication_background.png")}
       style={styles.page_background}
     >
       <SafeAreaView style={styles.container}>
@@ -62,7 +62,7 @@ const Authenticating = () => {
           <Animated.View style={{ transform: [{ rotate }] }}>
             <Image
               style={styles.loading}
-              source={require("../../assets/images/loadingCircle.png")}
+              source={require("../../../assets/images/loadingCircle.png")}
             />
           </Animated.View>
         </View>

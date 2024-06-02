@@ -15,11 +15,15 @@ import * as firebaseAuth from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import firebaseConfig from "./firebaseConfig";
 
-import Login from "./src/screens/Login";
-import Register from "./src/screens/Register";
-import ResetPassword from "./src/screens/ResetPassword";
-import Authenticating from "./src/screens/Authenticating";
+import Login from "./src/screens/Auth Screens/Login";
+import Register from "./src/screens/Auth Screens/Register";
+import ResetPassword from "./src/screens/Auth Screens/ResetPassword";
+import Authenticating from "./src/screens/Auth Screens/Authenticating";
 import Home from "./src/screens/Home";
+import Settings from "./src/screens/Settings Screens/Settings";
+import Trips from "./src/screens/Trips Screens/Trips";
+import Map from "./src/screens/Map Screens/Map";
+import Profile from "./src/screens/Profile Screens/Profile";
 
 const Stack = createNativeStackNavigator();
 
@@ -104,6 +108,10 @@ export default function App() {
         <Stack.Screen name="ResetPassword" component={ResetPassword} />
         <Stack.Screen name="Authenticating" component={Authenticating} />
         <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Settings" component={Settings} />
+        <Stack.Screen name="Trips" component={Trips} />
+        <Stack.Screen name="Map" component={Map} />
+        <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
     </NavigationContainer>
   );

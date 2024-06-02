@@ -21,8 +21,8 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 
-import CustomInput from "./components/CustomInput";
-import CustomButton from "./components/CustomButtom";
+import CustomInput from "../components/CustomInput";
+import CustomButton from "../components/CustomButtom";
 import { FirebaseError } from "firebase/app";
 
 const ResetPassword = () => {
@@ -78,7 +78,7 @@ const ResetPassword = () => {
 
   return (
     <ImageBackground
-      source={require("../../assets/images/resetPassword_background.png")}
+      source={require("../../../assets/images/resetPassword_background.png")}
       style={styles.page_background}
     >
       <ScrollView

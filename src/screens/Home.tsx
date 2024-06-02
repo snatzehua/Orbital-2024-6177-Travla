@@ -1,68 +1,122 @@
 import React from "react";
 import {
-  Button,
   Dimensions,
+  Image,
+  Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { ScrollView } from "react-native-reanimated/lib/typescript/Animated";
-import { getAuth, signOut } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import CustomButton from "./components/CustomButtom/CustomButton";
 
 const Home = () => {
   // Typing for navigation
   type RootStackParamList = {
     Login: undefined;
+    Settings: undefined;
+    Trips: undefined;
+    Map: undefined;
+    Profile: undefined;
   };
   const Stack = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Defining button press functions
-  const handleLogout = async () => {
-    try {
-      const auth = getAuth();
-      await signOut(auth);
-      // Optional: Clear any other local user data
-      await AsyncStorage.removeItem("userToken"); // Or any other relevant keys
-    } catch (error) {
-      console.error("Error logging out:", error);
-      // Potentially handle errors with a user-friendly message
-    }
-    navigation.navigate("Login");
+  const handleSettingsNavigation = () => {
+    navigation.navigate("Settings");
+  };
+  const handleTripsNavigation = () => {
+    navigation.navigate("Trips");
+  };
+  const handleMapNavigation = () => {
+    navigation.navigate("Map");
+  };
+  const handleProfileNavigation = () => {
+    navigation.navigate("Profile");
+  };
+  const handleAddEvent = () => {
+    console.log("Add...");
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.title_container}>
-        <Text style={styles.title_text}>Home</Text>
-        <View
-          style={{
-            flexDirection: "row",
-            marginHorizontal: "5%",
-            marginTop: 5,
-          }}
-        >
-          <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
+    <View style={{ flex: 1, backgroundColor: "#EBEBEB" }}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.title_container}>
+          <Text style={styles.title_text}>Home</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              marginHorizontal: "5%",
+              marginTop: 5,
+            }}
+          >
+            <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
+          </View>
         </View>
-      </View>
-      <View style={{ flex: 1, backgroundColor: "gray" }}>
-        <Text>test</Text>
-      </View>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <CustomButton text="Logout" onPress={handleLogout} wrapperStyle={{}} />
-      </View>
-    </SafeAreaView>
+        <View style={{ flex: 1 }}>
+          <ScrollView style={{ width: "95%" }}></ScrollView>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center" }}></View>
+        <View style={styles.menu_bar}>
+          <Pressable
+            onPress={handleSettingsNavigation}
+            style={styles.secondary_menu_button}
+          >
+            <Image
+              source={require("../../assets/images/settings_tab.png")}
+              style={styles.secondary_menu_icon}
+            />
+            <Text style={styles.secondary_menu_text}>Settings</Text>
+          </Pressable>
+          <Pressable
+            onPress={handleTripsNavigation}
+            style={styles.secondary_menu_button}
+          >
+            <Image
+              source={require("../../assets/images/trips_tab.png")}
+              style={styles.secondary_menu_icon}
+            />
+            <Text style={styles.secondary_menu_text}>Trips</Text>
+          </Pressable>
+          <Pressable
+            onPress={handleAddEvent}
+            style={styles.primary_menu_button}
+          >
+            <Image
+              source={require("../../assets/images/plus_icon.png")}
+              style={styles.secondary_menu_icon}
+            />
+          </Pressable>
+          <Pressable
+            onPress={handleMapNavigation}
+            style={styles.secondary_menu_button}
+          >
+            <Image
+              source={require("../../assets/images/map_tab.png")}
+              style={styles.secondary_menu_icon}
+            />
+            <Text style={styles.secondary_menu_text}>Map</Text>
+          </Pressable>
+          <Pressable
+            onPress={handleProfileNavigation}
+            style={styles.secondary_menu_button}
+          >
+            <Image
+              source={require("../../assets/images/profile_tab.png")}
+              style={styles.secondary_menu_icon}
+            />
+            <Text style={styles.secondary_menu_text}>Profile</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 };
 
@@ -78,6 +132,44 @@ const styles = StyleSheet.create({
   title_text: {
     fontFamily: "Arimo-Bold",
     fontSize: Dimensions.get("window").height * 0.05,
+  },
+  menu_bar: {
+    backgroundColor: "white",
+    width: "96%",
+    flexDirection: "row",
+    borderRadius: 30,
+    justifyContent: "space-evenly",
+    alignItems: "center",
+  },
+  primary_menu_button: {
+    flexDirection: "column",
+    backgroundColor: "#1C355B",
+    width: "18%",
+    height: Dimensions.get("window").width * 0.18,
+    borderColor: "#2E4F82",
+    borderWidth: 5,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 5,
+  },
+  secondary_menu_button: {
+    flexDirection: "column",
+    width: "16%",
+    height: Dimensions.get("window").width * 0.2,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  secondary_menu_icon: {
+    resizeMode: "contain",
+    width: "50%",
+    height: Dimensions.get("window").width * 0.08,
+  },
+  secondary_menu_text: {
+    color: "#7D7D7D",
+    fontFamily: "Arimo-Bold",
+    fontSize: 12,
+    marginTop: 10,
   },
 });
 
