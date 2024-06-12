@@ -15,6 +15,8 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 
+import Banner, { BannerData } from "./components/Banner";
+
 const Home = () => {
   // Typing for navigation
   type RootStackParamList = {
@@ -27,6 +29,31 @@ const Home = () => {
   const Stack = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  // Data
+  const ActiveBanners: BannerData[] = [
+    {
+      title: "Test1",
+      startHour: 9,
+      startMinute: 30,
+      endHour: 11,
+      endMinute: 30,
+    },
+    {
+      title: "Test2",
+      startHour: 7,
+      startMinute: 30,
+      endHour: 9,
+      endMinute: 30,
+    },
+    {
+      title: "Test3",
+      startHour: 11,
+      startMinute: 30,
+      endHour: 13,
+      endMinute: 30,
+    },
+  ];
 
   // Defining button press functions
   const handleSettingsNavigation = () => {
@@ -60,8 +87,19 @@ const Home = () => {
             <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
           </View>
         </View>
-        <View style={{ flex: 1 }}>
-          <ScrollView style={{ width: "95%" }}></ScrollView>
+        <View
+          style={{
+            flex: 1,
+            width: "95%",
+            marginTop: 5,
+            alignItems: "center",
+          }}
+        >
+          <ScrollView style={styles.banner_container}>
+            {ActiveBanners.map((datapack) => (
+              <Banner key={datapack.title} data={datapack} />
+            ))}
+          </ScrollView>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}></View>
         <View style={styles.menu_bar}>
@@ -132,6 +170,9 @@ const styles = StyleSheet.create({
   title_text: {
     fontFamily: "Arimo-Bold",
     fontSize: Dimensions.get("window").height * 0.05,
+  },
+  banner_container: {
+    width: "95%",
   },
   menu_bar: {
     backgroundColor: "white",

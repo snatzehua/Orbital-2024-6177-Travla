@@ -1,11 +1,11 @@
 import React from "react";
-import { SafeAreaView, View } from "react-native";
+import { SafeAreaView, StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Button } from "@rneui/base";
 
 const Settings = () => {
   // Typing for navigation
@@ -23,18 +23,28 @@ const Settings = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ marginHorizontal: 20, alignItems: "flex-start" }}>
-        <FontAwesome.Button
-          name="arrow-left"
-          color="white"
-          backgroundColor="#7D7D7D"
+      <View style={{ marginLeft: "2%", alignItems: "flex-start" }}>
+        <Button
+          icon={{
+            name: "arrow-left",
+            type: "font-awesome", // Specify the icon type
+            size: 40,
+            color: "black",
+          }}
+          type="clear"
+          containerStyle={[styles.container, styles.buttonStyle]}
+          titleStyle={styles.textStyle}
           onPress={handleNavBack}
-        >
-          Back
-        </FontAwesome.Button>
+        />
       </View>
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {},
+  buttonStyle: {},
+  textStyle: {},
+});
 
 export default Settings;

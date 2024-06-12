@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Animated from "react-native-reanimated";
 import * as Font from "expo-font";
-import { StatusBar } from "expo-status-bar";
 import { Dimensions, Image, ImageBackground, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -28,8 +26,6 @@ import Profile from "./src/screens/Profile Screens/Profile";
 const Stack = createNativeStackNavigator();
 
 const reactNativePersistence = (firebaseAuth as any).getReactNativePersistence;
-
-// initialize auth
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
