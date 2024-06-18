@@ -137,12 +137,14 @@ const Register = () => {
               setValue={setEmail}
               placeholder="Email"
               secureTextEntry={false}
+              onSubmitEditing={handleSignUp}
             />
             <CustomInput
               value={password}
               setValue={setPassword}
               placeholder="Create password"
               secureTextEntry={true}
+              onSubmitEditing={handleSignUp}
             />
             <CustomInput
               value={confirmPassword}

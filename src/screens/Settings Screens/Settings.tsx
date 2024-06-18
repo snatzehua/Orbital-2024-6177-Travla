@@ -5,7 +5,8 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { Button } from "@rneui/base";
+
+import BackButton from "../components/BackButton/BackButton";
 
 const Settings = () => {
   // Typing for navigation
@@ -24,27 +25,12 @@ const Settings = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ marginLeft: "2%", alignItems: "flex-start" }}>
-        <Button
-          icon={{
-            name: "arrow-left",
-            type: "font-awesome", // Specify the icon type
-            size: 40,
-            color: "black",
-          }}
-          type="clear"
-          containerStyle={[styles.container, styles.buttonStyle]}
-          titleStyle={styles.textStyle}
-          onPress={handleNavBack}
-        />
+        <BackButton onPress={handleNavBack} />
       </View>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {},
-  buttonStyle: {},
-  textStyle: {},
-});
+const styles = StyleSheet.create({});
 
 export default Settings;

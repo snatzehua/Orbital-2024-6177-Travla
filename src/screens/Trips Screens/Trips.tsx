@@ -14,6 +14,7 @@ import {
 } from "@react-navigation/native-stack";
 import { Button } from "@rneui/base";
 
+import BackButton from "../components/BackButton/BackButton";
 import Banner from "../components/Banner";
 
 const Trips = () => {
@@ -48,17 +49,9 @@ const Trips = () => {
           zIndex: 1,
         }}
       >
-        <Button
-          icon={{
-            name: "arrow-left",
-            type: "font-awesome", // Specify the icon type
-            size: 40,
-            color: "black",
-          }}
-          type="clear"
-          containerStyle={styles.button_container}
-          titleStyle={styles.textStyle}
+        <BackButton
           onPress={handleNavBack}
+          containerStyle={styles.button_container}
         />
       </View>
       <View style={styles.container}>

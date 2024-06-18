@@ -72,6 +72,7 @@ const Login = () => {
       navigation.navigate("Home");
     } catch (error: any) {
       setError(error.message);
+      navigation.goBack();
     }
   };
 
@@ -153,6 +154,7 @@ const Login = () => {
               setValue={setEmail}
               placeholder="Email"
               secureTextEntry={false}
+              onSubmitEditing={handleLogin}
             />
             <CustomInput
               value={password}

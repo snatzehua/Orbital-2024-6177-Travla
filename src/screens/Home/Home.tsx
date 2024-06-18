@@ -10,6 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Modal from "react-native-modal";
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
@@ -17,6 +18,9 @@ import {
 } from "@react-navigation/native-stack";
 
 import Banner, { EventData } from "../components/Banner";
+import BackButton from "../components/BackButton/BackButton";
+import CustomButton from "../components/CustomButtom/CustomButton";
+import CustomInput from "../components/CustomInput/CustomInput";
 
 const Home = () => {
   // Typing for navigation
@@ -32,15 +36,7 @@ const Home = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Data
-  const ActiveBanners: EventData[] = [
-    {
-      title: "Test1",
-      datatype: "Event",
-      locale: "ja-JP",
-      startTime: new Date(),
-      endTime: new Date(),
-    },
-  ];
+  const [events, setEvents] = useState<EventData[]>([]);
 
   // Add Event form
   const AddEventForm = () => {};
@@ -79,12 +75,66 @@ const Home = () => {
   const handleProfileNavigation = () => {
     navigation.navigate("Profile");
   };
-  const handleAddEvent = () => {
+  const handleAddEventPopup = () => {
     toggleModal();
   };
 
+  // Add event popup form
+  const AddEvent = () => {
+    // Defining hooks
+    const [newEventTitle, setNewEventTitle] = useState("");
+
+    // Defining button press functions (Add Event)
+    const handleAddEvent = () => {
+      // Error handling
+      if (newEventTitle === "") {
+        return;
+      }
+      const newEvent: EventData = {
+        title: newEventTitle,
+        // placeholders
+        datatype: "Event",
+        startTime: new Date(),
+        endTime: new Date(),
+      };
+      setEvents((list) => [...list, newEvent]);
+      toggleModal();
+    };
+    return (
+      <SafeAreaView style={{ backgroundColor: "#EBEBEB" }}>
+        <View style={{ alignItems: "flex-start" }}>
+          <BackButton onPress={toggleModal} iconName="window-close-o" />
+        </View>
+        <View style={{ alignItems: "center" }}>
+          <CustomInput
+            value={newEventTitle}
+            setValue={setNewEventTitle}
+            placeholder="Event Title"
+            secureTextEntry={false}
+          />
+          <CustomButton
+            text="Add Event"
+            onPress={handleAddEvent}
+            containerStyle={styles.add_event_container}
+            textStyle={styles.add_event_text}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  };
+
+  // Main Home screen framework
   return (
     <View style={{ flex: 1, backgroundColor: "#EBEBEB" }}>
+      <Modal isVisible={isModalVisible}>
+        <Animated.View
+          style={{
+            transform: [{ scale: scaleValue }],
+          }}
+        >
+          <AddEvent />
+        </Animated.View>
+      </Modal>
       <SafeAreaView style={styles.container}>
         <View style={styles.title_container}>
           <Text style={styles.title_text}>Home</Text>
@@ -107,7 +157,7 @@ const Home = () => {
           }}
         >
           <ScrollView style={styles.banner_container}>
-            {ActiveBanners.map((datapack) => (
+            {events.map((datapack) => (
               <Banner key={datapack.title} data={datapack} />
             ))}
           </ScrollView>
@@ -135,7 +185,7 @@ const Home = () => {
             <Text style={styles.secondary_menu_text}>Trips</Text>
           </Pressable>
           <Pressable
-            onPress={handleAddEvent}
+            onPress={handleAddEventPopup}
             style={styles.primary_menu_button}
           >
             <Image
@@ -170,6 +220,18 @@ const Home = () => {
 };
 
 const styles = StyleSheet.create({
+  add_event_container: {
+    backgroundColor: "#FFB000",
+    width: "90%",
+    borderRadius: 5,
+    alignItems: "center",
+    padding: 10,
+    marginTop: 5,
+    marginBottom: "5%",
+  },
+  add_event_text: {
+    fontFamily: "Arimo-Bold",
+  },
   container: {
     flex: 1,
     alignItems: "center",
