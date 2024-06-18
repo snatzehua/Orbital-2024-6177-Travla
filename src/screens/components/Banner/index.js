@@ -1,2 +1,3 @@
 export { default } from "./Banner";
-export { BannerData } from "./BannerData";
+export { EventData } from "./EventData";
+export { TripData } from "./TripData";

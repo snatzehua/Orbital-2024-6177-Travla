@@ -17,7 +17,7 @@ import Login from "./src/screens/Auth Screens/Login";
 import Register from "./src/screens/Auth Screens/Register";
 import ResetPassword from "./src/screens/Auth Screens/ResetPassword";
 import Authenticating from "./src/screens/Auth Screens/Authenticating";
-import Home from "./src/screens/Home";
+import Home from "./src/screens/Home/Home";
 import Settings from "./src/screens/Settings Screens/Settings";
 import Trips from "./src/screens/Trips Screens/Trips";
 import Map from "./src/screens/Map Screens/Map";

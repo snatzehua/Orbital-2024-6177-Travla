@@ -14,7 +14,7 @@ import {
 } from "@react-navigation/native-stack";
 import { Button } from "@rneui/base";
 
-import Trip, { TripData } from "../components/Trip";
+import Banner from "../components/Banner";
 
 const Trips = () => {
   // Typing for navigation
@@ -33,6 +33,7 @@ const Trips = () => {
   const ActiveBanners: TripData[] = [
     {
       title: "Trip1",
+      datatype: "Trip",
       startDate: new Date(),
       endDate: new Date(),
     },
@@ -83,7 +84,7 @@ const Trips = () => {
         >
           <ScrollView style={styles.banner_container}>
             {ActiveBanners.map((datapack) => (
-              <Trip key={datapack.title} data={datapack} />
+              <Banner key={datapack.title} data={datapack} />
             ))}
           </ScrollView>
         </View>

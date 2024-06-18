@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
+  Animated,
   Dimensions,
   Image,
   Pressable,
@@ -15,7 +16,7 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 
-import Banner, { BannerData } from "./components/Banner";
+import Banner, { EventData } from "../components/Banner";
 
 const Home = () => {
   // Typing for navigation
@@ -31,29 +32,39 @@ const Home = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Data
-  const ActiveBanners: BannerData[] = [
+  const ActiveBanners: EventData[] = [
     {
       title: "Test1",
-      startHour: 9,
-      startMinute: 30,
-      endHour: 11,
-      endMinute: 30,
-    },
-    {
-      title: "Test2",
-      startHour: 7,
-      startMinute: 30,
-      endHour: 9,
-      endMinute: 30,
-    },
-    {
-      title: "Test3",
-      startHour: 11,
-      startMinute: 30,
-      endHour: 13,
-      endMinute: 30,
+      datatype: "Event",
+      locale: "ja-JP",
+      startTime: new Date(),
+      endTime: new Date(),
     },
   ];
+
+  // Add Event form
+  const AddEventForm = () => {};
+  const [isModalVisible, setModalVisible] = useState(false);
+  const scaleValue = useRef(new Animated.Value(0)).current;
+
+  const toggleModal = () => {
+    console.log("Toggled");
+    setModalVisible(!isModalVisible);
+
+    if (!isModalVisible) {
+      // If modal is about to become visible, start zoom animation
+      Animated.spring(scaleValue, {
+        toValue: 1,
+        useNativeDriver: true, // For smoother animation
+      }).start();
+    } else {
+      Animated.spring(scaleValue, {
+        // Reverse the animation on hiding
+        toValue: 0,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
 
   // Defining button press functions
   const handleSettingsNavigation = () => {
@@ -69,7 +80,7 @@ const Home = () => {
     navigation.navigate("Profile");
   };
   const handleAddEvent = () => {
-    console.log("Add...");
+    toggleModal();
   };
 
   return (
@@ -108,7 +119,7 @@ const Home = () => {
             style={styles.secondary_menu_button}
           >
             <Image
-              source={require("../../assets/images/settings_tab.png")}
+              source={require("../../../assets/images/settings_tab.png")}
               style={styles.secondary_menu_icon}
             />
             <Text style={styles.secondary_menu_text}>Settings</Text>
@@ -118,7 +129,7 @@ const Home = () => {
             style={styles.secondary_menu_button}
           >
             <Image
-              source={require("../../assets/images/trips_tab.png")}
+              source={require("../../../assets/images/trips_tab.png")}
               style={styles.secondary_menu_icon}
             />
             <Text style={styles.secondary_menu_text}>Trips</Text>
@@ -128,7 +139,7 @@ const Home = () => {
             style={styles.primary_menu_button}
           >
             <Image
-              source={require("../../assets/images/plus_icon.png")}
+              source={require("../../../assets/images/plus_icon.png")}
               style={styles.secondary_menu_icon}
             />
           </Pressable>
@@ -137,7 +148,7 @@ const Home = () => {
             style={styles.secondary_menu_button}
           >
             <Image
-              source={require("../../assets/images/map_tab.png")}
+              source={require("../../../assets/images/map_tab.png")}
               style={styles.secondary_menu_icon}
             />
             <Text style={styles.secondary_menu_text}>Map</Text>
@@ -147,7 +158,7 @@ const Home = () => {
             style={styles.secondary_menu_button}
           >
             <Image
-              source={require("../../assets/images/profile_tab.png")}
+              source={require("../../../assets/images/profile_tab.png")}
               style={styles.secondary_menu_icon}
             />
             <Text style={styles.secondary_menu_text}>Profile</Text>
