@@ -19,13 +19,13 @@ const Banner: React.FC<BannerData> = (datapack: BannerData) => {
   };
 
   // Convert 24h format to 12h format
-  const formatTime = (start: Date, end: Date) => {
+  const formatTime = (startTime: Date, endTime: Date) => {
     const options: Intl.DateTimeFormatOptions = {
       hour: "numeric",
       minute: "2-digit",
     };
-    const startTimeString = start.toLocaleTimeString([], options);
-    const endTimeString = end.toLocaleTimeString([], options);
+    const startTimeString = startTime.toLocaleTimeString([], options);
+    const endTimeString = endTime.toLocaleTimeString([], options);
     return `${startTimeString} - ${endTimeString}`;
   };
 
@@ -40,12 +40,12 @@ const Banner: React.FC<BannerData> = (datapack: BannerData) => {
       <View style={{ alignItems: "flex-end" }}>
         {data.datatype === "Event" ? (
           <Text style={styles.bottom_right}>
-            {formatTime(data.start, data.end)}
+            {formatTime(data.startTime, data.endTime)}
           </Text>
         ) : null}
         {data.datatype === "Trip" ? (
           <Text style={styles.bottom_right}>
-            {formatDate(data.start, data.end)}
+            {formatDate(data.startDate, data.endDate)}
           </Text>
         ) : null}
       </View>

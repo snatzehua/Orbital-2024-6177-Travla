@@ -35,8 +35,8 @@ const Trips = () => {
     {
       title: "Trip1",
       datatype: "Trip",
-      start: new Date(),
-      end: new Date(),
+      startDate: new Date(),
+      endDate: new Date(),
     },
   ];
 

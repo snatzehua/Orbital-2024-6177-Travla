@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
+  Image,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -9,13 +11,30 @@ import {
   View,
 } from "react-native";
 import Modal from "react-native-modal";
+import { useNavigation } from "@react-navigation/native";
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationProp,
+} from "@react-navigation/native-stack";
 
-import AddEvent from "./AddEvent";
 import Banner, { EventData } from "../components/Banner";
-import DateTimeDisplay from "./DateTimeDisplay";
-import MenuBar from "./MenuBar";
+import BackButton from "../components/BackButton/BackButton";
+import CustomButton from "../components/CustomButtom/CustomButton";
+import CustomInput from "../components/CustomInput/CustomInput";
 
 const Home = () => {
+  // Typing for navigation
+  type RootStackParamList = {
+    Login: undefined;
+    Settings: undefined;
+    Trips: undefined;
+    Map: undefined;
+    Profile: undefined;
+  };
+  const Stack = createNativeStackNavigator<RootStackParamList>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   // Data
   const [events, setEvents] = useState<EventData[]>([]);
 
@@ -44,6 +63,65 @@ const Home = () => {
   };
 
   // Defining button press functions
+  const handleSettingsNavigation = () => {
+    navigation.navigate("Settings");
+  };
+  const handleTripsNavigation = () => {
+    navigation.navigate("Trips");
+  };
+  const handleMapNavigation = () => {
+    navigation.navigate("Map");
+  };
+  const handleProfileNavigation = () => {
+    navigation.navigate("Profile");
+  };
+  const handleAddEventPopup = () => {
+    toggleModal();
+  };
+
+  // Add event popup form
+  const AddEvent = () => {
+    // Defining hooks
+    const [newEventTitle, setNewEventTitle] = useState("");
+
+    // Defining button press functions (Add Event)
+    const handleAddEvent = () => {
+      // Error handling
+      if (newEventTitle === "") {
+        return;
+      }
+      const newEvent: EventData = {
+        title: newEventTitle,
+        // placeholders
+        datatype: "Event",
+        startTime: new Date(),
+        endTime: new Date(),
+      };
+      setEvents((list) => [...list, newEvent]);
+      toggleModal();
+    };
+    return (
+      <SafeAreaView style={{ backgroundColor: "#EBEBEB" }}>
+        <View style={{ alignItems: "flex-start" }}>
+          <BackButton onPress={toggleModal} iconName="window-close-o" />
+        </View>
+        <View style={{ alignItems: "center" }}>
+          <CustomInput
+            value={newEventTitle}
+            setValue={setNewEventTitle}
+            placeholder="Event Title"
+            secureTextEntry={false}
+          />
+          <CustomButton
+            text="Add Event"
+            onPress={handleAddEvent}
+            containerStyle={styles.add_event_container}
+            textStyle={styles.add_event_text}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  };
 
   // Main Home screen framework
   return (
@@ -54,22 +132,12 @@ const Home = () => {
             transform: [{ scale: scaleValue }],
           }}
         >
-          <AddEvent toggleModal={toggleModal} setEvents={setEvents} />
+          <AddEvent />
         </Animated.View>
       </Modal>
       <SafeAreaView style={styles.container}>
         <View style={styles.title_container}>
           <Text style={styles.title_text}>Home</Text>
-          <View
-            style={{
-              backgroundColor: "#FFB000",
-              paddingVertical: 5,
-              paddingHorizontal: 8,
-              borderRadius: 5,
-            }}
-          >
-            <DateTimeDisplay />
-          </View>
           <View
             style={{
               flexDirection: "row",
@@ -92,27 +160,60 @@ const Home = () => {
             {events.map((datapack) => (
               <Banner key={datapack.title} data={datapack} />
             ))}
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                marginTop: 10,
-              }}
-            >
-              {events.length === 0 ? (
-                <Text style={{ fontFamily: "Arimo-Bold", color: "#7D7D7D" }}>
-                  No events today
-                </Text>
-              ) : (
-                <Text style={{ fontFamily: "Arimo-Bold", color: "#7D7D7D" }}>
-                  No more events today
-                </Text>
-              )}
-            </View>
           </ScrollView>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}></View>
-        <MenuBar toggleModal={toggleModal} />
+        <View style={styles.menu_bar}>
+          <Pressable
+            onPress={handleSettingsNavigation}
+            style={styles.secondary_menu_button}
+          >
+            <Image
+              source={require("../../../assets/images/settings_tab.png")}
+              style={styles.secondary_menu_icon}
+            />
+            <Text style={styles.secondary_menu_text}>Settings</Text>
+          </Pressable>
+          <Pressable
+            onPress={handleTripsNavigation}
+            style={styles.secondary_menu_button}
+          >
+            <Image
+              source={require("../../../assets/images/trips_tab.png")}
+              style={styles.secondary_menu_icon}
+            />
+            <Text style={styles.secondary_menu_text}>Trips</Text>
+          </Pressable>
+          <Pressable
+            onPress={handleAddEventPopup}
+            style={styles.primary_menu_button}
+          >
+            <Image
+              source={require("../../../assets/images/plus_icon.png")}
+              style={styles.secondary_menu_icon}
+            />
+          </Pressable>
+          <Pressable
+            onPress={handleMapNavigation}
+            style={styles.secondary_menu_button}
+          >
+            <Image
+              source={require("../../../assets/images/map_tab.png")}
+              style={styles.secondary_menu_icon}
+            />
+            <Text style={styles.secondary_menu_text}>Map</Text>
+          </Pressable>
+          <Pressable
+            onPress={handleProfileNavigation}
+            style={styles.secondary_menu_button}
+          >
+            <Image
+              source={require("../../../assets/images/profile_tab.png")}
+              style={styles.secondary_menu_icon}
+            />
+            <Text style={styles.secondary_menu_text}>Profile</Text>
+          </Pressable>
+        </View>
       </SafeAreaView>
     </View>
   );

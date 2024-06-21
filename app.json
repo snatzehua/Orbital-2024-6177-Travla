@@ -1,29 +1,54 @@
 {
-  "name": "Travla",
-  "slug": "Travla",
-  "version": "1.0.0",
-  "orientation": "portrait",
-  "icon": "./assets/images/icon.png",
-  "userInterfaceStyle": "light",
-  "splash": {
-    "image": "./assets/images/splash.png",
-    "resizeMode": "contain",
-    "backgroundColor": "#ffffff"
-  },
-  "ios": {
-    "googleServicesFile": "./GoogleService-Info.plist",
-    "supportsTablet": true,
-    "bundleIdentifier": "com.snatzehua.travla"
-  },
-  "android": {
-    "googleServicesFile": "./google-services.json",
-    "adaptiveIcon": {
-      "foregroundImage": "./assets/images/adaptive-icon.png",
+  "expo": {
+    "name": "Travla",
+    "slug": "Travla",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "package": "com.snatzehua.travla"
+    "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.snatzehua.travla"
+    },
+    "android": {
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.snatzehua.travla"
+    },
+    "plugins": [
+      "@react-native-google-signin/google-signin"
+    ],
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e40cfa52-858d-4c7e-8715-c25a0cccc65c"
+      }
+    }
   },
-  "web": {
-    "favicon": "./assets/images/favicon.png"
+  "eas": {
+    "build": {
+      "development": {
+        "developmentClient": true,
+        "distribution": "internal",
+        "ios": {
+          "simulator": true
+        }
+      },
+      "preview": {
+        "distribution": "internal"
+      },
+      "production": {}
+    }
   }
 }

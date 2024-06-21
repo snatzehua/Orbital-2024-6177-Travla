@@ -2,14 +2,10 @@
   "cli": {
     "version": ">= 9.1.0"
   },
-  "projectId": "e40cfa52-858d-4c7e-8715-c25a0cccc65c", // Your project ID
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "simulator": true // Enable iOS simulator builds
-      }
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal"
@@ -19,5 +15,4 @@
   "submit": {
     "production": {}
   }
-  // Add any other custom configurations from your previous eas.json here
 }
