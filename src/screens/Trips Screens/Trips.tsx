@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
+  Animated,
   Dimensions,
   SafeAreaView,
   ScrollView,
@@ -7,15 +8,19 @@ import {
   Text,
   View,
 } from "react-native";
+import Modal from "react-native-modal";
+
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { Button } from "@rneui/base";
 
+import AddTrip from "./AddTrip";
+import AddTripButton from "./AddTripButton";
 import BackButton from "../components/BackButton/BackButton";
 import Banner from "../components/Banner";
+import DateTimeDisplay from "../Home/DateTimeDisplay";
 
 const Trips = () => {
   // Typing for navigation
@@ -27,21 +32,50 @@ const Trips = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const handleNavBack = async () => {
-    navigation.goBack();
+  // Data
+  const [trips, setTrips] = useState<TripData[]>([]);
+
+  // Add Event form
+  const [isModalVisible, setModalVisible] = useState(false);
+  const scaleValue = useRef(new Animated.Value(0)).current;
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+
+    if (!isModalVisible) {
+      // If modal is about to become visible, start zoom animation
+      Animated.spring(scaleValue, {
+        toValue: 1,
+        useNativeDriver: true, // For smoother animation
+      }).start();
+    } else {
+      Animated.spring(scaleValue, {
+        // Reverse the animation on hiding
+        toValue: 0,
+        useNativeDriver: true,
+      }).start();
+    }
   };
 
-  const ActiveBanners: TripData[] = [
-    {
-      title: "Trip1",
-      datatype: "Trip",
-      start: new Date(),
-      end: new Date(),
-    },
-  ];
+  // Defining button presses
+  const handleNavBack = () => {
+    navigation.goBack();
+  };
+  const handleAddEventPopup = () => {
+    toggleModal();
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <Modal isVisible={isModalVisible}>
+        <Animated.View
+          style={{
+            transform: [{ scale: scaleValue }],
+          }}
+        >
+          <AddTrip toggleModal={toggleModal} setTrips={setTrips} />
+        </Animated.View>
+      </Modal>
       <View
         style={{
           marginLeft: "2%",
@@ -57,6 +91,9 @@ const Trips = () => {
       <View style={styles.container}>
         <View style={styles.title_container}>
           <Text style={styles.title_text}>Trips</Text>
+          <View style={styles.date_time_display_container}>
+            <DateTimeDisplay />
+          </View>
           <View
             style={{
               flexDirection: "row",
@@ -76,9 +113,22 @@ const Trips = () => {
           }}
         >
           <ScrollView style={styles.banner_container}>
-            {ActiveBanners.map((datapack) => (
+            {trips.map((datapack) => (
               <Banner key={datapack.title} data={datapack} />
             ))}
+            <AddTripButton
+              toggleModal={toggleModal}
+              text={
+                trips.length === 0 ? "Add your first trip!" : "Add another trip"
+              }
+            ></AddTripButton>
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                marginVertical: 10,
+              }}
+            ></View>
           </ScrollView>
         </View>
       </View>
@@ -98,6 +148,13 @@ const styles = StyleSheet.create({
   title_text: {
     fontFamily: "Arimo-Bold",
     fontSize: Dimensions.get("window").height * 0.05,
+  },
+  date_time_display_container: {
+    backgroundColor: "#1C355B",
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+    marginTop: 5,
   },
   banner_container: {
     width: "95%",

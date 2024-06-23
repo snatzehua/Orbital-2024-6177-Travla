@@ -23,7 +23,7 @@ const DateTimeDisplay = () => {
 
 const styles = StyleSheet.create({
   container: { flexDirection: "row", alignItems: "center" },
-  text: { fontFamily: "Arimo-Bold" },
+  text: { fontFamily: "Arimo-Bold", color: "white" },
 });
 
 export default DateTimeDisplay;

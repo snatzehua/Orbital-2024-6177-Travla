@@ -20,12 +20,10 @@ const Home = () => {
   const [events, setEvents] = useState<EventData[]>([]);
 
   // Add Event form
-  const AddEventForm = () => {};
   const [isModalVisible, setModalVisible] = useState(false);
   const scaleValue = useRef(new Animated.Value(0)).current;
 
   const toggleModal = () => {
-    console.log("Toggled");
     setModalVisible(!isModalVisible);
 
     if (!isModalVisible) {
@@ -43,8 +41,6 @@ const Home = () => {
     }
   };
 
-  // Defining button press functions
-
   // Main Home screen framework
   return (
     <View style={{ flex: 1, backgroundColor: "#EBEBEB" }}>
@@ -60,14 +56,7 @@ const Home = () => {
       <SafeAreaView style={styles.container}>
         <View style={styles.title_container}>
           <Text style={styles.title_text}>Home</Text>
-          <View
-            style={{
-              backgroundColor: "#FFB000",
-              paddingVertical: 5,
-              paddingHorizontal: 8,
-              borderRadius: 5,
-            }}
-          >
+          <View style={styles.date_time_display_container}>
             <DateTimeDisplay />
           </View>
           <View
@@ -142,6 +131,13 @@ const styles = StyleSheet.create({
   title_text: {
     fontFamily: "Arimo-Bold",
     fontSize: Dimensions.get("window").height * 0.05,
+  },
+  date_time_display_container: {
+    backgroundColor: "#1C355B",
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+    marginTop: 5,
   },
   banner_container: {
     width: "95%",

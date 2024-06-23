@@ -31,7 +31,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ toggleModal }) => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Defining button press functions
-  const handleSettingsNavigation = () => {
+  const handleInsightsNavigation = () => {
     navigation.navigate("Settings");
   };
   const handleTripsNavigation = () => {
@@ -43,21 +43,18 @@ const MenuBar: React.FC<MenuBarProps> = ({ toggleModal }) => {
   const handleProfileNavigation = () => {
     navigation.navigate("Profile");
   };
-  const handleAddEventPopup = () => {
-    toggleModal();
-  };
 
   return (
     <View style={styles.menu_bar}>
       <Pressable
-        onPress={handleSettingsNavigation}
+        onPress={handleInsightsNavigation}
         style={styles.secondary_menu_button}
       >
         <Image
           source={require("../../../assets/images/insights_tab.png")}
           style={styles.secondary_menu_icon}
         />
-        <Text style={styles.secondary_menu_text}>Settings</Text>
+        <Text style={styles.secondary_menu_text}>Insights</Text>
       </Pressable>
       <Pressable
         onPress={handleTripsNavigation}
@@ -69,10 +66,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ toggleModal }) => {
         />
         <Text style={styles.secondary_menu_text}>Trips</Text>
       </Pressable>
-      <Pressable
-        onPress={handleAddEventPopup}
-        style={styles.primary_menu_button}
-      >
+      <Pressable onPress={toggleModal} style={styles.primary_menu_button}>
         <Image
           source={require("../../../assets/images/plus_icon.png")}
           style={styles.secondary_menu_icon}

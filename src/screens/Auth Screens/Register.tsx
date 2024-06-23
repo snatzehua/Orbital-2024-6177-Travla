@@ -16,10 +16,11 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 
 import CustomInput from "../components/CustomInput";
 import CustomButton from "../components/CustomButtom";
-import { FirebaseError } from "firebase/app";
+import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
 
 const Register = () => {
   // Typing for navigation
@@ -123,14 +124,8 @@ const Register = () => {
             <View style={styles.title_container}>
               <Text style={styles.title_text}>Create an Account</Text>
             </View>
-            <View
-              style={
-                error == ""
-                  ? styles.error_container_empty
-                  : styles.error_container_full
-              }
-            >
-              <Text style={styles.error_text}>{error}</Text>
+            <View style={{ marginBottom: 10 }}>
+              <ErrorDisplay error={error} />
             </View>
             <CustomInput
               value={email}

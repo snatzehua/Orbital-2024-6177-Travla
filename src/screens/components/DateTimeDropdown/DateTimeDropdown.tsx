@@ -1,46 +1,72 @@
 import React, { useState } from "react";
-import { Button, Platform, StyleSheet, Text, View } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { StyleSheet, Text, View } from "react-native";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 
 interface DateTimeDropdownProps {
   datatype: "Event" | "Trip";
+  date: Date;
+  setDate: React.Dispatch<React.SetStateAction<Date>>; // Dispatch function for updating the events array
+  minimumDate?: Date;
 }
 
-const DateTimeDropdown: React.FC<DateTimeDropdownProps> = ({ datatype }) => {
-  const [date, setDate] = useState(new Date());
-
-  const mode = datatype == "Event" ? "time" : "date";
-
-  const onChange = (_event: any, selectedDate?: Date) => {
-    console.log("Procced");
+const DateTimeDropdown: React.FC<DateTimeDropdownProps> = ({
+  datatype,
+  date,
+  setDate,
+  minimumDate,
+}) => {
+  const onChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
     if (selectedDate) {
       setDate(selectedDate);
     }
   };
 
+  // If Event type
+  if (datatype === "Event") {
+    return (
+      <View style={styles.container}>
+        <DateTimePicker
+          value={date}
+          mode={"time"}
+          is24Hour={true}
+          display="default"
+          onChange={onChange}
+          minimumDate={minimumDate}
+          style={styles.DateTimePicker}
+        />
+      </View>
+    );
+  }
+  // If Trip type
+  if (datatype === "Trip") {
+    return (
+      <View style={styles.container}>
+        <DateTimePicker
+          value={date}
+          mode={"date"}
+          display="default"
+          onChange={onChange}
+          minimumDate={minimumDate}
+          style={styles.DateTimePicker}
+        />
+      </View>
+    );
+  }
+  // If undefined
   return (
-    <DateTimePicker
-      value={date}
-      mode={mode}
-      is24Hour={true}
-      display="default"
-      onChange={onChange}
-      style={styles.dropdown}
-    />
+    <View>
+      <Text>Undefined datatype: {datatype} </Text>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
   },
-  dropdown: {
-    backgroundColor: "pink",
-  },
+  DateTimePicker: { justifyContent: "center", alignItems: "center" },
 });
 
 export default DateTimeDropdown;

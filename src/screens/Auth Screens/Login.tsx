@@ -25,6 +25,7 @@ import {
 
 import CustomInput from "../components/CustomInput";
 import CustomButton from "../components/CustomButtom";
+import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
 
 const Login = () => {
   // Typing for navigation
@@ -140,14 +141,8 @@ const Login = () => {
               justifyContent: "center",
             }}
           >
-            <View
-              style={
-                error == ""
-                  ? styles.error_container_empty
-                  : styles.error_container_full
-              }
-            >
-              <Text style={styles.error_text}>{error}</Text>
+            <View style={{ marginBottom: 10 }}>
+              <ErrorDisplay error={error} />
             </View>
             <CustomInput
               value={email}

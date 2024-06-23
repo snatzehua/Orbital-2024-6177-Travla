@@ -7,46 +7,40 @@ import CustomInput from "../components/CustomInput/CustomInput";
 import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
 
-interface AddEventProps {
+interface AddTripProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
-  setEvents: React.Dispatch<React.SetStateAction<EventData[]>>; // Dispatch function for updating the events array
+  setTrips: React.Dispatch<React.SetStateAction<TripData[]>>; // Dispatch function for updating the Trips array
 }
 
-// Add event popup form
-const AddEvent = ({ toggleModal, setEvents }: AddEventProps) => {
+// Add Trip popup form
+const AddTrip = ({ toggleModal, setTrips }: AddTripProps) => {
   // Defining hooks
   const baseStart = new Date();
-  baseStart.setHours(0);
-  baseStart.setMinutes(0);
-  baseStart.setSeconds(0);
   const baseEnd = new Date();
-  baseEnd.setHours(0);
-  baseEnd.setMinutes(0);
-  baseEnd.setSeconds(0);
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
-  const [newEventTitle, setNewEventTitle] = useState("");
+  const [newTripTitle, setnewTripTitle] = useState("");
   const [newStart, setNewStart] = useState(baseStart);
   const [newEnd, setNewEnd] = useState(baseEnd);
 
-  // Defining button press functions (Add Event)
-  const handleAddEvent = () => {
+  // Defining button press functions (Add Trip)
+  const handleAddTrip = () => {
     // Error handling
-    if (newEventTitle === "") {
+    if (newTripTitle === "") {
       setError("Please enter a title");
       return;
     }
-    if (newStart.getTime > newEnd.getTime) {
+    if (newStart > newEnd) {
       setError("End cannot be before start");
       return;
     }
-    const newEvent: EventData = {
-      title: newEventTitle,
-      datatype: "Event",
+    const newTrip: TripData = {
+      title: newTripTitle,
+      datatype: "Trip",
       start: newStart,
       end: newEnd,
     };
-    setEvents((list) => [...list, newEvent]);
+    setTrips((list) => [...list, newTrip]);
     toggleModal();
   };
 
@@ -61,8 +55,8 @@ const AddEvent = ({ toggleModal, setEvents }: AddEventProps) => {
       >
         <View
           style={{ position: "absolute", left: 0 }}
-          onLayout={(event) => {
-            setBackButtonHeight(event.nativeEvent.layout.height);
+          onLayout={(Trip) => {
+            setBackButtonHeight(Trip.nativeEvent.layout.height);
           }}
         >
           <BackButton onPress={toggleModal} iconName="window-close-o" />
@@ -73,9 +67,9 @@ const AddEvent = ({ toggleModal, setEvents }: AddEventProps) => {
       </View>
       <View style={{ alignItems: "center" }}>
         <CustomInput
-          value={newEventTitle}
-          setValue={setNewEventTitle}
-          placeholder="Event Title"
+          value={newTripTitle}
+          setValue={setnewTripTitle}
+          placeholder="Trip Title"
           secureTextEntry={false}
         />
         <View style={styles.line} />
@@ -84,7 +78,7 @@ const AddEvent = ({ toggleModal, setEvents }: AddEventProps) => {
             Start :
           </Text>
           <DateTimeDropdown
-            datatype={"Event"}
+            datatype={"Trip"}
             date={newStart}
             setDate={setNewStart}
           />
@@ -93,17 +87,17 @@ const AddEvent = ({ toggleModal, setEvents }: AddEventProps) => {
         <View style={styles.time_dropdown}>
           <Text style={{ fontFamily: "Arimo-Bold", fontSize: 20 }}>End :</Text>
           <DateTimeDropdown
-            datatype={"Event"}
+            datatype={"Trip"}
             date={newEnd}
             setDate={setNewEnd}
           />
         </View>
         <View style={styles.line} />
         <CustomButton
-          text="Add Event"
-          onPress={handleAddEvent}
-          containerStyle={styles.add_event_container}
-          textStyle={styles.add_event_text}
+          text="Add Trip"
+          onPress={handleAddTrip}
+          containerStyle={styles.add_trip_container}
+          textStyle={styles.add_trip_text}
         />
       </View>
     </SafeAreaView>
@@ -124,7 +118,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   to: { marginVertical: 5 },
-  add_event_container: {
+  add_trip_container: {
     backgroundColor: "#FFB000",
     width: "90%",
     borderRadius: 5,
@@ -133,9 +127,9 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: "5%",
   },
-  add_event_text: {
+  add_trip_text: {
     fontFamily: "Arimo-Bold",
   },
 });
 
-export default AddEvent;
+export default AddTrip;
