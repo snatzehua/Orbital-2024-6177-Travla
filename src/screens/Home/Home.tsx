@@ -1,7 +1,14 @@
-import React, { useRef, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import {
   Animated,
   Dimensions,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -12,12 +19,21 @@ import Modal from "react-native-modal";
 
 import AddEvent from "./AddEvent";
 import Banner, { EventData } from "../components/Banner";
-import DateTimeDisplay from "./DateTimeDisplay";
 import MenuBar from "./MenuBar";
+import { updateUserData } from "../shared/UserDataService";
+import { useUserData } from "../shared/UserDataContext";
+import {
+  DateTimeDisplay,
+  useDate,
+  convertToDate,
+} from "../shared/DateTimeContext";
 
 const Home = () => {
   // Data
+  const [refreshing, setRefreshing] = useState(false);
+  const { userData, setUserData } = useUserData();
   const [events, setEvents] = useState<EventData[]>([]);
+  const { date } = useDate();
 
   // Add Event form
   const [isModalVisible, setModalVisible] = useState(false);
@@ -41,6 +57,61 @@ const Home = () => {
     }
   };
 
+  const today = useMemo(
+    () => convertToDate(new Date()).toLocaleDateString(),
+    [date]
+  );
+
+  useEffect(() => {
+    const currentEvents = Array.from(userData.trips.values()).flatMap(
+      (tripData) => tripData.days.get(today) || []
+    );
+    setEvents(currentEvents);
+  }, [userData, today]);
+
+  const updateHomePage = useCallback(async () => {
+    try {
+      for (const [key, tripData] of userData.trips.entries()) {
+        const currentEvents = await userData.trips
+          .get(key)
+          ?.days.get(convertToDate(new Date()).toISOString());
+        console.log(date);
+        if (currentEvents) {
+          setEvents(currentEvents);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, [userData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    updateHomePage().finally(() => setRefreshing(false));
+  }, [updateHomePage]);
+
+  const updateAsync = async (
+    selectedTrip: string,
+    selectedDate: string,
+    newEvent: EventData
+  ) => {
+    setUserData((prevUserData) => {
+      const updatedTrip = { ...prevUserData.trips.get(selectedTrip)! }; // Get a copy of the selected trip
+      const updatedDays = new Map(updatedTrip.days);
+      updatedDays.set(selectedDate, [newEvent]); // Replace the entire day's events
+      const updatedUserData = {
+        ...prevUserData,
+        trips: new Map(prevUserData.trips).set(selectedTrip, {
+          ...updatedTrip,
+          days: updatedDays,
+        }),
+      };
+      updateUserData(updatedUserData);
+      return updatedUserData;
+    });
+  };
+
   // Main Home screen framework
   return (
     <View style={{ flex: 1, backgroundColor: "#EBEBEB" }}>
@@ -50,7 +121,7 @@ const Home = () => {
             transform: [{ scale: scaleValue }],
           }}
         >
-          <AddEvent toggleModal={toggleModal} setEvents={setEvents} />
+          <AddEvent toggleModal={toggleModal} updateAsync={updateAsync} />
         </Animated.View>
       </Modal>
       <SafeAreaView style={styles.container}>
@@ -77,7 +148,12 @@ const Home = () => {
             alignItems: "center",
           }}
         >
-          <ScrollView style={styles.banner_container}>
+          <ScrollView
+            style={styles.banner_container}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+          >
             {events.map((datapack) => (
               <Banner key={datapack.title} data={datapack} />
             ))}
@@ -137,7 +213,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 8,
     borderRadius: 5,
-    marginTop: 5,
+    marginVertical: 5,
   },
   banner_container: {
     width: "95%",

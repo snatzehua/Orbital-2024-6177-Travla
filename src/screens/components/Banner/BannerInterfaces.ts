@@ -5,8 +5,9 @@ interface BannerData {
   end: Date;
 }
 
-interface EventData extends BannerData {
+interface TripData extends BannerData {
+  days: Map<string, EventData[]>;
 }
 
-interface TripData extends BannerData {
+interface EventData extends BannerData {
 }

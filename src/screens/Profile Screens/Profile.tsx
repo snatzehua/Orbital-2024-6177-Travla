@@ -1,18 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { Button } from "@rneui/base";
 import { getAuth, signOut } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
+import { createEmptyUserData, clearUserData } from "../shared/UserDataService";
+import { useUserData } from "../shared/UserDataContext";
 
 const Profile = () => {
+  // Data
+  const { userData, setUserData } = useUserData();
+
   // Typing for navigation
   type RootStackParamList = {
     Login: undefined;
@@ -38,6 +42,10 @@ const Profile = () => {
     }
     navigation.navigate("Login");
   };
+  const handleClearData = async () => {
+    clearUserData();
+    setUserData(createEmptyUserData());
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -46,6 +54,11 @@ const Profile = () => {
       </View>
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <CustomButton text="Logout" onPress={handleLogout} wrapperStyle={{}} />
+        <CustomButton
+          text="CLEAR DATA"
+          onPress={handleClearData}
+          wrapperStyle={{}}
+        />
       </View>
     </SafeAreaView>
   );

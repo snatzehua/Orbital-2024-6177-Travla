@@ -1,36 +1,41 @@
 import React, { useState } from "react";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
 import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
+import SelectTrip from "./SelectTrip";
+import SelectDate from "./SelectDate";
+import { useUserData } from "../shared/UserDataContext";
+import { updateUserData } from "../shared/UserDataService";
+import { convertToDate } from "../shared/DateTimeContext";
 
 interface AddEventProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
-  setEvents: React.Dispatch<React.SetStateAction<EventData[]>>; // Dispatch function for updating the events array
+  updateAsync: (
+    selectedTrip: string,
+    selectedDate: string,
+    newEvent: EventData
+  ) => Promise<void>;
 }
 
 // Add event popup form
-const AddEvent = ({ toggleModal, setEvents }: AddEventProps) => {
+const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   // Defining hooks
-  const baseStart = new Date();
-  baseStart.setHours(0);
-  baseStart.setMinutes(0);
-  baseStart.setSeconds(0);
-  const baseEnd = new Date();
-  baseEnd.setHours(0);
-  baseEnd.setMinutes(0);
-  baseEnd.setSeconds(0);
+  const baseStart = convertToDate(new Date());
+  const baseEnd = convertToDate(new Date());
+
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newStart, setNewStart] = useState(baseStart);
   const [newEnd, setNewEnd] = useState(baseEnd);
-
+  const [selectedTrip, setSelectedTrip] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   // Defining button press functions (Add Event)
-  const handleAddEvent = () => {
+  const handleAddEvent = async () => {
     // Error handling
     if (newEventTitle === "") {
       setError("Please enter a title");
@@ -46,66 +51,103 @@ const AddEvent = ({ toggleModal, setEvents }: AddEventProps) => {
       start: newStart,
       end: newEnd,
     };
-    setEvents((list) => [...list, newEvent]);
+    updateAsync(selectedTrip, selectedDate, newEvent);
     toggleModal();
+  };
+  const handleDateBackButton = () => {
+    setSelectedTrip("");
+  };
+
+  const handleAddBackButton = () => {
+    setSelectedDate("");
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "#EBEBEB" }}>
-      <View
-        style={{
-          justifyContent: "center",
-          flexDirection: "row",
-          minHeight: backButtonHeight,
-        }}
-      >
-        <View
-          style={{ position: "absolute", left: 0 }}
-          onLayout={(event) => {
-            setBackButtonHeight(event.nativeEvent.layout.height);
-          }}
-        >
-          <BackButton onPress={toggleModal} iconName="window-close-o" />
-        </View>
-        <View style={{ justifyContent: "center" }}>
-          <ErrorDisplay error={error} />
-        </View>
-      </View>
-      <View style={{ alignItems: "center" }}>
-        <CustomInput
-          value={newEventTitle}
-          setValue={setNewEventTitle}
-          placeholder="Event Title"
-          secureTextEntry={false}
-        />
-        <View style={styles.line} />
-        <View style={styles.time_dropdown}>
-          <Text style={{ fontFamily: "Arimo-Bold", fontSize: 20 }}>
-            Start :
-          </Text>
-          <DateTimeDropdown
-            datatype={"Event"}
-            date={newStart}
-            setDate={setNewStart}
+    <SafeAreaView style={{ height: "85%", backgroundColor: "#EBEBEB" }}>
+      {selectedTrip === "" ? (
+        <>
+          <View style={{ alignItems: "flex-start" }}>
+            <BackButton onPress={toggleModal} iconName="window-close-o" />
+          </View>
+          <SelectTrip setSelectedTrip={setSelectedTrip} />
+        </>
+      ) : selectedDate === "" ? (
+        <>
+          <View style={{ alignItems: "flex-start" }}>
+            <BackButton onPress={handleDateBackButton} />
+          </View>
+          <SelectDate
+            selectedTrip={selectedTrip}
+            setSelectedDate={setSelectedDate}
+          />
+        </>
+      ) : (
+        <View style={{ flex: 1 }}>
+          <View>
+            <View
+              style={{
+                justifyContent: "center",
+                flexDirection: "row",
+                minHeight: backButtonHeight,
+              }}
+            >
+              <View
+                style={{ position: "absolute", left: 0 }}
+                onLayout={(event) => {
+                  setBackButtonHeight(event.nativeEvent.layout.height);
+                }}
+              >
+                <BackButton onPress={handleAddBackButton} />
+              </View>
+              <View style={{ justifyContent: "center" }}>
+                <ErrorDisplay error={error} />
+              </View>
+            </View>
+          </View>
+          <ScrollView
+            contentContainerStyle={{ alignItems: "center" }}
+            style={{
+              flex: 1,
+            }}
+          >
+            <CustomInput
+              value={newEventTitle}
+              setValue={setNewEventTitle}
+              placeholder="Event Title"
+              secureTextEntry={false}
+            />
+            <View style={styles.line} />
+            <View style={styles.time_dropdown}>
+              <Text style={{ fontFamily: "Arimo-Bold", fontSize: 20 }}>
+                Start :
+              </Text>
+              <DateTimeDropdown
+                datatype={"Event"}
+                date={newStart}
+                setDate={setNewStart}
+              />
+            </View>
+            <Text style={styles.to}> - </Text>
+            <View style={styles.time_dropdown}>
+              <Text style={{ fontFamily: "Arimo-Bold", fontSize: 20 }}>
+                End :
+              </Text>
+              <DateTimeDropdown
+                datatype={"Event"}
+                date={newEnd}
+                setDate={setNewEnd}
+              />
+            </View>
+            <View style={styles.line} />
+          </ScrollView>
+          <CustomButton
+            text="Add Event"
+            onPress={handleAddEvent}
+            containerStyle={styles.add_event_container}
+            textStyle={styles.add_event_text}
           />
         </View>
-        <Text style={styles.to}> - </Text>
-        <View style={styles.time_dropdown}>
-          <Text style={{ fontFamily: "Arimo-Bold", fontSize: 20 }}>End :</Text>
-          <DateTimeDropdown
-            datatype={"Event"}
-            date={newEnd}
-            setDate={setNewEnd}
-          />
-        </View>
-        <View style={styles.line} />
-        <CustomButton
-          text="Add Event"
-          onPress={handleAddEvent}
-          containerStyle={styles.add_event_container}
-          textStyle={styles.add_event_text}
-        />
-      </View>
+      )}
     </SafeAreaView>
   );
 };

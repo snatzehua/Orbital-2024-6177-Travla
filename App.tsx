@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import * as Font from "expo-font";
 import { Dimensions, Image, ImageBackground, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
@@ -13,6 +13,20 @@ import * as firebaseAuth from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import firebaseConfig from "./firebaseConfig";
 
+import {
+  createEmptyUserData,
+  getUserData,
+  UserData,
+} from "./src/screens/shared/UserDataService";
+import {
+  useUserData,
+  UserDataProvider,
+} from "./src/screens/shared/UserDataContext";
+import {
+  DateTimeProvider,
+  DateTimeDisplay,
+} from "./src/screens/shared/DateTimeContext";
+
 import Login from "./src/screens/Auth Screens/Login";
 import Register from "./src/screens/Auth Screens/Register";
 import ResetPassword from "./src/screens/Auth Screens/ResetPassword";
@@ -24,13 +38,25 @@ import Map from "./src/screens/Map Screens/Map";
 import Profile from "./src/screens/Profile Screens/Profile";
 
 const Stack = createNativeStackNavigator();
-
 const reactNativePersistence = (firebaseAuth as any).getReactNativePersistence;
+
+export type RootStackParamList = {
+  Home: undefined;
+  Login: undefined;
+  Register: undefined;
+  ResetPassword: undefined;
+  Authenticating: undefined;
+  Settings: undefined;
+  Trips: { openForm: boolean };
+  Map: undefined;
+  Profile: undefined;
+};
 
 export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [auth, setAuth] = useState<any>(null);
+  const { userData, setUserData, error } = useUserData();
 
   // Initialize Firebase
   useEffect(() => {
@@ -78,6 +104,35 @@ export default function App() {
     loadFonts();
   }, []);
 
+  // Fetch Async data
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (user) {
+          const fetchedUserData = await getUserData();
+          if (!fetchedUserData) {
+            // Check fetchedData directly
+            console.log("User data is null, creating new user data");
+            const emptyData = createEmptyUserData();
+            setUserData(emptyData);
+          } else {
+            setUserData(fetchedUserData);
+          }
+          console.log("Fetched:", fetchedUserData);
+          console.log(fetchedUserData.trips.get("T1")?.days);
+        } else {
+          setUserData(createEmptyUserData());
+          console.log("Created:", userData);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [user]); // This useEffect should only run when user changes.
+
   // Conditional Rendering
   if (initializing) {
     return (
@@ -94,22 +149,30 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName={user ? "Home" : "Login"}
-        screenOptions={{ headerShown: false }}
-      >
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Register" component={Register} />
-        <Stack.Screen name="ResetPassword" component={ResetPassword} />
-        <Stack.Screen name="Authenticating" component={Authenticating} />
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Settings" component={Settings} />
-        <Stack.Screen name="Trips" component={Trips} />
-        <Stack.Screen name="Map" component={Map} />
-        <Stack.Screen name="Profile" component={Profile} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <UserDataProvider>
+      <DateTimeProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName={user ? "Home" : "Login"}
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Register" component={Register} />
+            <Stack.Screen name="ResetPassword" component={ResetPassword} />
+            <Stack.Screen name="Authenticating" component={Authenticating} />
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="Settings" component={Settings} />
+            <Stack.Screen
+              name="Trips"
+              component={Trips}
+              initialParams={{ openForm: false }}
+            />
+            <Stack.Screen name="Map" component={Map} />
+            <Stack.Screen name="Profile" component={Profile} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </DateTimeProvider>
+    </UserDataProvider>
   );
 }
 

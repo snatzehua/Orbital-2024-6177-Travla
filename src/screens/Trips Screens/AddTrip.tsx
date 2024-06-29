@@ -6,22 +6,43 @@ import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
 import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
+import SelectTrip from "../Home/SelectTrip";
+import { convertToDate } from "../shared/DateTimeContext";
 
 interface AddTripProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
-  setTrips: React.Dispatch<React.SetStateAction<TripData[]>>; // Dispatch function for updating the Trips array
+  updateAsync: (newTrip: TripData) => void;
 }
 
 // Add Trip popup form
-const AddTrip = ({ toggleModal, setTrips }: AddTripProps) => {
+const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
   // Defining hooks
-  const baseStart = new Date();
-  const baseEnd = new Date();
+  const baseStart = convertToDate(new Date());
+  const baseEnd = convertToDate(new Date());
+
+  // Data
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
   const [newTripTitle, setnewTripTitle] = useState("");
   const [newStart, setNewStart] = useState(baseStart);
   const [newEnd, setNewEnd] = useState(baseEnd);
+
+  // Create DayData array
+  function getEmptyDaysMap(
+    startDate: Date,
+    endDate: Date
+  ): Map<string, EventData[]> {
+    const days = new Map<string, EventData[]>();
+    const currentDate = new Date(startDate); // Start with the start date
+
+    while (currentDate <= endDate) {
+      const dateKey = currentDate.toLocaleDateString(); // YYYY-MM-DD
+      days.set(dateKey, []);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+
+    return days;
+  }
 
   // Defining button press functions (Add Trip)
   const handleAddTrip = () => {
@@ -39,8 +60,9 @@ const AddTrip = ({ toggleModal, setTrips }: AddTripProps) => {
       datatype: "Trip",
       start: newStart,
       end: newEnd,
+      days: getEmptyDaysMap(newStart, newEnd),
     };
-    setTrips((list) => [...list, newTrip]);
+    updateAsync(newTrip);
     toggleModal();
   };
 

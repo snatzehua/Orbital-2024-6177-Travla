@@ -20,6 +20,7 @@ const DateTimeDropdown: React.FC<DateTimeDropdownProps> = ({
   const onChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
     if (selectedDate) {
       setDate(selectedDate);
+      console.log(date);
     }
   };
 

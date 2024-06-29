@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -20,20 +20,22 @@ import AddTrip from "./AddTrip";
 import AddTripButton from "./AddTripButton";
 import BackButton from "../components/BackButton/BackButton";
 import Banner from "../components/Banner";
-import DateTimeDisplay from "../Home/DateTimeDisplay";
+import { useUserData } from "../shared/UserDataContext";
+import { getUserData, updateUserData } from "../shared/UserDataService";
+import { DateTimeDisplay } from "../shared/DateTimeContext";
 
 const Trips = () => {
   // Typing for navigation
   type RootStackParamList = {
-    Login: undefined;
-    Profile: undefined;
+    Home: undefined;
+    Trips: { openForm?: boolean };
   };
   const Stack = createNativeStackNavigator<RootStackParamList>();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Data
-  const [trips, setTrips] = useState<TripData[]>([]);
+  const { userData, setUserData } = useUserData();
 
   // Add Event form
   const [isModalVisible, setModalVisible] = useState(false);
@@ -59,10 +61,20 @@ const Trips = () => {
 
   // Defining button presses
   const handleNavBack = () => {
-    navigation.goBack();
+    navigation.navigate("Home");
   };
-  const handleAddEventPopup = () => {
-    toggleModal();
+  const updateAsync = async (newTrip: TripData) => {
+    setUserData((prevUserData) => {
+      const newTrips = new Map(prevUserData.trips);
+      newTrips.set(newTrip.title, newTrip);
+      const updatedUserData = { ...prevUserData, trips: newTrips };
+
+      // Update AsyncStorage *within* the state update function
+      updateUserData(updatedUserData);
+      return updatedUserData;
+    });
+
+    // No need to call updateUserData here again
   };
 
   return (
@@ -73,7 +85,7 @@ const Trips = () => {
             transform: [{ scale: scaleValue }],
           }}
         >
-          <AddTrip toggleModal={toggleModal} setTrips={setTrips} />
+          <AddTrip toggleModal={toggleModal} updateAsync={updateAsync} />
         </Animated.View>
       </Modal>
       <View
@@ -113,13 +125,15 @@ const Trips = () => {
           }}
         >
           <ScrollView style={styles.banner_container}>
-            {trips.map((datapack) => (
+            {Array.from(userData.trips.values()).map((datapack) => (
               <Banner key={datapack.title} data={datapack} />
             ))}
             <AddTripButton
-              toggleModal={toggleModal}
+              onPressFunction={toggleModal}
               text={
-                trips.length === 0 ? "Add your first trip!" : "Add another trip"
+                Array.from(userData.trips.values()).length === 0
+                  ? "Add your first trip!"
+                  : "Add another trip"
               }
             ></AddTripButton>
             <View
@@ -154,7 +168,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 8,
     borderRadius: 5,
-    marginTop: 5,
+    marginVertical: 5,
   },
   banner_container: {
     width: "95%",

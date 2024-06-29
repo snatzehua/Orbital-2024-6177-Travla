@@ -12,10 +12,18 @@ const Banner: React.FC<BannerData> = (datapack: BannerData) => {
   const data = datapack.data;
 
   // Format dates
-  const formatDate = (startDate: Date, endDate: Date) => {
-    const startDateString = startDate.toLocaleDateString();
-    const endDateString = endDate.toLocaleDateString();
-    return `${startDateString} - ${endDateString}`;
+  const formatDate = (startDate: Date | string, endDate: Date | string) => {
+    if (startDate instanceof Date && endDate instanceof Date) {
+      // Handle Dates
+      return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+    }
+    if (typeof startDate === "string" && typeof endDate === "string") {
+      // Handle strings (potentially parse them into Dates if needed)
+      const parsedStartDate = new Date(startDate);
+      const parsedEndDate = new Date(endDate);
+      return `${parsedStartDate.toLocaleDateString()} - ${parsedEndDate.toLocaleDateString()}`;
+    }
+    return "Error detected";
   };
 
   // Convert 24h format to 12h format
@@ -26,6 +34,9 @@ const Banner: React.FC<BannerData> = (datapack: BannerData) => {
     };
     const startTimeString = start.toLocaleTimeString([], options);
     const endTimeString = end.toLocaleTimeString([], options);
+    if (startTimeString === endTimeString) {
+      return `${startTimeString}`;
+    }
     return `${startTimeString} - ${endTimeString}`;
   };
 

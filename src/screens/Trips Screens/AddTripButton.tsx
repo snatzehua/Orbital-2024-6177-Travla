@@ -2,13 +2,16 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface AddTripButtonProps {
-  toggleModal: () => void; // Correct type for toggleModal
+  onPressFunction: () => void; // Correct type for onPressFunction
   text: string;
 }
 
-const AddTripButton: React.FC<AddTripButtonProps> = ({ toggleModal, text }) => {
+const AddTripButton: React.FC<AddTripButtonProps> = ({
+  onPressFunction,
+  text,
+}) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={toggleModal}>
+    <TouchableOpacity style={styles.container} onPress={onPressFunction}>
       <View>
         <Text style={styles.text}>{text}</Text>
       </View>
