@@ -69,27 +69,10 @@ const Home = () => {
     setEvents(currentEvents);
   }, [userData, today]);
 
-  const updateHomePage = useCallback(async () => {
-    try {
-      for (const [key, tripData] of userData.trips.entries()) {
-        const currentEvents = await userData.trips
-          .get(key)
-          ?.days.get(convertToDate(new Date()).toISOString());
-        console.log(date);
-        if (currentEvents) {
-          setEvents(currentEvents);
-          return;
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }, [userData]);
-
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    updateHomePage().finally(() => setRefreshing(false));
-  }, [updateHomePage]);
+    setRefreshing(false);
+  }, []);
 
   const updateAsync = async (
     selectedTrip: string,

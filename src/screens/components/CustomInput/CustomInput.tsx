@@ -1,11 +1,23 @@
 import React from "react";
-import { StyleSheet, View, TextInput, TextInputProps } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+  TextInput,
+  TextInputProps,
+  KeyboardTypeOptions,
+} from "react-native";
 
 interface CustomInputProps extends TextInputProps {
   value: string;
   setValue: (newValue: string) => void;
   placeholder: string;
   secureTextEntry: boolean;
+  multiline?: boolean; // Add a prop for multiline input
+  numberOfLines?: number; // Add a prop to control the number of lines
+  keyboardType?: KeyboardTypeOptions;
+  containerStyle?: StyleProp<ViewStyle>;
   onSubmitEditing?: () => void;
 }
 
@@ -13,19 +25,31 @@ const CustomInput: React.FC<CustomInputProps> = ({
   value,
   setValue,
   placeholder,
+  placeholderTextColor = "#7D7D7D",
   secureTextEntry,
+  multiline = false, // Default to single-line
+  numberOfLines,
+  keyboardType = "default",
+  containerStyle,
   onSubmitEditing,
 }) => {
   return (
-    <View style={styles.container}>
+    <View style={containerStyle ?? styles.container}>
       <TextInput
         value={value}
         onChangeText={setValue}
         placeholder={placeholder}
-        style={styles.input}
+        placeholderTextColor={placeholderTextColor}
+        style={[
+          styles.input,
+          multiline && { height: numberOfLines ? numberOfLines * 20 : 80 }, // Adjust height dynamically
+        ]}
         secureTextEntry={secureTextEntry}
         onSubmitEditing={onSubmitEditing}
         autoCapitalize="none"
+        keyboardType={keyboardType}
+        multiline={multiline} // Enable multiline if the prop is true
+        numberOfLines={numberOfLines} // Allow controlling the number of visible lines
       />
     </View>
   );
@@ -45,6 +69,7 @@ const styles = StyleSheet.create({
   input: {
     fontFamily: "Arimo-Regular",
     paddingLeft: 5,
+    textAlignVertical: "top",
   },
 });
 

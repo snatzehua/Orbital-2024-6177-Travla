@@ -21,7 +21,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ toggleModal }) => {
   // Typing for navigation
   type RootStackParamList = {
     Login: undefined;
-    Settings: undefined;
+    Insights: undefined;
     Trips: undefined;
     Map: undefined;
     Profile: undefined;
@@ -32,7 +32,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ toggleModal }) => {
 
   // Defining button press functions
   const handleInsightsNavigation = () => {
-    navigation.navigate("Settings");
+    navigation.navigate("Insights");
   };
   const handleTripsNavigation = () => {
     navigation.navigate("Trips");

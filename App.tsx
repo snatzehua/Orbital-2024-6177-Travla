@@ -32,7 +32,7 @@ import Register from "./src/screens/Auth Screens/Register";
 import ResetPassword from "./src/screens/Auth Screens/ResetPassword";
 import Authenticating from "./src/screens/Auth Screens/Authenticating";
 import Home from "./src/screens/Home/Home";
-import Settings from "./src/screens/Settings Screens/Settings";
+import Insights from "./src/screens/Insights Screens/Insights";
 import Trips from "./src/screens/Trips Screens/Trips";
 import Map from "./src/screens/Map Screens/Map";
 import Profile from "./src/screens/Profile Screens/Profile";
@@ -161,7 +161,7 @@ export default function App() {
             <Stack.Screen name="ResetPassword" component={ResetPassword} />
             <Stack.Screen name="Authenticating" component={Authenticating} />
             <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="Settings" component={Settings} />
+            <Stack.Screen name="Insights" component={Insights} />
             <Stack.Screen
               name="Trips"
               component={Trips}

@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+import EventBody from "./EventBody";
+import TripBody from "./TripBody";
 import { EventData, TripData } from ".";
+
+import { useUserData } from "../../shared/UserDataContext";
+import { updateUserData } from "../../shared/UserDataService";
+import EditBanner from "./EditBanner";
+import { formatDate, formatTime } from "../../shared/DateTimeContext";
 
 type BannerData = {
   data: TripData | EventData;
@@ -10,57 +17,107 @@ type BannerData = {
 const Banner: React.FC<BannerData> = (datapack: BannerData) => {
   // Extract data from wrapped datapck
   const data = datapack.data;
+  const { setUserData } = useUserData();
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Format dates
-  const formatDate = (startDate: Date | string, endDate: Date | string) => {
-    if (startDate instanceof Date && endDate instanceof Date) {
-      // Handle Dates
-      return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
-    }
-    if (typeof startDate === "string" && typeof endDate === "string") {
-      // Handle strings (potentially parse them into Dates if needed)
-      const parsedStartDate = new Date(startDate);
-      const parsedEndDate = new Date(endDate);
-      return `${parsedStartDate.toLocaleDateString()} - ${parsedEndDate.toLocaleDateString()}`;
-    }
-    return "Error detected";
-  };
+  const isTripData = (data: TripData | EventData): data is TripData =>
+    data.datatype === "Trip";
 
-  // Convert 24h format to 12h format
-  const formatTime = (start: Date, end: Date) => {
-    const options: Intl.DateTimeFormatOptions = {
-      hour: "numeric",
-      minute: "2-digit",
-    };
-    const startTimeString = start.toLocaleTimeString([], options);
-    const endTimeString = end.toLocaleTimeString([], options);
-    if (startTimeString === endTimeString) {
-      return `${startTimeString}`;
-    }
-    return `${startTimeString} - ${endTimeString}`;
-  };
+  const isEventData = (data: TripData | EventData): data is EventData =>
+    data.datatype === "Event";
 
   // Defining button press functions
   const handleBannerEdit = () => {
-    console.log("Banner pressed");
+    setIsEditing(true); // Show the EditBanner modal
+  };
+  const handleUpdate = (
+    oldTitle: string,
+    updatedData: TripData | EventData
+  ) => {
+    setUserData((prevUserData) => {
+      const trips = new Map(prevUserData.trips);
+      if (isTripData(data)) {
+        trips.set(data.trip, updatedData);
+      } else if (isEventData(data)) {
+        const trip = trips.get(data.trip);
+        if (trip) {
+          const days = new Map(trip.days);
+          const day = days?.get(data.day) || [];
+          const updatedEvents =
+            day?.map((event) =>
+              event.title == oldTitle ? updatedData : event
+            ) || [];
+          days.set(data.day, updatedEvents);
+          trips.set(data.trip, { ...trip, days: days });
+        }
+      }
+      const updatedTrips = { ...prevUserData, trips: trips };
+      updateUserData(updatedTrips);
+      return updatedTrips;
+    });
+    setIsEditing(false); // Close the modal after saving
+  };
+  const handleDelete = () => {
+    setUserData((prevUserData) => {
+      const trips = new Map(prevUserData.trips);
+      if (isTripData(data)) {
+        trips.delete(data.trip);
+      } else if (isEventData(data)) {
+        const trip = trips.get(data.trip);
+        if (trip) {
+          const days = new Map(trip.days);
+          const day = days?.get(data.day) || [];
+          const updatedEvents = day?.filter(
+            (event) => event.title !== data.title
+          );
+          days?.set(data.day, updatedEvents);
+          trips?.set(data.trip, { ...trip, days: days });
+        }
+      }
+      const updatedUserData = { ...prevUserData, trips: trips };
+      updateUserData(updatedUserData);
+      return updatedUserData;
+    });
+    setIsEditing(false); // Close the modal after saving};
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={handleBannerEdit}>
-      <Text style={styles.title}>{data.title}</Text>
-      <View style={{ alignItems: "flex-end" }}>
-        {data.datatype === "Event" ? (
-          <Text style={styles.bottom_right}>
-            {formatTime(data.start, data.end)}
-          </Text>
-        ) : null}
-        {data.datatype === "Trip" ? (
-          <Text style={styles.bottom_right}>
-            {formatDate(data.start, data.end)}
-          </Text>
-        ) : null}
-      </View>
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity style={styles.container} onPress={handleBannerEdit}>
+        <Text style={styles.title}>{data.title}</Text>
+        <View style={{ alignItems: "flex-end" }}>
+          {data.datatype === "Event" ? (
+            <>
+              <View style={{ width: "100%" }}>
+                <EventBody data={data} />
+              </View>
+              <Text style={styles.bottom_right}>
+                {formatTime(data.start, data.end)}
+              </Text>
+            </>
+          ) : null}
+          {data.datatype === "Trip" ? (
+            <>
+              <View style={{ width: "100%" }}>
+                <TripBody data={data} />
+              </View>
+              <Text style={styles.bottom_right}>
+                {formatDate(data.start, data.end)}
+              </Text>
+            </>
+          ) : null}
+        </View>
+      </TouchableOpacity>
+      {isEditing && (
+        <EditBanner
+          bannerData={data}
+          isVisible={isEditing}
+          onClose={() => setIsEditing(false)}
+          onUpdate={handleUpdate}
+          onDelete={handleDelete}
+        />
+      )}
+    </>
   );
 };
 

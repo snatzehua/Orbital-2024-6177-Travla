@@ -42,6 +42,38 @@ export const DateTimeDisplay = () => {
   );
 };
 
+// Format dates
+export const formatDate = (
+  startDate: Date | string,
+  endDate: Date | string
+) => {
+  if (startDate instanceof Date && endDate instanceof Date) {
+    // Handle Dates
+    return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+  }
+  if (typeof startDate === "string" && typeof endDate === "string") {
+    // Handle strings (potentially parse them into Dates if needed)
+    const parsedStartDate = new Date(startDate);
+    const parsedEndDate = new Date(endDate);
+    return `${parsedStartDate.toLocaleDateString()} - ${parsedEndDate.toLocaleDateString()}`;
+  }
+  return "Error detected";
+};
+
+// Convert 24h format to 12h format
+export const formatTime = (start: Date, end: Date) => {
+  const options: Intl.DateTimeFormatOptions = {
+    hour: "numeric",
+    minute: "2-digit",
+  };
+  const startTimeString = start.toLocaleTimeString([], options);
+  const endTimeString = end.toLocaleTimeString([], options);
+  if (startTimeString === endTimeString) {
+    return `${startTimeString}`;
+  }
+  return `${startTimeString} - ${endTimeString}`;
+};
+
 export const convertToDate = (date: Date) => {
   const newDate = date;
   newDate.setHours(0);

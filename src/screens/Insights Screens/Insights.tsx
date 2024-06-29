@@ -8,7 +8,7 @@ import {
 
 import BackButton from "../components/BackButton/BackButton";
 
-const Map = () => {
+const Settings = () => {
   // Typing for navigation
   type RootStackParamList = {
     Login: undefined;
@@ -38,7 +38,7 @@ const Map = () => {
       </View>
       <View style={styles.container}>
         <View style={styles.title_container}>
-          <Text style={styles.title_text}>Map</Text>
+          <Text style={styles.title_text}>Insights</Text>
           <View
             style={{
               flexDirection: "row",
@@ -78,4 +78,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Map;
+export default Settings;

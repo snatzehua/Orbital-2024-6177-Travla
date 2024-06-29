@@ -1,5 +1,12 @@
 import React, { useContext } from "react";
-import { SafeAreaView, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
@@ -43,31 +50,91 @@ const Profile = () => {
     navigation.navigate("Login");
   };
   const handleClearData = async () => {
-    clearUserData();
-    setUserData(createEmptyUserData());
+    Alert.alert(
+      "Confirm Clear Data",
+      "Are you sure you want to clear all your data? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Clear",
+          onPress: () => {
+            clearUserData();
+            setUserData(createEmptyUserData());
+          },
+          style: "destructive", // Indicate a destructive action
+        },
+      ]
+    );
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ marginLeft: "2%", alignItems: "flex-start" }}>
-        <BackButton onPress={handleNavBack} />
-      </View>
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <CustomButton text="Logout" onPress={handleLogout} wrapperStyle={{}} />
-        <CustomButton
-          text="CLEAR DATA"
-          onPress={handleClearData}
-          wrapperStyle={{}}
+      <View
+        style={{
+          marginLeft: "2%",
+          alignItems: "flex-start",
+          zIndex: 1,
+        }}
+      >
+        <BackButton
+          onPress={handleNavBack}
+          containerStyle={styles.button_container}
         />
+      </View>
+      <View style={styles.container}>
+        <View style={styles.title_container}>
+          <Text style={styles.title_text}>Profile</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              marginHorizontal: "5%",
+              marginTop: 5,
+            }}
+          >
+            <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
+          </View>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            width: "95%",
+            marginTop: 5,
+            alignItems: "center",
+          }}
+        >
+          <CustomButton
+            text="Logout"
+            onPress={handleLogout}
+            wrapperStyle={{}}
+          />
+          <CustomButton
+            text="CLEAR DATA"
+            onPress={handleClearData}
+            wrapperStyle={{}}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {},
-  buttonStyle: {},
-  textStyle: {},
+  button_container: { position: "absolute" },
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title_container: {
+    alignItems: "center",
+  },
+  title_text: {
+    fontFamily: "Arimo-Bold",
+    fontSize: Dimensions.get("window").height * 0.05,
+  },
 });
 
 export default Profile;

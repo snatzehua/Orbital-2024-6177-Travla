@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
+import { LinearGradient } from "expo-linear-gradient"; // Import the library
+import { v4 as uuidv4 } from "uuid";
 
+import { Currencies } from "./Currencies";
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
@@ -8,8 +12,6 @@ import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
 import SelectTrip from "./SelectTrip";
 import SelectDate from "./SelectDate";
-import { useUserData } from "../shared/UserDataContext";
-import { updateUserData } from "../shared/UserDataService";
 import { convertToDate } from "../shared/DateTimeContext";
 
 interface AddEventProps {
@@ -32,6 +34,12 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newStart, setNewStart] = useState(baseStart);
   const [newEnd, setNewEnd] = useState(baseEnd);
+  const [newDescription, setNewDescription] = useState("");
+  const [newLocation, setNewLocation] = useState("");
+  const [newCurrency, setNewCurrency] = useState("");
+  const [newAmount, setNewAmount] = useState("");
+  const [newRemarks, setNewRemarks] = useState("");
+  const [newAdditionalInformation, setNewAdditionalInformation] = useState("");
   const [selectedTrip, setSelectedTrip] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   // Defining button press functions (Add Event)
@@ -46,10 +54,20 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
       return;
     }
     const newEvent: EventData = {
+      trip: selectedTrip,
+      day: selectedDate,
       title: newEventTitle,
       datatype: "Event",
       start: newStart,
       end: newEnd,
+      description: newDescription,
+      cost: {
+        currency: newCurrency,
+        amount: Number(newAmount),
+      },
+      location: newLocation,
+      remarks: newRemarks,
+      additional_information: newAdditionalInformation,
     };
     updateAsync(selectedTrip, selectedDate, newEvent);
     toggleModal();
@@ -110,10 +128,32 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               flex: 1,
             }}
           >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                margin: "5%",
+              }}
+            >
+              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
+              <View>
+                <Text
+                  style={{
+                    color: "black",
+                    textAlign: "center",
+                    fontFamily: "Arimo-Bold",
+                    marginHorizontal: "2.5%",
+                  }}
+                >
+                  Compulsory
+                </Text>
+              </View>
+              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
+            </View>
             <CustomInput
               value={newEventTitle}
               setValue={setNewEventTitle}
-              placeholder="Event Title"
+              placeholder="Event title"
               secureTextEntry={false}
             />
             <View style={styles.line} />
@@ -139,6 +179,84 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               />
             </View>
             <View style={styles.line} />
+            <View style={{ paddingVertical: 10 }} />
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                margin: "5%",
+              }}
+            >
+              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
+              <View>
+                <Text
+                  style={{
+                    color: "black",
+                    textAlign: "center",
+                    fontFamily: "Arimo-Bold",
+                    marginHorizontal: "2.5%",
+                  }}
+                >
+                  Optional
+                </Text>
+              </View>
+              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
+            </View>
+            <CustomInput
+              value={newDescription}
+              setValue={setNewDescription}
+              placeholder="Description"
+              secureTextEntry={false}
+              multiline={true}
+              numberOfLines={5}
+            />
+            <View style={{ flex: 1, flexDirection: "row", width: "90%" }}>
+              <Dropdown
+                style={styles.dropdown}
+                search
+                placeholder="Currency"
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selected_text}
+                itemTextStyle={styles.items_text}
+                data={Currencies}
+                onChange={(item) => setNewCurrency(item.value)}
+                labelField="label"
+                valueField="value"
+              />
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "flex-end",
+                }}
+              >
+                <CustomInput
+                  value={newAmount}
+                  setValue={setNewAmount}
+                  placeholder="Amount"
+                  secureTextEntry={false}
+                  keyboardType="numeric"
+                  containerStyle={styles.custom_input}
+                />
+              </View>
+            </View>
+            <CustomInput
+              value={newLocation}
+              setValue={setNewLocation}
+              placeholder="Location"
+              secureTextEntry={false}
+            />
+            <CustomInput
+              value={newRemarks}
+              setValue={setNewRemarks}
+              placeholder="Remarks"
+              secureTextEntry={false}
+            />
+            <CustomInput
+              value={newAdditionalInformation}
+              setValue={setNewAdditionalInformation}
+              placeholder="Additional information"
+              secureTextEntry={false}
+            />
           </ScrollView>
           <CustomButton
             text="Add Event"
@@ -178,6 +296,30 @@ const styles = StyleSheet.create({
   add_event_text: {
     fontFamily: "Arimo-Bold",
   },
+  dropdown: {
+    width: "45%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    marginVertical: 5,
+  },
+  custom_input: {
+    width: "96%",
+    backgroundColor: "white",
+    borderColor: "white",
+    borderRadius: 20,
+    padding: 10,
+    marginVertical: 5,
+  },
+  placeholderStyle: { textAlign: "center", color: "#7D7D7D" },
+  blurOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 50, // Adjust this for the desired blur height
+  },
+  selected_text: { color: "#7D7D7D", paddingLeft: 15 },
+  items_text: { color: "#7D7D7D" },
 });
 
 export default AddEvent;

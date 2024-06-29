@@ -6,8 +6,19 @@ interface BannerData {
 }
 
 interface TripData extends BannerData {
+  trip: string;
   days: Map<string, EventData[]>;
 }
 
 interface EventData extends BannerData {
+  trip: string;
+  day: string;
+  description?: string;
+  location?: string,
+  cost?: {
+    currency: string;
+    amount: number;
+  }
+  remarks?: string;
+  additional_information?: string;
 }

@@ -56,6 +56,7 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       return;
     }
     const newTrip: TripData = {
+      trip: newTripTitle,
       title: newTripTitle,
       datatype: "Trip",
       start: newStart,
