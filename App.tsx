@@ -22,6 +22,8 @@ import Settings from "./src/screens/Settings Screens/Settings";
 import Trips from "./src/screens/Trips Screens/Trips";
 import Map from "./src/screens/Map Screens/Map";
 import Profile from "./src/screens/Profile Screens/Profile";
+import TripsList from './src/screens/components/Trips/tripsList';
+
 
 const Stack = createNativeStackNavigator();
 
