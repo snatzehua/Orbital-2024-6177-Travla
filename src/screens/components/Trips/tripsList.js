@@ -1,49 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { fetchTripsByUser } from '../services/api';
-import Banner from './Banner';
+import { useUserData } from '../context/UserDataContext';
 
-const TripsList = ({ userId }) => {
+const TripsList = () => {
   const [trips, setTrips] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { userData } = useUserData();
 
   useEffect(() => {
-    const loadTrips = async () => {
+    const fetchTrips = async () => {
       try {
-        const tripsData = await fetchTripsByUser(userId);
-        setTrips(tripsData);
+        const userTrips = await fetchTripsByUser(userData.uid);
+        setTrips(userTrips);
       } catch (error) {
-        console.error('Error loading trips:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching trips:', error);
       }
     };
 
-    loadTrips();
-  }, [userId]);
-
-  if (loading) {
-    return <Text>Loading...</Text>;
-  }
+    if (userData.uid) {
+      fetchTrips();
+    }
+  }, [userData.uid]);
 
   return (
-    <View style={styles.container}>
+    <View>
       <FlatList
         data={trips}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
-          <Banner data={{ ...item, datatype: 'Trip' }} />
+          <View>
+            <Text>{item.title}</Text>
+            <Text>{new Date(item.startDate).toDateString()} - {new Date(item.endDate).toDateString()}</Text>
+          </View>
         )}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-});
 
 export default TripsList;

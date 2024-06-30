@@ -17,6 +17,7 @@ import {
   createEmptyUserData,
   getUserData,
   UserData,
+  updateUserData,
 } from "./src/screens/shared/UserDataService";
 import {
   useUserData,
@@ -74,7 +75,7 @@ export default function App() {
   // Handle Auth State Changes
   useEffect(() => {
     let unsubscribeAuth = () => {}; // Default empty function
-
+  
     if (auth) {
       // Set Persistence
       setPersistence(auth, reactNativePersistence(AsyncStorage)).catch(
@@ -82,15 +83,52 @@ export default function App() {
           console.error("Error setting persistence:", error);
         }
       );
-
+  
       // Listen for Auth State Changes
       unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-        setUser(user);
-        // Only set initializing to false if a user is found or if it's determined there's no authenticated user
-        setInitializing(false);
+        if (user) {
+          setUserData(prevData => ({ 
+            ...prevData, 
+            uid: user.uid // Set the uid in userData context
+          }));
+          console.log("User ID:", user.uid); // Log the uid
+  
+          // Define an async function to handle the API call
+          const createUserInDB = async () => {
+            try {
+              const response = await fetch('http://localhost:3001/api/users', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  uid: user.uid,
+                  username: user.displayName || 'default_username',
+                  email: user.email
+                  // Ensure no password field is included
+                })
+              });
+  
+              if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Failed to create user:', response.status, response.statusText);
+                throw new Error(`Failed to create user: ${errorData.message}`);
+              }
+  
+              const data = await response.json();
+              console.log('User created:', data);
+            } catch (error) {
+              console.error('Error creating user:', error);
+            }
+          };
+  
+          // Call the async function
+          createUserInDB();
+        }
+        setInitializing(false); // Set initializing to false
       });
     }
-
+  
     return unsubscribeAuth; // Cleanup on unmount
   }, [auth]);
 
@@ -112,6 +150,7 @@ export default function App() {
     const fetchUserData = async () => {
       try {
         if (user) {
+          const userId = user.uid;
           const fetchedUserData = await getUserData();
           if (!fetchedUserData) {
             // Check fetchedData directly
@@ -134,6 +173,11 @@ export default function App() {
 
     fetchUserData();
   }, [user]); // This useEffect should only run when user changes.
+  useEffect(() => {
+    if (userData && userData.uid) {
+      console.log("User ID:", userData.uid); // Log userData to check if uid is set
+    }
+  }, [userData]); // Only run when 'userData' changes
 
   // Conditional Rendering
   if (initializing) {
