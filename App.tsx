@@ -36,6 +36,8 @@ import Insights from "./src/screens/Insights Screens/Insights";
 import Trips from "./src/screens/Trips Screens/Trips";
 import Map from "./src/screens/Map Screens/Map";
 import Profile from "./src/screens/Profile Screens/Profile";
+import TripsList from './src/screens/components/Trips/tripsList';
+
 
 const Stack = createNativeStackNavigator();
 const reactNativePersistence = (firebaseAuth as any).getReactNativePersistence;
