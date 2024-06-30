@@ -3,18 +3,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const USER_DATA_KEY = "userData";
 
 export interface UserData {
+  uid?: string;
   trips: Map<string, TripData>;
   settings: {};
 }
 
 // Create empty UserData
 export const createEmptyUserData: () => UserData = () => ({
+  uid: '',
   trips: new Map<string, TripData>(),
   settings: {},
 });
 
 // Get UserData
-export const getUserData = async () => {
+export const getUserData = async (): Promise<UserData> => {
   try {
     const jsonValue = await AsyncStorage.getItem(USER_DATA_KEY);
     if (!jsonValue) {
@@ -49,6 +51,7 @@ export const getUserData = async () => {
 
     const userData: UserData = {
       ...parsedData,
+      uid: parsedData.uid || '', // Ensure uid is set
       trips: tripsMap,
     };
 
@@ -64,7 +67,7 @@ export const updateUserData = async (newUserData: UserData): Promise<void> => {
   try {
     const tripsForJson = Object.fromEntries(
       Array.from(newUserData.trips, ([tripId, tripData]) => {
-        // 1a. Serialize Days Map within Each Trip
+        // Serialize Days Map within Each Trip
         const daysForJson = Object.fromEntries(
           Array.from(tripData.days, ([dateStr, events]) => [
             dateStr,
@@ -86,7 +89,7 @@ export const updateUserData = async (newUserData: UserData): Promise<void> => {
       })
     );
 
-    // 2. Serialize Full UserData
+    // Serialize Full UserData
     const jsonData = JSON.stringify(
       {
         ...newUserData,
