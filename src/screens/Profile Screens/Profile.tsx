@@ -17,6 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
+import { DateTimeDisplay } from "../shared/DateTimeContext";
 import { createEmptyUserData, clearUserData } from "../shared/UserDataService";
 import { useUserData } from "../shared/UserDataContext";
 
@@ -87,6 +88,9 @@ const Profile = () => {
       <View style={styles.container}>
         <View style={styles.title_container}>
           <Text style={styles.title_text}>Profile</Text>
+          <View style={styles.date_time_display_container}>
+            <DateTimeDisplay />
+          </View>
           <View
             style={{
               flexDirection: "row",
@@ -122,7 +126,7 @@ const Profile = () => {
 };
 
 const styles = StyleSheet.create({
-  button_container: { position: "absolute" },
+  button_container: { marginTop: 10, position: "absolute" },
   container: {
     flex: 1,
     alignItems: "center",
@@ -134,6 +138,13 @@ const styles = StyleSheet.create({
   title_text: {
     fontFamily: "Arimo-Bold",
     fontSize: Dimensions.get("window").height * 0.05,
+  },
+  date_time_display_container: {
+    backgroundColor: "#1C355B",
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+    marginVertical: 5,
   },
 });
 

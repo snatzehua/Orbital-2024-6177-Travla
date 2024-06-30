@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import { LinearGradient } from "expo-linear-gradient"; // Import the library
-import { v4 as uuidv4 } from "uuid";
 
-import { Currencies } from "./Currencies";
+import { Currencies } from "../shared/Currencies";
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
@@ -13,6 +11,7 @@ import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
 import SelectTrip from "./SelectTrip";
 import SelectDate from "./SelectDate";
 import { convertToDate } from "../shared/DateTimeContext";
+import CustomMultipleInput from "../components/CustomMultipleInput.tsx/CustomMultipleInput";
 
 interface AddEventProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
@@ -36,12 +35,14 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   const [newEnd, setNewEnd] = useState(baseEnd);
   const [newDescription, setNewDescription] = useState("");
   const [newLocation, setNewLocation] = useState("");
+  const [items, setItems] = useState<string[]>([]);
   const [newCurrency, setNewCurrency] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newRemarks, setNewRemarks] = useState("");
   const [newAdditionalInformation, setNewAdditionalInformation] = useState("");
   const [selectedTrip, setSelectedTrip] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+
   // Defining button press functions (Add Event)
   const handleAddEvent = async () => {
     // Error handling
@@ -53,6 +54,23 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
       setError("End cannot be before start");
       return;
     }
+    if (Number(newAmount) == undefined || Number(newAmount) == null) {
+      setError("Invalid cost amount");
+      return;
+    }
+    if (Number(newAmount) > 0 && newCurrency == "") {
+      setError("Please select a currency");
+      return;
+    }
+
+    // Data trimming
+    if (items.length > 0) {
+      setItems(items.filter((item) => item != ""));
+    }
+    if ((Number(newAmount) == 0 || newAmount == "") && newCurrency != "") {
+      setNewCurrency("");
+    }
+
     const newEvent: EventData = {
       trip: selectedTrip,
       day: selectedDate,
@@ -60,12 +78,13 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
       datatype: "Event",
       start: newStart,
       end: newEnd,
+      location: newLocation,
       description: newDescription,
       cost: {
         currency: newCurrency,
-        amount: Number(newAmount),
+        amount: newAmount == "" ? 0 : Number(newAmount),
       },
-      location: newLocation,
+      items: items.filter((item) => item.trim() !== ""),
       remarks: newRemarks,
       additional_information: newAdditionalInformation,
     };
@@ -163,7 +182,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               </Text>
               <DateTimeDropdown
                 datatype={"Event"}
-                date={newStart}
+                date={new Date(newStart)}
                 setDate={setNewStart}
               />
             </View>
@@ -174,7 +193,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               </Text>
               <DateTimeDropdown
                 datatype={"Event"}
-                date={newEnd}
+                date={new Date(newEnd)}
                 setDate={setNewEnd}
               />
             </View>
@@ -203,6 +222,12 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
             </View>
             <CustomInput
+              value={newLocation}
+              setValue={setNewLocation}
+              placeholder="Location"
+              secureTextEntry={false}
+            />
+            <CustomInput
               value={newDescription}
               setValue={setNewDescription}
               placeholder="Description"
@@ -214,6 +239,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               <Dropdown
                 style={styles.dropdown}
                 search
+                searchPlaceholder={"Search..."}
                 placeholder="Currency"
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selected_text}
@@ -239,12 +265,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
                 />
               </View>
             </View>
-            <CustomInput
-              value={newLocation}
-              setValue={setNewLocation}
-              placeholder="Location"
-              secureTextEntry={false}
-            />
+            <CustomMultipleInput items={items} setItems={setItems} />
             <CustomInput
               value={newRemarks}
               setValue={setNewRemarks}
@@ -297,7 +318,7 @@ const styles = StyleSheet.create({
     fontFamily: "Arimo-Bold",
   },
   dropdown: {
-    width: "45%",
+    width: "40%",
     backgroundColor: "white",
     borderRadius: 20,
     marginVertical: 5,
@@ -310,7 +331,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
   },
-  placeholderStyle: { textAlign: "center", color: "#7D7D7D" },
+  placeholderStyle: { color: "#7D7D7D", fontSize: 14, marginLeft: 15 },
   blurOverlay: {
     position: "absolute",
     bottom: 0,
@@ -318,8 +339,8 @@ const styles = StyleSheet.create({
     right: 0,
     height: 50, // Adjust this for the desired blur height
   },
-  selected_text: { color: "#7D7D7D", paddingLeft: 15 },
-  items_text: { color: "#7D7D7D" },
+  selected_text: { color: "black", fontSize: 14, marginLeft: 15 },
+  items_text: { color: "black", fontSize: 14 },
 });
 
 export default AddEvent;

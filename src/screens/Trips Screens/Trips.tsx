@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   banner_container: {
     width: "95%",
   },
-  button_container: { position: "absolute" },
+  button_container: { marginTop: 10, position: "absolute" },
   textStyle: {},
 });
 

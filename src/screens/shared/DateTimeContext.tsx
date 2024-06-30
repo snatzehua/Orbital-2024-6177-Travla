@@ -74,6 +74,59 @@ export const formatTime = (start: Date, end: Date) => {
   return `${startTimeString} - ${endTimeString}`;
 };
 
+export const getEmptyDaysMap = (
+  startDate: Date,
+  endDate: Date
+): Map<string, EventData[]> => {
+  const days = new Map<string, EventData[]>();
+  const currentDate = new Date(startDate); // Start with the start date
+
+  while (currentDate <= endDate) {
+    const dateKey = currentDate.toLocaleDateString(); // YYYY-MM-DD
+    days.set(dateKey, []);
+    currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+  }
+
+  return days;
+};
+
+export const deleteDaysOutsideRange = (
+  days: Map<string, EventData[]>,
+  newStart: Date,
+  newEnd: Date
+): Map<string, EventData[]> => {
+  const updatedDays = new Map(days);
+
+  // iterate over a copy of the map entries
+  const datesToDelete = Array.from(updatedDays.keys()).filter((dateKey) => {
+    const date = new Date(dateKey);
+    return date < newStart || date > newEnd;
+  });
+
+  for (const dateKey of datesToDelete) {
+    updatedDays.delete(dateKey);
+  }
+
+  return updatedDays;
+};
+
+export const addNewDaysInRange = (
+  days: Map<string, EventData[]>,
+  newStart: Date,
+  newEnd: Date
+): Map<string, EventData[]> => {
+  const updatedDays = new Map(days);
+  const currentDate = new Date(newStart);
+  while (currentDate <= newEnd) {
+    const dateKey = currentDate.toLocaleDateString();
+    if (!updatedDays.has(dateKey)) {
+      updatedDays.set(dateKey, []);
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  return updatedDays;
+};
+
 export const convertToDate = (date: Date) => {
   const newDate = date;
   newDate.setHours(0);

@@ -28,6 +28,8 @@ export const getUserData = async () => {
     // Convert 'days' back to a Map for each TripData
     for (const [tripId, tripData] of tripsMap.entries()) {
       const typedTripData = tripData as TripData;
+      typedTripData.start = new Date(typedTripData.start);
+      typedTripData.end = new Date(typedTripData.end);
       const daysMap = new Map(
         Object.entries(typedTripData.days).map(
           ([dateStr, events]): [string, any[]] => [

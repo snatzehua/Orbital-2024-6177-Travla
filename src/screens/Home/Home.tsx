@@ -80,9 +80,16 @@ const Home = () => {
     newEvent: EventData
   ) => {
     setUserData((prevUserData) => {
-      const updatedTrip = { ...prevUserData.trips.get(selectedTrip)! }; // Get a copy of the selected trip
+      const updatedTrip = { ...prevUserData.trips.get(selectedTrip)! };
       const updatedDays = new Map(updatedTrip.days);
-      updatedDays.set(selectedDate, [newEvent]); // Replace the entire day's events
+
+      // Get existing events for the selected date, or an empty array if none exist
+      const existingEvents = updatedDays.get(selectedDate) || [];
+
+      // Add the new event to the existing events
+      const newEvents = [...existingEvents, newEvent];
+
+      updatedDays.set(selectedDate, newEvents);
       const updatedUserData = {
         ...prevUserData,
         trips: new Map(prevUserData.trips).set(selectedTrip, {

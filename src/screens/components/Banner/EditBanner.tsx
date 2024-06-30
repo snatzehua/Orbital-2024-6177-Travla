@@ -6,16 +6,22 @@ import {
   View,
   Text,
   Modal,
-  TouchableOpacity,
   StyleSheet,
 } from "react-native";
 import { EventData, TripData } from ".";
 import { Dropdown } from "react-native-element-dropdown";
 
+import { Currencies } from "../../shared/Currencies";
+import BackButton from "../BackButton/BackButton";
 import CustomInput from "../CustomInput/CustomInput";
+import CustomMultipleInput from "../CustomMultipleInput.tsx/CustomMultipleInput";
 import DateTimeDropdown from "../DateTimeDropdown/DateTimeDropdown";
-import { useUserData } from "../../shared/UserDataContext";
+import ErrorDisplay from "../ErrorDisplay/ErrorDisplay";
 import CustomButton from "../CustomButtom/CustomButton";
+import {
+  addNewDaysInRange,
+  deleteDaysOutsideRange,
+} from "../../shared/DateTimeContext";
 
 interface EditBannerProps {
   bannerData: BannerData;
@@ -35,11 +41,103 @@ const EditBanner: React.FC<EditBannerProps> = ({
   const [editedData, setEditedData] = useState<TripData | EventData>(
     bannerData
   );
-  const { userData } = useUserData();
-  const tripNames = Array.from(userData.trips.keys());
+  const [error, setError] = useState("");
+  const [newAmount, setNewAmount] = useState<string>(
+    editedData?.cost?.amount.toString() ?? ""
+  );
+  const [items, setItems] = useState<string[]>(editedData?.items ?? []);
+  const [startDate, setStartDate] = useState<Date>(editedData.start);
+  const [endDate, setEndDate] = useState<Date>(editedData.end);
+
+  const checkForIssues = () => {
+    if (editedData.datatype === "Trip") {
+      if (editedData.start < startDate || editedData.end > endDate) {
+        Alert.alert(
+          "Change Trip Dates?",
+          "Are you sure you want to do this? This may delete some of your events.",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Change",
+              onPress: () => {
+                const updatedDays = deleteDaysOutsideRange(
+                  editedData.days,
+                  startDate,
+                  endDate
+                );
+                console.log(updatedDays);
+                handleInputChange("days", updatedDays);
+                handleSave();
+              },
+              style: "destructive", // Indicate a destructive action
+            },
+          ]
+        );
+      } else if (editedData.start > startDate || editedData.end < endDate) {
+        const updatedDays = addNewDaysInRange(
+          editedData.days,
+          startDate,
+          endDate
+        );
+        console.log(updatedDays);
+        handleInputChange("days", updatedDays);
+        handleSave();
+      } else {
+        handleSave();
+      }
+    } else {
+      handleSave();
+    }
+  };
 
   const handleSave = () => {
-    onUpdate(bannerData.title, editedData);
+    // Error handling
+    if (editedData.title === "") {
+      setError("Please enter a title");
+      return;
+    }
+    if (startDate.getTime > endDate.getTime) {
+      setError("End cannot be before start");
+      return;
+    }
+
+    // Event
+    if (editedData.datatype === "Event") {
+      if (Number(newAmount) == undefined || Number(newAmount) == null) {
+        setError("Invalid cost amount");
+        return;
+      }
+      if (Number(newAmount) > 0 && editedData.cost.currency == "") {
+        setError("Please select a currency");
+        return;
+      }
+
+      // Data trimming
+      if (
+        (Number(newAmount) == 0 || newAmount == "") &&
+        editedData.cost.currency != ""
+      ) {
+        handleInputChange("currency", "");
+      }
+      onUpdate(bannerData.title, {
+        ...editedData,
+        cost: { ...editedData.cost, amount: Number(newAmount) },
+        items: items.filter((item) => item.trim() !== ""),
+        start: startDate,
+        end: endDate,
+      });
+
+      // Trip
+    } else if (editedData.datatype === "Trip") {
+      onUpdate(bannerData.title, {
+        ...editedData,
+        start: startDate,
+        end: endDate,
+      });
+    }
     onClose();
   };
 
@@ -63,19 +161,50 @@ const EditBanner: React.FC<EditBannerProps> = ({
     );
   };
 
-  const handleInputChange = (key: keyof typeof editedData, value: any) => {
-    setEditedData({ ...editedData, [key]: value });
+  const handleCancel = () => {
+    onClose();
   };
 
-  const handleDateTimeChange = (key: "start" | "end", newDate: Date) => {
-    setEditedData({ ...editedData, [key]: newDate });
+  const handleInputChange = (key: keyof typeof editedData, value: any) => {
+    if (key === "currency") {
+      const updatedCost = { ...editedData.cost, currency: value.value };
+      setEditedData({ ...editedData, cost: updatedCost });
+    } else if (key === "amount") {
+      const updatedCost = { ...editedData.cost, amount: Number(value) };
+      setEditedData({ ...editedData, cost: updatedCost });
+    } else {
+      setEditedData({ ...editedData, [key]: value });
+    }
   };
 
   return (
     <Modal visible={isVisible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={{ flex: 1, backgroundColor: "#EBEBEB" }}>
+        <View
+          style={{
+            marginLeft: "2%",
+            alignItems: "flex-start",
+            zIndex: 1,
+          }}
+        >
+          <BackButton
+            onPress={handleCancel}
+            containerStyle={styles.button_container}
+          />
+        </View>
         <View style={styles.modalContainer}>
           <Text style={styles.title}>Edit {editedData.datatype}</Text>
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                marginBottom: 10,
+              }}
+            >
+              <ErrorDisplay error={error} />
+            </View>
+          </View>
           <View
             style={{
               width: "90%",
@@ -85,8 +214,8 @@ const EditBanner: React.FC<EditBannerProps> = ({
             }}
           />
           <ScrollView
-            contentContainerStyle={{ alignItems: "center" }}
-            style={{}}
+            contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
+            style={{ flex: 1 }}
           >
             <View
               style={{
@@ -95,15 +224,39 @@ const EditBanner: React.FC<EditBannerProps> = ({
                 marginTop: 10,
               }}
             >
-              <Text style={{ fontFamily: "Arimo-Bold", marginLeft: 15 }}>
-                Event title
-              </Text>
+              <Text style={styles.input_titles}>Title</Text>
             </View>
             <CustomInput
               value={editedData.title}
               setValue={(value) => handleInputChange("title", value)}
-              placeholder="Title"
+              placeholder="..."
               secureTextEntry={false}
+            />
+            <View style={styles.datetimeContainer}>
+              <View style={styles.datetimeLabelContainer}>
+                <Text style={styles.input_titles}>
+                  {editedData.datatype === "Event" ? "Time:" : "Dates:"}
+                </Text>
+              </View>
+              <DateTimeDropdown
+                datatype={editedData.datatype}
+                date={startDate} // Use startDate state
+                setDate={setStartDate} // Use setStartDate updater
+              />
+              <DateTimeDropdown
+                datatype={editedData.datatype}
+                date={endDate} // Use endDate state
+                setDate={setEndDate} // Use setEndDate updater
+                minimumDate={startDate} // End date should not be before start date
+              />
+            </View>
+            <View
+              style={{
+                width: "90%",
+                height: 1,
+                backgroundColor: "#7D7D7D",
+                alignSelf: "center",
+              }}
             />
             {editedData.datatype === "Trip" ? <View /> : null}
             {editedData.datatype === "Event" ? (
@@ -115,32 +268,116 @@ const EditBanner: React.FC<EditBannerProps> = ({
                     marginTop: 10,
                   }}
                 >
-                  <Text style={{ fontFamily: "Arimo-Bold", marginLeft: 15 }}>
-                    Description
-                  </Text>
+                  <Text style={styles.input_titles}>Location</Text>
+                </View>
+                <CustomInput
+                  value={(editedData as EventData).location}
+                  setValue={(value) => handleInputChange("location", value)}
+                  placeholder="..."
+                  secureTextEntry={false}
+                />
+                <View
+                  style={{
+                    width: "90%",
+                    alignItems: "flex-start",
+                    marginTop: 10,
+                  }}
+                >
+                  <Text style={styles.input_titles}>Description</Text>
                 </View>
                 <CustomInput
                   value={(editedData as EventData).description}
                   setValue={(value) => handleInputChange("description", value)}
-                  placeholder="Description"
+                  placeholder="..."
+                  secureTextEntry={false}
+                  multiline={true}
+                  numberOfLines={3}
+                />
+
+                <View
+                  style={{
+                    width: "90%",
+                    alignItems: "flex-start",
+                    marginTop: 10,
+                  }}
+                >
+                  <Text style={styles.input_titles}>Cost</Text>
+                </View>
+                <View style={{ flexDirection: "row", width: "90%" }}>
+                  <Dropdown
+                    style={styles.dropdown}
+                    search
+                    searchPlaceholder={"Search..."}
+                    placeholder="Currency"
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selected_text}
+                    itemTextStyle={styles.items_text}
+                    data={Currencies}
+                    value={(editedData as EventData).cost?.currency} // Correct key for value
+                    onChange={
+                      (value) => handleInputChange("currency", value) // Correct key
+                    }
+                    labelField="label"
+                    valueField="value"
+                  />
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    <CustomInput
+                      value={newAmount}
+                      setValue={setNewAmount}
+                      placeholder="Amount"
+                      secureTextEntry={false}
+                      keyboardType="numeric"
+                      containerStyle={styles.custom_input}
+                    />
+                  </View>
+                </View>
+
+                <CustomMultipleInput items={items} setItems={setItems} />
+                <View
+                  style={{
+                    width: "90%",
+                    alignItems: "flex-start",
+                    marginTop: 10,
+                  }}
+                >
+                  <Text style={styles.input_titles}>Remarks</Text>
+                </View>
+                <CustomInput
+                  value={(editedData as EventData).remarks}
+                  setValue={(value) => handleInputChange("remarks", value)}
+                  placeholder="..."
+                  secureTextEntry={false}
+                />
+                <View
+                  style={{
+                    width: "90%",
+                    alignItems: "flex-start",
+                    marginTop: 10,
+                  }}
+                >
+                  <Text style={styles.input_titles}>
+                    Additional Information
+                  </Text>
+                </View>
+                <CustomInput
+                  value={(editedData as EventData).additional_information}
+                  setValue={(value) =>
+                    handleInputChange("additional_information", value)
+                  }
+                  placeholder="..."
                   secureTextEntry={false}
                 />
               </>
             ) : null}
           </ScrollView>
-          {editedData.datatype === "Event" && (
-            <>
-              {/* ... your custom input fields for EventData (description, cost, etc.) */}
-            </>
-          )}
-
-          {/* Trip-specific input fields */}
-          {editedData.datatype === "Trip" && (
-            <>{/* ... your custom input fields for TripData (days, etc.) */}</>
-          )}
           <CustomButton
             text="Save"
-            onPress={handleSave}
+            onPress={checkForIssues}
             containerStyle={styles.save_container}
             textStyle={styles.save_text}
           />
@@ -157,13 +394,14 @@ const EditBanner: React.FC<EditBannerProps> = ({
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {},
+  modalContainer: { flex: 1 },
   title: {
     fontSize: 24,
     fontFamily: "Arimo-Bold",
-    marginBottom: 15,
+    marginBottom: 5,
     textAlign: "center", // Center the title text
   },
+  input_titles: { fontFamily: "Arimo-Bold", marginLeft: 5 },
   dropdownContainer: {
     marginBottom: 15,
   },
@@ -182,7 +420,7 @@ const styles = StyleSheet.create({
     fontFamily: "Arimo-Bold",
   },
   delete_container: {
-    backgroundColor: "#FD1415",
+    backgroundColor: "#E62E00",
     width: "90%",
     borderRadius: 5,
     alignItems: "center",
@@ -193,6 +431,39 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "Arimo-Bold",
   },
+  datetimeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "90%",
+    marginVertical: 10,
+  },
+  datetimeLabelContainer: {
+    flex: 1, // Allow the label to take remaining space
+  },
+  datetimeLabel: {
+    fontFamily: "Arimo-Bold",
+    marginLeft: 15,
+    fontSize: 16,
+  },
+  dropdown: {
+    width: "40%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    marginVertical: 5,
+  },
+  custom_input: {
+    width: "96%",
+    backgroundColor: "white",
+    borderColor: "white",
+    borderRadius: 20,
+    padding: 10,
+    marginVertical: 5,
+  },
+  placeholderStyle: { color: "#7D7D7D", fontSize: 14, marginLeft: 15 },
+  selected_text: { color: "black", fontSize: 14, marginLeft: 15 },
+  items_text: { color: "black", fontSize: 14 },
+  button_container: { position: "absolute" },
   // ... Add styles for other elements (e.g., error messages) as needed
 });
 

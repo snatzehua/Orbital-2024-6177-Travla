@@ -1,6 +1,14 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+const formatItemList = (items: string[]): string => {
+  let formattedString = "Items to bring:\n";
+  for (const item of items) {
+    formattedString += `- ${item}\n`;
+  }
+  return formattedString;
+};
+
 const EventBody = ({ data }: any) => {
   return (
     <View style={styles.container}>
@@ -8,7 +16,10 @@ const EventBody = ({ data }: any) => {
         <Text style={styles.generic_text}>@{data.location}</Text>
       ) : null}
       {data.description ? (
-        <Text style={styles.generic_text}>{data.description}</Text>
+        <Text style={styles.smaller_text}>{data.description}</Text>
+      ) : null}
+      {data.items.length != 0 ? (
+        <Text style={styles.smaller_text}>{formatItemList(data.items)}</Text>
       ) : null}
       {data.remarks || data.additional_information ? (
         <>
@@ -25,7 +36,7 @@ const EventBody = ({ data }: any) => {
         </>
       ) : null}
       <View style={{ alignItems: "flex-end" }}>
-        {data.cost.amount && data.cost.amount != 0 ? (
+        {data.cost.currency != "" && data.cost.amount != 0 ? (
           <Text style={{ fontFamily: "Arimo-Bold" }}>
             {data.cost.currency} {data.cost.amount.toFixed(2)}
           </Text>
@@ -37,7 +48,8 @@ const EventBody = ({ data }: any) => {
 
 const styles = StyleSheet.create({
   container: {},
-  generic_text: { fontFamily: "Arimo-Regular" },
+  generic_text: { fontFamily: "Arimo-Regular", fontSize: 14 },
+  smaller_text: { fontFamily: "Arimo-Regular", fontSize: 12, marginTop: 10 },
 });
 
 export default EventBody;

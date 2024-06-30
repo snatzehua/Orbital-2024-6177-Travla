@@ -6,7 +6,7 @@ import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
 import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
-import SelectTrip from "../Home/SelectTrip";
+import { getEmptyDaysMap } from "../shared/DateTimeContext";
 import { convertToDate } from "../shared/DateTimeContext";
 
 interface AddTripProps {
@@ -26,23 +26,6 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
   const [newTripTitle, setnewTripTitle] = useState("");
   const [newStart, setNewStart] = useState(baseStart);
   const [newEnd, setNewEnd] = useState(baseEnd);
-
-  // Create DayData array
-  function getEmptyDaysMap(
-    startDate: Date,
-    endDate: Date
-  ): Map<string, EventData[]> {
-    const days = new Map<string, EventData[]>();
-    const currentDate = new Date(startDate); // Start with the start date
-
-    while (currentDate <= endDate) {
-      const dateKey = currentDate.toLocaleDateString(); // YYYY-MM-DD
-      days.set(dateKey, []);
-      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
-    }
-
-    return days;
-  }
 
   // Defining button press functions (Add Trip)
   const handleAddTrip = () => {
@@ -94,6 +77,7 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
           setValue={setnewTripTitle}
           placeholder="Trip Title"
           secureTextEntry={false}
+          onSubmitEditing={handleAddTrip}
         />
         <View style={styles.line} />
         <View style={styles.time_dropdown}>

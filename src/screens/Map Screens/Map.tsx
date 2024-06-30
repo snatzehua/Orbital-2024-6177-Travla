@@ -7,6 +7,7 @@ import {
 } from "@react-navigation/native-stack";
 
 import BackButton from "../components/BackButton/BackButton";
+import { DateTimeDisplay } from "../shared/DateTimeContext";
 
 const Map = () => {
   // Typing for navigation
@@ -39,6 +40,9 @@ const Map = () => {
       <View style={styles.container}>
         <View style={styles.title_container}>
           <Text style={styles.title_text}>Map</Text>
+          <View style={styles.date_time_display_container}>
+            <DateTimeDisplay />
+          </View>
           <View
             style={{
               flexDirection: "row",
@@ -63,7 +67,7 @@ const Map = () => {
 };
 
 const styles = StyleSheet.create({
-  button_container: { position: "absolute" },
+  button_container: { marginTop: 10, position: "absolute" },
   container: {
     flex: 1,
     alignItems: "center",
@@ -75,6 +79,13 @@ const styles = StyleSheet.create({
   title_text: {
     fontFamily: "Arimo-Bold",
     fontSize: Dimensions.get("window").height * 0.05,
+  },
+  date_time_display_container: {
+    backgroundColor: "#1C355B",
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 5,
+    marginVertical: 5,
   },
 });
 

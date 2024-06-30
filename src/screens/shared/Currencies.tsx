@@ -1,6 +1,8 @@
 import React from "react";
 
 export const Currencies = [
+  { label: "-", value: "" },
+
   // Major Currencies
   { label: "US Dollar", value: "USD" },
   { label: "Euro", value: "EUR" },
