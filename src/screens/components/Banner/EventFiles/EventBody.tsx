@@ -32,7 +32,7 @@ const EventBody = ({ data }: any) => {
             }}
           />
           <Text style={styles.generic_text}>{data.remarks}</Text>
-          <Text style={styles.generic_text}>{data.additional_information}</Text>
+          <Text style={styles.smaller_text}>{data.additional_information}</Text>
         </>
       ) : null}
       <View style={{ alignItems: "flex-end" }}>

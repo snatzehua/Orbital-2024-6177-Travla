@@ -127,11 +127,20 @@ export const addNewDaysInRange = (
   return updatedDays;
 };
 
-export const convertToDate = (date: Date) => {
+export const convertToStartDate = (date: Date) => {
   const newDate = date;
   newDate.setHours(0);
   newDate.setMinutes(0);
   newDate.setSeconds(0);
+  newDate.setMilliseconds(0);
+  return newDate;
+};
+
+export const convertToEndDate = (date: Date) => {
+  const newDate = date;
+  newDate.setHours(23);
+  newDate.setMinutes(59);
+  newDate.setSeconds(59);
   newDate.setMilliseconds(0);
   return newDate;
 };
@@ -144,6 +153,46 @@ export const isWithinDateRange = (start: Date, end: Date) => {
 
 export const useDate = () => {
   return useContext(DateTimeContext);
+};
+
+export const sortEventsByTime = (events: EventData[]) => {
+  return events.sort((event1, event2) => {
+    const startTime1 = event1.start.getTime();
+    const startTime2 = event2.start.getTime();
+    if (startTime1 == startTime2) {
+      return event1.end.getTime() - event2.end.getTime();
+    }
+    return startTime1 - startTime2;
+  });
+};
+
+export const sortTripsByDate = (events: TripData[]) => {
+  return events.sort((trip1, trip2) => {
+    const startTime1 = trip1.start.getTime();
+    const startTime2 = trip2.start.getTime();
+    if (startTime1 == startTime2) {
+      return trip1.end.getTime() - trip2.end.getTime();
+    }
+    return startTime1 - startTime2;
+  });
+};
+
+export const hasConflictingDates = (
+  list: BannerData[],
+  newStart: Date,
+  newEnd: Date
+) => {
+  for (const item of list) {
+    const start = item.start;
+    const end = item.end;
+    if (
+      newEnd.getTime() < start.getTime() ||
+      newStart.getTime() > end.getTime()
+    ) {
+      return false;
+    }
+    return true;
+  }
 };
 
 // Styles

@@ -8,9 +8,9 @@ import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
 import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
-import SelectTrip from "./SelectTrip";
-import SelectDate from "./SelectDate";
-import { convertToDate } from "../shared/DateTimeContext";
+import SelectTrip from "../components/SelectionComponents/SelectTrip";
+import SelectDate from "../components/SelectionComponents/SelectDate";
+import { convertToStartDate } from "../shared/DateTimeContext";
 import CustomMultipleInput from "../components/CustomMultipleInput.tsx/CustomMultipleInput";
 
 interface AddEventProps {
@@ -25,8 +25,8 @@ interface AddEventProps {
 // Add event popup form
 const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   // Defining hooks
-  const baseStart = convertToDate(new Date());
-  const baseEnd = convertToDate(new Date());
+  const baseStart = convertToStartDate(new Date());
+  const baseEnd = convertToStartDate(new Date());
 
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
@@ -50,7 +50,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
       setError("Please enter a title");
       return;
     }
-    if (newStart.getTime > newEnd.getTime) {
+    if (newStart.getTime() > newEnd.getTime()) {
       setError("End cannot be before start");
       return;
     }
@@ -182,7 +182,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               </Text>
               <DateTimeDropdown
                 datatype={"Event"}
-                date={new Date(newStart)}
+                date={newStart}
                 setDate={setNewStart}
               />
             </View>
@@ -193,7 +193,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               </Text>
               <DateTimeDropdown
                 datatype={"Event"}
-                date={new Date(newEnd)}
+                date={newEnd}
                 setDate={setNewEnd}
               />
             </View>

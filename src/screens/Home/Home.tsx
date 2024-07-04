@@ -18,20 +18,21 @@ import {
 import Modal from "react-native-modal";
 
 import AddEvent from "./AddEvent";
-import Banner, { EventData } from "../components/Banner";
 import MenuBar from "./MenuBar";
+import EventBanner from "../components/Banner/EventFiles/EventBanner";
 import { updateUserData } from "../shared/UserDataService";
 import { useUserData } from "../shared/UserDataContext";
 import {
   DateTimeDisplay,
   useDate,
-  convertToDate,
+  convertToStartDate,
+  sortEventsByTime,
 } from "../shared/DateTimeContext";
 
 const Home = () => {
   // Data
   const [refreshing, setRefreshing] = useState(false);
-  const { userData, setUserData } = useUserData();
+  const { userInfo, userData, setUserData } = useUserData();
   const [events, setEvents] = useState<EventData[]>([]);
   const { date } = useDate();
 
@@ -58,7 +59,7 @@ const Home = () => {
   };
 
   const today = useMemo(
-    () => convertToDate(new Date()).toLocaleDateString(),
+    () => convertToStartDate(new Date()).toLocaleDateString(),
     [date]
   );
 
@@ -66,7 +67,7 @@ const Home = () => {
     const currentEvents = Array.from(userData.trips.values()).flatMap(
       (tripData) => tripData.days.get(today) || []
     );
-    setEvents(currentEvents);
+    setEvents(sortEventsByTime(currentEvents));
   }, [userData, today]);
 
   const onRefresh = useCallback(() => {
@@ -145,7 +146,11 @@ const Home = () => {
             }
           >
             {events.map((datapack) => (
-              <Banner key={datapack.title} data={datapack} />
+              <EventBanner
+                key={datapack.title}
+                data={datapack}
+                displayEventDetails={userData.settings.displayEventDetails}
+              />
             ))}
             <View
               style={{

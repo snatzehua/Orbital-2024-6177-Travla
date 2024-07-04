@@ -8,20 +8,21 @@ import {
   Modal,
   StyleSheet,
 } from "react-native";
-import { EventData, TripData } from ".";
+import { EventData, TripData } from "..";
 import { Dropdown } from "react-native-element-dropdown";
 
-import { Currencies } from "../../shared/Currencies";
-import BackButton from "../BackButton/BackButton";
-import CustomInput from "../CustomInput/CustomInput";
-import CustomMultipleInput from "../CustomMultipleInput.tsx/CustomMultipleInput";
-import DateTimeDropdown from "../DateTimeDropdown/DateTimeDropdown";
-import ErrorDisplay from "../ErrorDisplay/ErrorDisplay";
-import CustomButton from "../CustomButtom/CustomButton";
+import { Currencies } from "../../../shared/Currencies";
+import BackButton from "../../BackButton/BackButton";
+import CustomInput from "../../CustomInput/CustomInput";
+import CustomMultipleInput from "../../CustomMultipleInput.tsx/CustomMultipleInput";
+import DateTimeDropdown from "../../DateTimeDropdown/DateTimeDropdown";
+import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
+import CustomButton from "../../CustomButtom/CustomButton";
 import {
+  formatDate,
   addNewDaysInRange,
   deleteDaysOutsideRange,
-} from "../../shared/DateTimeContext";
+} from "../../../shared/DateTimeContext";
 
 interface EditBannerProps {
   bannerData: BannerData;
@@ -213,9 +214,32 @@ const EditBanner: React.FC<EditBannerProps> = ({
               alignSelf: "center",
             }}
           />
+          {editedData.datatype == "Event" ? (
+            <View
+              style={{
+                width: "100%",
+                flexDirection: "row",
+                justifyContent: "center",
+                backgroundColor: "black",
+                marginVertical: 5,
+                alignSelf: "center",
+                borderColor: "black",
+                borderWidth: 8,
+              }}
+            >
+              <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
+                From Trip:{" "}
+              </Text>
+              <Text style={{ fontFamily: "Arimo-Regular", color: "white" }}>
+                {editedData.trip} - {"("}
+                {formatDate(editedData.start, editedData.end)}
+                {")"}
+              </Text>
+            </View>
+          ) : null}
           <ScrollView
             contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
-            style={{ flex: 1 }}
+            style={{ flex: 1, backgroundColor: "#D6E1EE" }}
           >
             <View
               style={{
@@ -291,7 +315,7 @@ const EditBanner: React.FC<EditBannerProps> = ({
                   placeholder="..."
                   secureTextEntry={false}
                   multiline={true}
-                  numberOfLines={3}
+                  numberOfLines={5}
                 />
 
                 <View
@@ -375,18 +399,20 @@ const EditBanner: React.FC<EditBannerProps> = ({
               </>
             ) : null}
           </ScrollView>
-          <CustomButton
-            text="Save"
-            onPress={checkForIssues}
-            containerStyle={styles.save_container}
-            textStyle={styles.save_text}
-          />
-          <CustomButton
-            text="Delete"
-            onPress={handleDelete}
-            containerStyle={styles.delete_container}
-            textStyle={styles.delete_text}
-          />
+          <View style={{ marginTop: 5 }}>
+            <CustomButton
+              text="Save"
+              onPress={checkForIssues}
+              containerStyle={styles.save_container}
+              textStyle={styles.save_text}
+            />
+            <CustomButton
+              text="Delete"
+              onPress={handleDelete}
+              containerStyle={styles.delete_container}
+              textStyle={styles.delete_text}
+            />
+          </View>
         </View>
       </SafeAreaView>
     </Modal>

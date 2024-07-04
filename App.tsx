@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as Font from "expo-font";
 import { Dimensions, Image, ImageBackground, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
@@ -14,19 +14,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import firebaseConfig from "./firebaseConfig";
 
 import {
-  createEmptyUserData,
-  getUserData,
-  UserData,
-  updateUserData,
-} from "./src/screens/shared/UserDataService";
-import {
   useUserData,
   UserDataProvider,
 } from "./src/screens/shared/UserDataContext";
-import {
-  DateTimeProvider,
-  DateTimeDisplay,
-} from "./src/screens/shared/DateTimeContext";
+import { DateTimeProvider } from "./src/screens/shared/DateTimeContext";
 
 import Login from "./src/screens/Auth Screens/Login";
 import Register from "./src/screens/Auth Screens/Register";
@@ -57,9 +48,8 @@ export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [auth, setAuth] = useState<any>(null);
-  const { userData, setUserData, error } = useUserData();
 
-  // Initialize Firebase
+  // Initialise Firebase
   useEffect(() => {
     if (!getApps().length) {
       const app = initializeApp(firebaseConfig);
@@ -70,10 +60,22 @@ export default function App() {
     }
   }, []);
 
+  // Initialise fonts
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        "Arimo-Bold": require("./assets/fonts/Arimo-Bold.ttf"),
+        "Arimo-Regular": require("./assets/fonts/Arimo-Regular.ttf"),
+      });
+    }
+
+    loadFonts();
+  }, []);
+
   // Handle Auth State Changes
   useEffect(() => {
     let unsubscribeAuth = () => {}; // Default empty function
-  
+
     if (auth) {
       // Set Persistence
       setPersistence(auth, reactNativePersistence(AsyncStorage)).catch(
@@ -81,52 +83,62 @@ export default function App() {
           console.error("Error setting persistence:", error);
         }
       );
-  
+
       // Listen for Auth State Changes
       unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+        setUser(user);
         if (user) {
-          setUserData(prevData => ({ 
-            ...prevData, 
-            uid: user.uid // Set the uid in userData context
+          // Looks like it doesnt work
+          /*
+          setUserData((prevData) => ({
+            ...prevData,
+            uid: user.uid, // Set the uid in userData context
           }));
           console.log("User ID:", userData.uid); // Log the uid
           
           // Define an async function to handle the API call
           const createUserInDB = async () => {
+            // Add retrieve here
+            //
+            //
             try {
-              const response = await fetch('http://localhost:3001/api/users', {
-                method: 'POST',
+              const response = await fetch("http://localhost:3001/api/users", {
+                method: "POST",
                 headers: {
-                  'Content-Type': 'application/json'
+                  "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                   uid: user.uid,
-                  username: user.displayName || 'default_username',
-                  email: user.email
+                  username: user.displayName || "default_username",
+                  email: user.email,
                   // Ensure no password field is included
-                })
+                }),
               });
-  
+
               if (!response.ok) {
                 const errorData = await response.json();
-                console.error('Failed to create user:', response.status, response.statusText);
+                console.error(
+                  "Failed to create user:",
+                  response.status,
+                  response.statusText
+                );
                 throw new Error(`Failed to create user: ${errorData.message}`);
               }
-  
+
               const data = await response.json();
-              console.log('User created:', data);
+              console.log("User created:", data);
             } catch (error) {
-              console.error('Error creating user:', error);
+              console.error("Error creating user:", error);
             }
           };
-  
+
           // Call the async function
           createUserInDB();
         }
         setInitializing(false); // Set initializing to false
       });
     }
-  
+
     return unsubscribeAuth; // Cleanup on unmount
   }, [auth]);
 

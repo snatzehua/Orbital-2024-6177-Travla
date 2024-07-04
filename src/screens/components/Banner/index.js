@@ -1,2 +1,2 @@
-export { default } from "./Banner";
-export { TripData, DayData, EventData } from "./BannerInterfaces";
+export { default } from "./unused_temp/Banner";
+export { TripData, DayData, EventData } from "./Base/BannerInterfaces";

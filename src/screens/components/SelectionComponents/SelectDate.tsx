@@ -1,17 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, ScrollView, StyleSheet, View } from "react-native";
 
-import BackButton from "../components/BackButton/BackButton";
-import SelectionBoxes from "../components/SelectionBoxes/SelectionBoxes";
-import { useUserData } from "../shared/UserDataContext";
+import SelectionBoxes from "../SelectionBoxes/SelectionBoxes";
+import { useUserData } from "../../shared/UserDataContext";
 
-interface SelectTripProps {
-  setSelectedTrip: React.Dispatch<React.SetStateAction<string>>;
+interface SelectDateProps {
+  selectedTrip: string;
+  setSelectedDate: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const SelectTrip: React.FC<SelectTripProps> = ({ setSelectedTrip }) => {
+const SelectDate: React.FC<SelectDateProps> = ({
+  selectedTrip,
+  setSelectedDate,
+}) => {
   const { userData } = useUserData();
-  const currentTrip = Array.from(userData.trips.keys());
+  const tripData = userData.trips.get(selectedTrip);
+  const [dates, setDates] = useState<string[]>([]);
+  useEffect(() => {
+    if (tripData) {
+      setDates(Array.from(tripData.days.keys()));
+    }
+  }, [tripData]);
 
   return (
     <View style={{ flex: 1, alignItems: "center" }}>
@@ -22,7 +31,7 @@ const SelectTrip: React.FC<SelectTripProps> = ({ setSelectedTrip }) => {
           marginBottom: 10,
         }}
       >
-        Select Trip to Add Event
+        Select Date to Add Event
       </Text>
       <View
         style={{
@@ -38,14 +47,14 @@ const SelectTrip: React.FC<SelectTripProps> = ({ setSelectedTrip }) => {
           alignItems: "center",
         }}
       >
-        {currentTrip.map((tripName) => (
+        {dates.map((date, index) => (
           <SelectionBoxes
-            key={tripName}
-            title={tripName}
-            dateValue={tripName}
-            onPressFunction={setSelectedTrip}
-            startDate={userData.trips.get(tripName)?.start}
-            endDate={userData.trips.get(tripName)?.end}
+            key={date}
+            title={date.split("T")[0]}
+            dateValue={date}
+            onPressFunction={setSelectedDate}
+            index={index + 1}
+            maxIndex={dates.length}
           />
         ))}
         {Array.from(userData.trips.keys()).length === 0 ? (
@@ -53,7 +62,6 @@ const SelectTrip: React.FC<SelectTripProps> = ({ setSelectedTrip }) => {
             <Text
               style={{
                 fontFamily: "Arimo-Bold",
-                fontSize: 25,
                 color: "#7D7D7D",
                 justifyContent: "center",
                 marginBottom: 10,
@@ -82,4 +90,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SelectTrip;
+export default SelectDate;

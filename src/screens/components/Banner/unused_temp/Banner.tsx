@@ -1,24 +1,29 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import EventBody from "./EventBody";
-import TripBody from "./TripBody";
-import { EventData, TripData } from ".";
+import EventBody from "../EventFiles/EventBody";
+import TripBody from "../TripFiles/TripBody";
+import { EventData, TripData } from "..";
 
-import { useUserData } from "../../shared/UserDataContext";
-import { updateUserData } from "../../shared/UserDataService";
-import EditBanner from "./EditBanner";
-import { formatDate, formatTime } from "../../shared/DateTimeContext";
+import EditBanner from "../Base/EditBanner";
+import TripDetails from "../TripFiles/TripDetails";
+import { useUserData } from "../../../shared/UserDataContext";
+import { updateUserData } from "../../../shared/UserDataService";
+import { formatDate, formatTime } from "../../../shared/DateTimeContext";
 
-type BannerData = {
-  data: TripData | EventData;
+type BannerProps = {
+  data: EventData | TripData;
+  displayEventDetails?: boolean;
 };
 
-const Banner: React.FC<BannerData> = (datapack: BannerData) => {
+const Banner: React.FC<BannerProps> = ({
+  data,
+  displayEventDetails = true,
+}) => {
   // Extract data from wrapped datapck
-  const data = datapack.data;
   const { setUserData } = useUserData();
   const [isEditing, setIsEditing] = useState(false);
+  const [isViewing, setIsViewing] = useState(false);
 
   const isTripData = (data: TripData | EventData): data is TripData =>
     data.datatype === "Trip";
@@ -27,8 +32,21 @@ const Banner: React.FC<BannerData> = (datapack: BannerData) => {
     data.datatype === "Event";
 
   // Defining button press functions
+  const handleViewTrip = () => {
+    if (isEventData(data)) {
+      setIsEditing(true);
+    }
+    if (isTripData(data)) {
+      setIsViewing(true);
+    }
+  };
   const handleBannerEdit = () => {
-    setIsEditing(true); // Show the EditBanner modal
+    if (isEventData(data)) {
+      setIsEditing(true);
+    }
+    if (isTripData(data)) {
+      setIsEditing(true);
+    }
   };
   const handleUpdate = (
     oldTitle: string,
@@ -83,20 +101,27 @@ const Banner: React.FC<BannerData> = (datapack: BannerData) => {
 
   return (
     <>
-      <TouchableOpacity style={styles.container} onPress={handleBannerEdit}>
+      <TouchableOpacity
+        style={styles.container}
+        onPress={handleViewTrip}
+        onLongPress={handleBannerEdit}
+        delayLongPress={350}
+      >
         <Text style={styles.title}>{data.title}</Text>
         <View style={{ alignItems: "flex-end" }}>
-          {data.datatype === "Event" ? (
+          {isEventData(data) ? (
             <>
-              <View style={{ width: "100%" }}>
-                <EventBody data={data} />
-              </View>
+              {displayEventDetails ? (
+                <View style={{ width: "100%" }}>
+                  <EventBody data={data} />
+                </View>
+              ) : null}
               <Text style={styles.bottom_right}>
                 {formatTime(data.start, data.end)}
               </Text>
             </>
           ) : null}
-          {data.datatype === "Trip" ? (
+          {isTripData(data) ? (
             <>
               <View style={{ width: "100%" }}>
                 <TripBody data={data} />
@@ -115,6 +140,13 @@ const Banner: React.FC<BannerData> = (datapack: BannerData) => {
           onClose={() => setIsEditing(false)}
           onUpdate={handleUpdate}
           onDelete={handleDelete}
+        />
+      )}
+      {isViewing && isTripData(data) && (
+        <TripDetails
+          tripData={data}
+          isVisible={isViewing}
+          onClose={() => setIsViewing(false)}
         />
       )}
     </>

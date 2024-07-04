@@ -7,7 +7,10 @@ import CustomInput from "../components/CustomInput/CustomInput";
 import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
 import { getEmptyDaysMap } from "../shared/DateTimeContext";
-import { convertToDate } from "../shared/DateTimeContext";
+import {
+  convertToStartDate,
+  convertToEndDate,
+} from "../shared/DateTimeContext";
 import { createTrip } from "../Api/tripApi"; // Import createTrip API function
 import { useUserData } from "../shared/UserDataContext"; // Import user data context
 
@@ -31,9 +34,8 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
   // }, []);
   const { uid } = useUserData(); // Access uid from context
 
-
-  const baseStart = convertToDate(new Date());
-  const baseEnd = convertToDate(new Date());
+  const baseStart = convertToStartDate(new Date());
+  const baseEnd = convertToEndDate(new Date());
 
   const { userData } = useUserData(); //fetch user data from context
 
@@ -43,6 +45,12 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
   const [newTripTitle, setnewTripTitle] = useState("");
   const [newStart, setNewStart] = useState(baseStart);
   const [newEnd, setNewEnd] = useState(baseEnd);
+
+  useEffect(() => {
+    if (newStart > newEnd) {
+      setNewEnd(newStart);
+    }
+  }, [newStart]);
 
   // Defining button press functions (Add Trip)
   const handleAddTrip = async () => {
@@ -127,6 +135,7 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
             datatype={"Trip"}
             date={newEnd}
             setDate={setNewEnd}
+            minimumDate={newStart}
           />
         </View>
         <View style={styles.line} />

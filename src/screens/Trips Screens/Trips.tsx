@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   SafeAreaView,
@@ -19,10 +20,14 @@ import {
 import AddTrip from "./AddTrip";
 import AddTripButton from "./AddTripButton";
 import BackButton from "../components/BackButton/BackButton";
-import Banner from "../components/Banner";
+import TripBanner from "../components/Banner/TripFiles/TripBanner";
 import { useUserData } from "../shared/UserDataContext";
-import { getUserData, updateUserData } from "../shared/UserDataService";
-import { DateTimeDisplay } from "../shared/DateTimeContext";
+import { updateUserData } from "../shared/UserDataService";
+import {
+  DateTimeDisplay,
+  hasConflictingDates,
+  sortTripsByDate,
+} from "../shared/DateTimeContext";
 
 const Trips = () => {
   // Typing for navigation
@@ -36,6 +41,12 @@ const Trips = () => {
 
   // Data
   const { userData, setUserData } = useUserData();
+  const [trips, setTrips] = useState<TripData[]>([]);
+  //const [selectedTrip, setSelectedTrip] = useState<string>("");
+
+  useEffect(() => {
+    setTrips(sortTripsByDate(Array.from(userData.trips.values())));
+  }, [userData]);
 
   // Add Event form
   const [isModalVisible, setModalVisible] = useState(false);
@@ -64,89 +75,111 @@ const Trips = () => {
     navigation.navigate("Home");
   };
   const updateAsync = async (newTrip: TripData) => {
-    setUserData((prevUserData) => {
-      const newTrips = new Map(prevUserData.trips);
-      newTrips.set(newTrip.title, newTrip);
-      const updatedUserData = { ...prevUserData, trips: newTrips };
-
-      // Update AsyncStorage *within* the state update function
-      updateUserData(updatedUserData);
-      return updatedUserData;
-    });
-
-    // No need to call updateUserData here again
+    const handleTripAddition = () => {
+      setUserData((prevUserData) => {
+        const newTrips = new Map(prevUserData.trips);
+        newTrips.set(newTrip.title, newTrip);
+        const updatedUserData = { ...prevUserData, trips: newTrips };
+        updateUserData(updatedUserData);
+        return updatedUserData;
+      });
+    };
+    if (hasConflictingDates(trips, newTrip.start, newTrip.end)) {
+      Alert.alert(
+        "Conflicting Dates",
+        "Are you sure you want to add this trip? This trip conflicts with existing trips.",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Confirm",
+            onPress: () => {
+              handleTripAddition();
+            },
+          },
+        ]
+      );
+    } else {
+      handleTripAddition();
+    }
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Modal isVisible={isModalVisible}>
-        <Animated.View
+    <>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Modal isVisible={isModalVisible}>
+          <Animated.View
+            style={{
+              transform: [{ scale: scaleValue }],
+            }}
+          >
+            <AddTrip toggleModal={toggleModal} updateAsync={updateAsync} />
+          </Animated.View>
+        </Modal>
+        <View
           style={{
-            transform: [{ scale: scaleValue }],
+            marginLeft: "2%",
+            alignItems: "flex-start",
+            zIndex: 1,
           }}
         >
-          <AddTrip toggleModal={toggleModal} updateAsync={updateAsync} />
-        </Animated.View>
-      </Modal>
-      <View
-        style={{
-          marginLeft: "2%",
-          alignItems: "flex-start",
-          zIndex: 1,
-        }}
-      >
-        <BackButton
-          onPress={handleNavBack}
-          containerStyle={styles.button_container}
-        />
-      </View>
-      <View style={styles.container}>
-        <View style={styles.title_container}>
-          <Text style={styles.title_text}>Trips</Text>
-          <View style={styles.date_time_display_container}>
-            <DateTimeDisplay />
+          <BackButton
+            onPress={handleNavBack}
+            containerStyle={styles.button_container}
+          />
+        </View>
+        <View style={styles.container}>
+          <View style={styles.title_container}>
+            <Text style={styles.title_text}>Trips</Text>
+            <View style={styles.date_time_display_container}>
+              <DateTimeDisplay />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                marginHorizontal: "5%",
+                marginTop: 5,
+              }}
+            >
+              <View
+                style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }}
+              />
+            </View>
           </View>
           <View
             style={{
-              flexDirection: "row",
-              marginHorizontal: "5%",
+              flex: 1,
+              width: "95%",
               marginTop: 5,
+              alignItems: "center",
             }}
           >
-            <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
+            <ScrollView style={styles.banner_container}>
+              {trips.map((datapack) => (
+                <TripBanner key={datapack.title} data={datapack} />
+              ))}
+              <AddTripButton
+                onPressFunction={toggleModal}
+                text={
+                  Array.from(userData.trips.values()).length === 0
+                    ? "Add your first trip!"
+                    : "Add another trip"
+                }
+              ></AddTripButton>
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  marginVertical: 10,
+                }}
+              ></View>
+            </ScrollView>
           </View>
         </View>
-        <View
-          style={{
-            flex: 1,
-            width: "95%",
-            marginTop: 5,
-            alignItems: "center",
-          }}
-        >
-          <ScrollView style={styles.banner_container}>
-            {Array.from(userData.trips.values()).map((datapack) => (
-              <Banner key={datapack.title} data={datapack} />
-            ))}
-            <AddTripButton
-              onPressFunction={toggleModal}
-              text={
-                Array.from(userData.trips.values()).length === 0
-                  ? "Add your first trip!"
-                  : "Add another trip"
-              }
-            ></AddTripButton>
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                marginVertical: 10,
-              }}
-            ></View>
-          </ScrollView>
-        </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 };
 

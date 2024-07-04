@@ -26,6 +26,7 @@ import {
 import CustomInput from "../components/CustomInput";
 import CustomButton from "../components/CustomButtom";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
+import { useUserData } from "../shared/UserDataContext";
 
 const Login = () => {
   // Typing for navigation
@@ -68,8 +69,6 @@ const Login = () => {
         password
       );
       setError("");
-      // Check for cases (so what is user?)
-      const user = userCredential.user;
       navigation.navigate("Home");
     } catch (error: any) {
       setError(error.message);

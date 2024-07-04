@@ -5,14 +5,22 @@ const USER_DATA_KEY = "userData";
 export interface UserData {
   uid: string;
   trips: Map<string, TripData>;
-  settings: {};
+  settings: Settings;
 }
+
+export interface Settings {
+  displayEventDetails: boolean;
+}
+
+const initialSettings = {
+  displayEventDetails: true,
+};
 
 // Create empty UserData
 export const createEmptyUserData: () => UserData = () => ({
-  uid: '',
+  uid: "",
   trips: new Map<string, TripData>(),
-  settings: {},
+  settings: initialSettings,
 });
 
 // Get UserData
@@ -51,7 +59,7 @@ export const getUserData = async (): Promise<UserData> => {
 
     const userData: UserData = {
       ...parsedData,
-      uid: parsedData.uid || '', // Ensure uid is set
+      uid: parsedData.uid || "", // Ensure uid is set
       trips: tripsMap,
     };
 

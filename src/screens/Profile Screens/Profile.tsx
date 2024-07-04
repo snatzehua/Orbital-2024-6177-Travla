@@ -18,12 +18,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
 import { DateTimeDisplay } from "../shared/DateTimeContext";
-import { createEmptyUserData, clearUserData } from "../shared/UserDataService";
+import {
+  createEmptyUserData,
+  clearUserData,
+  updateUserData,
+} from "../shared/UserDataService";
 import { useUserData } from "../shared/UserDataContext";
 
 const Profile = () => {
   // Data
-  const { userData, setUserData } = useUserData();
+  const { userInfo, setUserInfo, userData, setUserData } = useUserData();
 
   // Typing for navigation
   type RootStackParamList = {
@@ -117,6 +121,24 @@ const Profile = () => {
           <CustomButton
             text="CLEAR DATA"
             onPress={handleClearData}
+            wrapperStyle={{}}
+          />
+          <CustomButton
+            text="Display details toggle"
+            onPress={() => {
+              setUserData((prevUserData) => {
+                const currentDisplayEventDetails =
+                  prevUserData.settings.displayEventDetails;
+                const updatedUserData = {
+                  ...prevUserData,
+                  settings: {
+                    displayEventDetails: !currentDisplayEventDetails,
+                  },
+                };
+                updateUserData(updatedUserData);
+                return updatedUserData;
+              });
+            }}
             wrapperStyle={{}}
           />
         </View>
