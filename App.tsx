@@ -37,8 +37,6 @@ import Insights from "./src/screens/Insights Screens/Insights";
 import Trips from "./src/screens/Trips Screens/Trips";
 import Map from "./src/screens/Map Screens/Map";
 import Profile from "./src/screens/Profile Screens/Profile";
-import TripsList from './src/screens/components/Trips/tripsList';
-
 
 const Stack = createNativeStackNavigator();
 const reactNativePersistence = (firebaseAuth as any).getReactNativePersistence;
@@ -91,8 +89,8 @@ export default function App() {
             ...prevData, 
             uid: user.uid // Set the uid in userData context
           }));
-          console.log("User ID:", user.uid); // Log the uid
-  
+          console.log("User ID:", userData.uid); // Log the uid
+          
           // Define an async function to handle the API call
           const createUserInDB = async () => {
             try {
@@ -175,7 +173,7 @@ export default function App() {
   }, [user]); // This useEffect should only run when user changes.
   useEffect(() => {
     if (userData && userData.uid) {
-      console.log("User ID:", userData.uid); // Log userData to check if uid is set
+      //console.log("User ID:", userData.uid); // Log userData to check if uid is set
     }
   }, [userData]); // Only run when 'userData' changes
 

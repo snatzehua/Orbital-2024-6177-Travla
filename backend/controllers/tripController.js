@@ -1,50 +1,71 @@
-// backend/controllers/tripController.js
-const Trip = require('../models/trip');
-const User = require('../models/user');
+const { Trip } = require('../models/trip'); 
+const { User } = require('../models/user'); 
 
 // Create a new trip
 const createTrip = async (req, res) => {
-  const userId = req.params.userId;
-  const { title, startDate, endDate } = req.body;
+  const { user, title, start, end, trip, days } = req.body; // Destructure days if it's part of the request
+  console.log('Request body:', req.body);
 
   try {
-    // Ensure the user exists
-    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Create the trip and associate it with the user
-    const trip = new Trip({
-      userId,
+    const tripData = new Trip({
       title,
-      startDate,
-      endDate
+      datatype: 'Trip',
+      start,
+      end,
+      user,
+      trip, 
+      days 
     });
 
-    const savedTrip = await trip.save();
-
-    // Add the trip to the user's list of trips
-    user.trips.push(savedTrip._id);
-    await user.save();
-
-    res.status(201).json(savedTrip);
+    const newTrip = await tripData.save();
+    res.status(201).json(newTrip);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-// Get all trips for a specific user
-const getTripsByUser = async (req, res) => {
-  const userId = req.params.userId;
+const getTrips = async (req, res) => {
+  const uid = req.user.uid; // Assuming the user is authenticated and uid is available in req.user
 
   try {
-    // Find all trips associated with the userId
-    const trips = await Trip.find({ userId });
+    const user = await User.findOne({ uid }); //getting user from firebase uid
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const trips = await Trip.find({ user: user._id }); //getting all trips that have the objectId of the user
     res.status(200).json(trips);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { createTrip, getTripsByUser };
+const getTripById = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) {
+      return res.status(404).json({ message: 'Trip not found' });
+    }
+    res.status(200).json(trip);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteTripById = async (req, res) => {
+  try {
+    const trip = await Trip.findByIdAndDelete(req.params.id);
+    if (!trip) {
+      return res.status(404).json({ message: 'Trip not found' });
+    }
+    res.status(200).json({ message: 'Trip deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createTrip, getTrips, getTripById, deleteTripById };

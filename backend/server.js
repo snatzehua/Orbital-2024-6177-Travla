@@ -9,7 +9,7 @@ const app = express();
 mongoose.connect('mongodb+srv://jiaming:orbital2024@travla.5qt8iwx.mongodb.net/travla?retryWrites=true&w=majority&appName=Travla')
 .then(() => {
   const User = require('./models/user');
-  console.log('User Schema:', User.schema.paths);
+  // console.log('User Schema:', User.schema.paths);
   console.log('MongoDB connected');
 })
 .catch((err) => {

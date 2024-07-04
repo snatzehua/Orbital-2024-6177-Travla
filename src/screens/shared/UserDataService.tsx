@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const USER_DATA_KEY = "userData";
 
 export interface UserData {
-  uid?: string;
+  uid: string;
   trips: Map<string, TripData>;
   settings: {};
 }

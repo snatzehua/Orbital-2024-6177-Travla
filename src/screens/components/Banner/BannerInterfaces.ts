@@ -3,6 +3,7 @@ interface BannerData {
   datatype: "Event" | "Trip";
   start: Date;
   end: Date;
+  user: string;
 }
 
 interface TripData extends BannerData {

@@ -1,11 +1,17 @@
 const express = require('express');
-const { createTrip, getTripsByUser } = require('../controllers/tripController');
+const { createTrip, getTrips, getTripById, deleteTripById } = require('../controllers/tripController');
 const router = express.Router();
 
-// POST create a new trip for a specific user
-router.post('/users/:userId/trips', createTrip);
+//CREATE trip for that user
+router.post('/trips', createTrip);
 
-// GET all trips for a specific user
-router.get('/users/:userId/trips', getTripsByUser);
+//GET all trips tied to user
+router.get('/trips', getTrips);
+
+//GET a specific trip by id
+router.get('/trips/:id', getTripById);
+
+//DELETE a specific trip by id
+router.delete('/trips/:id', deleteTripById);
 
 module.exports = router;

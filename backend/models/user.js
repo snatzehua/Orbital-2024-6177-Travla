@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
+const { tripSchema } = require('./trip'); 
 
 const userSchema = new mongoose.Schema({
   uid: { type: String, required: true, unique: true },
-  username: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  // Ensure password is either removed or not required
-  // password: { type: String }
+  trips: { type: Map, of: tripSchema, default: {} },
+  settings: { type: Map, of: mongoose.Schema.Types.Mixed, default: {} }
 });
 
 const User = mongoose.model('User', userSchema);
