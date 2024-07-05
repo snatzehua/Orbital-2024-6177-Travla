@@ -74,6 +74,19 @@ export const formatTime = (start: Date, end: Date) => {
   return `${startTimeString} - ${endTimeString}`;
 };
 
+export const getEmptyDaysArray = (startDate: Date, endDate: Date): string[] => {
+  const days = [];
+  const currentDate = new Date(startDate); // Start with the start date
+
+  while (currentDate <= endDate) {
+    const dateKey = currentDate.toLocaleDateString(); // YYYY-MM-DD
+    days.push(dateKey);
+    currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+  }
+
+  return days;
+};
+
 export const getEmptyDaysMap = (
   startDate: Date,
   endDate: Date
@@ -90,41 +103,24 @@ export const getEmptyDaysMap = (
   return days;
 };
 
-export const deleteDaysOutsideRange = (
-  days: Map<string, EventData[]>,
+export const updateTripDates = (
+  dates: Map<string, EventData[]>,
   newStart: Date,
   newEnd: Date
-): Map<string, EventData[]> => {
-  const updatedDays = new Map(days);
-
-  // iterate over a copy of the map entries
-  const datesToDelete = Array.from(updatedDays.keys()).filter((dateKey) => {
-    const date = new Date(dateKey);
-    return date < newStart || date > newEnd;
-  });
-
-  for (const dateKey of datesToDelete) {
-    updatedDays.delete(dateKey);
-  }
-
-  return updatedDays;
-};
-
-export const addNewDaysInRange = (
-  days: Map<string, EventData[]>,
-  newStart: Date,
-  newEnd: Date
-): Map<string, EventData[]> => {
-  const updatedDays = new Map(days);
-  const currentDate = new Date(newStart);
-  while (currentDate <= newEnd) {
-    const dateKey = currentDate.toLocaleDateString();
-    if (!updatedDays.has(dateKey)) {
-      updatedDays.set(dateKey, []);
+) => {
+  const dateKeys = getEmptyDaysArray(newStart, newEnd);
+  for (const existingKey of dates.keys()) {
+    if (!dateKeys.includes(existingKey)) {
+      dates.delete(existingKey);
     }
-    currentDate.setDate(currentDate.getDate() + 1);
   }
-  return updatedDays;
+
+  // Add new keys (if not already present)
+  for (const dateKey of dateKeys) {
+    if (!dates.has(dateKey)) {
+      dates.set(dateKey, []); // Add with empty array
+    }
+  }
 };
 
 export const convertToStartDate = (date: Date) => {

@@ -2,7 +2,7 @@ import React from "react";
 import { Text, ScrollView, StyleSheet, View } from "react-native";
 
 import BackButton from "../BackButton/BackButton";
-import SelectionBoxes from "../SelectionBoxes/SelectionBoxes";
+import SelectionBoxes from "./SelectionBoxes";
 import { useUserData } from "../../shared/UserDataContext";
 
 interface SelectTripProps {
@@ -33,7 +33,7 @@ const SelectTrip: React.FC<SelectTripProps> = ({ setSelectedTrip }) => {
         }}
       />
       <ScrollView
-        style={{ width: "95%" }}
+        style={{ width: "100%" }}
         contentContainerStyle={{
           alignItems: "center",
         }}

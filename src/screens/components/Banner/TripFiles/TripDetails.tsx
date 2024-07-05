@@ -62,8 +62,8 @@ const TripDetails: React.FC<TripDetailsProps> = ({
               </View>
               <View
                 style={{
+                  width: "90%",
                   flexDirection: "row",
-                  marginHorizontal: "5%",
                   marginTop: 5,
                 }}
               >
@@ -75,50 +75,52 @@ const TripDetails: React.FC<TripDetailsProps> = ({
             <View
               style={{
                 flex: 1,
-                width: "95%",
+                width: "100%",
                 marginTop: 5,
                 alignItems: "center",
               }}
             >
-              <FlatList
-                data={days}
-                renderItem={({ item, index }) => (
-                  <View style={{ width: Dimensions.get("window").width * 0.9 }}>
-                    <View
-                      style={{
-                        width: "100%",
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        backgroundColor: "black",
-                        marginVertical: 5,
-                        alignSelf: "center",
-                        borderColor: "black",
-                        borderWidth: 8,
-                      }}
-                    >
-                      <Text
-                        style={{ fontFamily: "Arimo-Bold", color: "white" }}
-                      ></Text>
-                      <Text
-                        style={{ fontFamily: "Arimo-Regular", color: "white" }}
-                      ></Text>
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  backgroundColor: "black",
+                  marginVertical: 5,
+                  alignSelf: "center",
+                  borderColor: "black",
+                  borderWidth: 8,
+                }}
+              >
+                <Text
+                  style={{ fontFamily: "Arimo-Bold", color: "white" }}
+                ></Text>
+                <Text
+                  style={{ fontFamily: "Arimo-Regular", color: "white" }}
+                ></Text>
+              </View>
+              <View style={{ width: "90%", backgroundColor: "pink" }}>
+                <FlatList
+                  data={days}
+                  renderItem={({ item, index }) => (
+                    <View style={{ width: Dimensions.get("window").width }}>
+                      <ScrollView style={{ backgroundColor: "transparent" }}>
+                        {item.map((datapack) => (
+                          <EventBanner
+                            key={datapack.title}
+                            data={datapack}
+                            displayEventDetails={
+                              userData.settings.displayEventDetails
+                            }
+                          />
+                        ))}
+                      </ScrollView>
                     </View>
-                    <ScrollView>
-                      {item.map((datapack) => (
-                        <EventBanner
-                          key={datapack.title}
-                          data={datapack}
-                          displayEventDetails={
-                            userData.settings.displayEventDetails
-                          }
-                        />
-                      ))}
-                    </ScrollView>
-                  </View>
-                )}
-                horizontal={true}
-                style={{ width: "95%" }}
-              ></FlatList>
+                  )}
+                  horizontal={true}
+                  style={{ width: "95%" }}
+                ></FlatList>
+              </View>
             </View>
           </View>
         </SafeAreaView>

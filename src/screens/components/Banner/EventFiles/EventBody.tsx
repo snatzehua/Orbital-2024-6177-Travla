@@ -9,7 +9,7 @@ const formatItemList = (items: string[]): string => {
   return formattedString;
 };
 
-const EventBody = ({ data }: any) => {
+const EventBody = ({ data }: { data: EventData }) => {
   return (
     <View style={styles.container}>
       {data.location ? (
@@ -21,7 +21,7 @@ const EventBody = ({ data }: any) => {
       {data.items.length != 0 ? (
         <Text style={styles.smaller_text}>{formatItemList(data.items)}</Text>
       ) : null}
-      {data.remarks || data.additional_information ? (
+      {data.remarks ? (
         <>
           <View
             style={{
@@ -32,7 +32,6 @@ const EventBody = ({ data }: any) => {
             }}
           />
           <Text style={styles.generic_text}>{data.remarks}</Text>
-          <Text style={styles.smaller_text}>{data.additional_information}</Text>
         </>
       ) : null}
       <View style={{ alignItems: "flex-end" }}>

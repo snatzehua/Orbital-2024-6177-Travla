@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import { useUserData } from "../../../shared/UserDataContext";
+import Tag from "../EventFiles/Tag";
+import CommonStyles from "../../../shared/CommonStyles";
 
 type BaseBannerProps = {
   title: string;
@@ -9,6 +10,7 @@ type BaseBannerProps = {
   onPress: () => void;
   onLongPress: () => void;
   bannerDateTime: string;
+  tag?: string;
 };
 
 const BaseBanner: React.FC<BaseBannerProps> = ({
@@ -17,10 +19,15 @@ const BaseBanner: React.FC<BaseBannerProps> = ({
   onPress,
   onLongPress,
   bannerDateTime,
+  tag,
 }) => {
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={
+        tag && tag == "Essentials"
+          ? { ...styles.container, backgroundColor: "#FFE5CC" }
+          : styles.container
+      }
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={350}
@@ -28,7 +35,17 @@ const BaseBanner: React.FC<BaseBannerProps> = ({
       <Text style={styles.title}>{title}</Text>
       <View style={{ alignItems: "flex-end" }}>
         <View style={{ width: "100%" }}>{bannerBody}</View>
-        <Text style={styles.bottom_right}>{bannerDateTime}</Text>
+        <View
+          style={{
+            width: "100%",
+            justifyContent: "space-between",
+            flexDirection: "row",
+            alignItems: "flex-end",
+          }}
+        >
+          {tag ? <Tag tag={tag} /> : null}
+          <Text style={styles.bottom_right}>{bannerDateTime}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -36,6 +53,7 @@ const BaseBanner: React.FC<BaseBannerProps> = ({
 
 const styles = StyleSheet.create({
   container: {
+    ...CommonStyles.perfect_shadows,
     width: "100%",
     backgroundColor: "white",
     paddingVertical: 8,

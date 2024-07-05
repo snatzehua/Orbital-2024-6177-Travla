@@ -18,11 +18,7 @@ import CustomMultipleInput from "../../CustomMultipleInput.tsx/CustomMultipleInp
 import DateTimeDropdown from "../../DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
 import CustomButton from "../../CustomButtom/CustomButton";
-import {
-  formatDate,
-  addNewDaysInRange,
-  deleteDaysOutsideRange,
-} from "../../../shared/DateTimeContext";
+import { formatDate, updateTripDates } from "../../../shared/DateTimeContext";
 
 interface EditBannerProps {
   bannerData: BannerData;
@@ -55,7 +51,7 @@ const EditBanner: React.FC<EditBannerProps> = ({
       if (editedData.start < startDate || editedData.end > endDate) {
         Alert.alert(
           "Change Trip Dates?",
-          "Are you sure you want to do this? This may delete some of your events.",
+          "Are you sure you want to do this? This may delete some existing events.",
           [
             {
               text: "Cancel",
@@ -64,13 +60,7 @@ const EditBanner: React.FC<EditBannerProps> = ({
             {
               text: "Change",
               onPress: () => {
-                const updatedDays = deleteDaysOutsideRange(
-                  editedData.days,
-                  startDate,
-                  endDate
-                );
-                console.log(updatedDays);
-                handleInputChange("days", updatedDays);
+                updateTripDates(editedData.days, startDate, endDate);
                 handleSave();
               },
               style: "destructive", // Indicate a destructive action
@@ -78,13 +68,7 @@ const EditBanner: React.FC<EditBannerProps> = ({
           ]
         );
       } else if (editedData.start > startDate || editedData.end < endDate) {
-        const updatedDays = addNewDaysInRange(
-          editedData.days,
-          startDate,
-          endDate
-        );
-        console.log(updatedDays);
-        handleInputChange("days", updatedDays);
+        updateTripDates(editedData.days, startDate, endDate);
         handleSave();
       } else {
         handleSave();
@@ -98,10 +82,6 @@ const EditBanner: React.FC<EditBannerProps> = ({
     // Error handling
     if (editedData.title === "") {
       setError("Please enter a title");
-      return;
-    }
-    if (startDate.getTime > endDate.getTime) {
-      setError("End cannot be before start");
       return;
     }
 
@@ -214,29 +194,27 @@ const EditBanner: React.FC<EditBannerProps> = ({
               alignSelf: "center",
             }}
           />
-          {editedData.datatype == "Event" ? (
-            <View
-              style={{
-                width: "100%",
-                flexDirection: "row",
-                justifyContent: "center",
-                backgroundColor: "black",
-                marginVertical: 5,
-                alignSelf: "center",
-                borderColor: "black",
-                borderWidth: 8,
-              }}
-            >
-              <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
-                From Trip:{" "}
-              </Text>
-              <Text style={{ fontFamily: "Arimo-Regular", color: "white" }}>
-                {editedData.trip} - {"("}
-                {formatDate(editedData.start, editedData.end)}
-                {")"}
-              </Text>
-            </View>
-          ) : null}
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "center",
+              backgroundColor: "black",
+              marginVertical: 5,
+              alignSelf: "center",
+              borderColor: "black",
+              borderWidth: 8,
+            }}
+          >
+            <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
+              {"Current Trip: "}
+            </Text>
+            <Text style={{ fontFamily: "Arimo-Regular", color: "white" }}>
+              {editedData.trip} {"("}
+              {formatDate(editedData.start, editedData.end)}
+              {")"}
+            </Text>
+          </View>
           <ScrollView
             contentContainerStyle={{ flexGrow: 1, alignItems: "center" }}
             style={{ flex: 1, backgroundColor: "#D6E1EE" }}
@@ -374,25 +352,6 @@ const EditBanner: React.FC<EditBannerProps> = ({
                 <CustomInput
                   value={(editedData as EventData).remarks}
                   setValue={(value) => handleInputChange("remarks", value)}
-                  placeholder="..."
-                  secureTextEntry={false}
-                />
-                <View
-                  style={{
-                    width: "90%",
-                    alignItems: "flex-start",
-                    marginTop: 10,
-                  }}
-                >
-                  <Text style={styles.input_titles}>
-                    Additional Information
-                  </Text>
-                </View>
-                <CustomInput
-                  value={(editedData as EventData).additional_information}
-                  setValue={(value) =>
-                    handleInputChange("additional_information", value)
-                  }
                   placeholder="..."
                   secureTextEntry={false}
                 />

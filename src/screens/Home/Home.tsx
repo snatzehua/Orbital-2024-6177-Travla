@@ -32,7 +32,7 @@ import {
 const Home = () => {
   // Data
   const [refreshing, setRefreshing] = useState(false);
-  const { userInfo, userData, setUserData } = useUserData();
+  const { userData, setUserData } = useUserData();
   const [events, setEvents] = useState<EventData[]>([]);
   const { date } = useDate();
 

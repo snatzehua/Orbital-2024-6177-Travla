@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Text, ScrollView, StyleSheet, View } from "react-native";
 
-import SelectionBoxes from "../SelectionBoxes/SelectionBoxes";
+import SelectionBoxes from "./SelectionBoxes";
 import { useUserData } from "../../shared/UserDataContext";
 
 interface SelectDateProps {
@@ -42,7 +42,7 @@ const SelectDate: React.FC<SelectDateProps> = ({
         }}
       />
       <ScrollView
-        style={{ width: "95%" }}
+        style={{ width: "100%" }}
         contentContainerStyle={{
           alignItems: "center",
         }}

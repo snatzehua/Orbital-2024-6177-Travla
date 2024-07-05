@@ -9,6 +9,8 @@ import {
   KeyboardTypeOptions,
 } from "react-native";
 
+import CommonStyles from "../../shared/CommonStyles";
+
 interface CustomInputProps extends TextInputProps {
   value: string;
   setValue: (newValue: string) => void;
@@ -34,7 +36,9 @@ const CustomInput: React.FC<CustomInputProps> = ({
   onSubmitEditing,
 }) => {
   return (
-    <View style={containerStyle ?? styles.container}>
+    <View
+      style={[containerStyle ?? styles.container, CommonStyles.perfect_shadows]}
+    >
       <TextInput
         value={value}
         onChangeText={setValue}

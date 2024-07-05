@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View, TouchableOpacity } from "react-native"; // Import TouchableOpacity for interactivity
 
 import { formatDate } from "../../shared/DateTimeContext";
+import CommonStyles from "../../shared/CommonStyles";
 
 interface SelectionBoxesProps {
   title: string;
@@ -29,6 +30,7 @@ const SelectionBoxes: React.FC<SelectionBoxesProps> = ({
   return (
     <TouchableOpacity
       style={{
+        ...CommonStyles.perfect_shadows,
         backgroundColor: "white",
         width: "90%",
         padding: 10,

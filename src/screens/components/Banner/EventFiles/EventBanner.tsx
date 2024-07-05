@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import BaseBanner from "../Base/BaseBanner";
 import EventBody from "./EventBody";
 import EditBanner from "../Base/EditBanner";
+import Tag from "./Tag";
 import { EventData } from "..";
 import { formatTime } from "../../../shared/DateTimeContext";
 import { useUserData } from "../../../shared/UserDataContext";
@@ -80,6 +81,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
         onPress={handleViewTrip}
         onLongPress={handleBannerEdit}
         bannerDateTime={formatTime(data.start, data.end)}
+        tag={data.tag}
       />
       {isEditing && (
         <EditBanner

@@ -13,6 +13,7 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 
+import CommonStyles from "../shared/CommonStyles";
 import BackButton from "../components/BackButton/BackButton";
 import { useUserData } from "../shared/UserDataContext";
 import { DateTimeDisplay } from "../shared/DateTimeContext";
@@ -134,11 +135,13 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   top_view_components: {
+    ...CommonStyles.perfect_shadows,
     width: Dimensions.get("window").width * 0.8,
     alignItems: "center",
     backgroundColor: "white",
     borderRadius: 10,
     marginHorizontal: Dimensions.get("window").width * 0.1,
+    marginBottom: 10,
   },
   top_view_number: {
     color: "black",

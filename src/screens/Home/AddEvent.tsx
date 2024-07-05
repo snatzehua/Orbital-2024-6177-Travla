@@ -1,8 +1,16 @@
 import React, { useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
 import { Currencies } from "../shared/Currencies";
+import { Tags } from "../shared/Tags";
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
@@ -12,6 +20,8 @@ import SelectTrip from "../components/SelectionComponents/SelectTrip";
 import SelectDate from "../components/SelectionComponents/SelectDate";
 import { convertToStartDate } from "../shared/DateTimeContext";
 import CustomMultipleInput from "../components/CustomMultipleInput.tsx/CustomMultipleInput";
+import { useUserData } from "../shared/UserDataContext";
+import CommonStyles from "../shared/CommonStyles";
 
 interface AddEventProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
@@ -39,9 +49,10 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   const [newCurrency, setNewCurrency] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newRemarks, setNewRemarks] = useState("");
-  const [newAdditionalInformation, setNewAdditionalInformation] = useState("");
+  const [newTag, setNewTag] = useState("");
   const [selectedTrip, setSelectedTrip] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+  const { user } = useUserData();
 
   // Defining button press functions (Add Event)
   const handleAddEvent = async () => {
@@ -78,6 +89,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
       datatype: "Event",
       start: newStart,
       end: newEnd,
+      user: user,
       location: newLocation,
       description: newDescription,
       cost: {
@@ -86,7 +98,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
       },
       items: items.filter((item) => item.trim() !== ""),
       remarks: newRemarks,
-      additional_information: newAdditionalInformation,
+      tag: newTag,
     };
     updateAsync(selectedTrip, selectedDate, newEvent);
     toggleModal();
@@ -241,8 +253,8 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
                 search
                 searchPlaceholder={"Search..."}
                 placeholder="Currency"
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selected_text}
+                placeholderStyle={styles.placeholderStyle1}
+                selectedTextStyle={styles.selected_text1}
                 itemTextStyle={styles.items_text}
                 data={Currencies}
                 onChange={(item) => setNewCurrency(item.value)}
@@ -272,12 +284,30 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               placeholder="Remarks"
               secureTextEntry={false}
             />
-            <CustomInput
-              value={newAdditionalInformation}
-              setValue={setNewAdditionalInformation}
-              placeholder="Additional information"
-              secureTextEntry={false}
+            <Dropdown
+              style={{
+                ...CommonStyles.perfect_shadows,
+                backgroundColor: "white",
+                width: "90%",
+
+                borderColor: "white",
+                borderRadius: 20,
+
+                padding: 10,
+                marginVertical: 5,
+              }}
+              search
+              searchPlaceholder={"Search..."}
+              placeholder="Tag"
+              placeholderStyle={styles.placeholderStyle2}
+              selectedTextStyle={styles.selected_text2}
+              itemTextStyle={styles.items_text}
+              data={Tags}
+              onChange={(item) => setNewTag(item.value)}
+              labelField="label"
+              valueField="value"
             />
+            <View style={{ height: Dimensions.get("window").height * 0.15 }} />
           </ScrollView>
           <CustomButton
             text="Add Event"
@@ -331,7 +361,8 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
   },
-  placeholderStyle: { color: "#7D7D7D", fontSize: 14, marginLeft: 15 },
+  placeholderStyle1: { color: "#7D7D7D", fontSize: 14, marginLeft: 15 },
+  placeholderStyle2: { color: "#7D7D7D", fontSize: 14, marginLeft: 5 },
   blurOverlay: {
     position: "absolute",
     bottom: 0,
@@ -339,7 +370,8 @@ const styles = StyleSheet.create({
     right: 0,
     height: 50, // Adjust this for the desired blur height
   },
-  selected_text: { color: "black", fontSize: 14, marginLeft: 15 },
+  selected_text1: { color: "black", fontSize: 14, marginLeft: 15 },
+  selected_text2: { color: "black", fontSize: 14, marginLeft: 5 },
   items_text: { color: "black", fontSize: 14 },
 });
 

@@ -22,5 +22,5 @@ interface EventData extends BannerData {
   }
   items: string[];
   remarks: string;
-  additional_information: string;
+  tag: string;
 }

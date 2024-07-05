@@ -35,7 +35,7 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
   const { uid } = useUserData(); // Access uid from context
 
   const baseStart = convertToStartDate(new Date());
-  const baseEnd = convertToEndDate(new Date());
+  const baseEnd = convertToStartDate(new Date());
 
   const { userData } = useUserData(); //fetch user data from context
 
@@ -79,7 +79,7 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       days: getEmptyDaysMap(newStart, newEnd),
     };
     try {
-      await createTrip(newTrip); // Call createTrip API
+      //await createTrip(newTrip); // Call createTrip API
       updateAsync(newTrip);
       toggleModal();
     } catch (error) {
