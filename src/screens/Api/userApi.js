@@ -23,8 +23,22 @@ export const fetchUsers = async () => {
   }
 };
 
+export const fetchUserById = async (uid) => {
+  try {
+    const response = await axios.get(`${API_URL}/users/${uid}`);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      return null; // User not found
+    }
+    console.error('API Error fetching user by ID:', error);
+    throw error;
+  }
+};
+
 export const createUser = async (user) => {
   try {
+    console.log("Api creating user: ", user);
     const response = await axios.post(`${API_URL}/users`, user);
     return response.data;
   } catch (error) {
