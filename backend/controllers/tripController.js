@@ -9,6 +9,7 @@ const createTrip = async (req, res) => {
 
   try {
     const userDoc = await User.findById(user);
+    console.log("User doc: ", userDoc);
     if (!userDoc) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -54,9 +55,11 @@ const getTrips = async (req, res) => {
   }
 };
 
-const getTripById = async (req, res) => {
+const fetchTripById = async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.id);
+    const tripId = req.params.tripId;
+    console.log("tripId: ", tripId);
+    const trip = await Trip.findById(tripId);
     if (!trip) {
       return res.status(404).json({ message: 'Trip not found' });
     }
@@ -78,4 +81,4 @@ const deleteTripById = async (req, res) => {
   }
 };
 
-module.exports = { createTrip, getTrips, getTripById, deleteTripById };
+module.exports = { createTrip, getTrips, fetchTripById, deleteTripById };

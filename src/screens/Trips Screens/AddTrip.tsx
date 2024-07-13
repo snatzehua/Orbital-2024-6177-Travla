@@ -6,6 +6,7 @@ import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
 import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
+import { createTrip } from "../Api/tripApi";
 import {
   getEmptyDaysMap,
   getUTCTime,
@@ -25,7 +26,7 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
   const baseStart = convertToStartDate(getUTCTime());
   const baseEnd = convertToStartDate(getUTCTime());
 
-  console.log(baseStart);
+  //console.log(baseStart);
   // Data
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
@@ -68,7 +69,7 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
     };
     console.log("TripData: ", newTrip);
     try {
-      //await createTrip(newTrip); // Call createTrip API
+      await createTrip(newTrip); // Call createTrip API
       updateAsync(newTrip);
       toggleModal();
       console.log("Userdata after adding trip: ", userData);

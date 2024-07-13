@@ -89,7 +89,7 @@ const MainApp = () => {
       unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
         if (user) {
           const firebaseUid = user.uid;
-          console.log("fire uid: ", firebaseUid);
+          console.log("firebase uid: ", firebaseUid);
           setUid(firebaseUid); // Set UID in context
         }
         setInitializing(false); // Set initializing to false

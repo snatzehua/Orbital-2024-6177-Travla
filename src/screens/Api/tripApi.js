@@ -26,9 +26,9 @@ export const getTrips = async () => {
 };
 
 // Get trip by ID
-export const getTripById = async (id) => {
+export const fetchTripById = async (tripId) => {
   try {
-    const response = await axios.get(`${API_URL}/trips/${id}`);
+    const response = await axios.get(`${API_URL}/trips/${tripId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching trip:', error);
