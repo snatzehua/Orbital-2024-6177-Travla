@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/users', fetchUsers);
 
 // GET user by ID
-router.get('/users/:id', fetchUserById);
+router.get('/users/:uid', fetchUserById);
 
 // POST create a new user
 router.post('/users', createUser);

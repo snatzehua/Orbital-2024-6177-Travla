@@ -13,7 +13,9 @@ const fetchUsers = async (req, res) => {
 // GET user by ID
 const fetchUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const uid = req.params.uid; // Ensure we are getting the UID from the params
+    console.log("Fetching user by UID in controller: ", uid); // Log UID
+    const user = await User.findOne({ uid });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -25,27 +27,26 @@ const fetchUserById = async (req, res) => {
 
 // POST create a new user
 const createUser = async (req, res) => {
-  const { uid, username, email } = req.body;
+  const { uid } = req.body;
+  console.log("Received request to create user with UID:", uid);
 
-  // Debug log the request body and User schema
-  console.log('Request Body:', req.body);
-  console.log('User Schema:', User.schema.paths);
+  if (!uid) {
+    return res.status(400).json({ message: "UID is required" });
+  }
 
   try {
-    let user = await User.findOne({ uid });
-
-    if (user) {
-      console.log('User already exists');
-      return res.status(200).json(user);
+    // Check if user already exists
+    const existingUser = await User.findOne({ uid });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    user = new User({ uid, username, email });
-    await user.save();
-
-    res.status(201).json(user);
+    // Create new user
+    const user = new User({ uid });
+    const newUser = await user.save();
+    res.status(201).json(newUser);
   } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: error.message });
   }
 };
 

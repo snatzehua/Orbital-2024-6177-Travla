@@ -1,29 +1,39 @@
-const { Trip } = require('../models/trip'); 
-const { User } = require('../models/user'); 
+const  { Trip } = require('../models/trip'); 
+const  User  = require('../models/user'); 
+
 
 // Create a new trip
 const createTrip = async (req, res) => {
-  const { user, title, start, end, trip, days } = req.body; // Destructure days if it's part of the request
+  const { user, title, start, end, trip, days } = req.body;
   console.log('Request body:', req.body);
 
   try {
-    if (!user) {
+    const userDoc = await User.findById(user);
+    if (!userDoc) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     const tripData = new Trip({
       title,
       datatype: 'Trip',
       start,
       end,
-      user,
+      user, // Link the trip to the MongoDB user ID
       trip, 
-      days 
+      days
     });
+    const savedTrip = await tripData.save(); // Save the trip first
+    console.log("Saved trip:", savedTrip);
 
-    const newTrip = await tripData.save();
-    res.status(201).json(newTrip);
+    // Link the trip to the user in the users collection
+    const UpdatedUser = await User.findByIdAndUpdate(
+      user,
+      { $push: { trips: savedTrip._id } },
+      { new: true }
+    );
+    console.log("Updated user: ", UpdatedUser);
+    res.status(201).json(savedTrip);
   } catch (error) {
+    console.error("error creating trip: ", error);
     res.status(400).json({ message: error.message });
   }
 };

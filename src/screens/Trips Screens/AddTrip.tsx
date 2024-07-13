@@ -20,26 +20,12 @@ interface AddTripProps {
 
 // Add Trip popup form
 const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
-  // const [uid, setUid] = useState<string | null>(null);
-
-  // // Fetch UID from Firebase Auth
-  // useEffect(() => {
-  //   const auth = getAuth();
-  //   const user = auth.currentUser;
-  //   if (user) {
-  //     setUid(user.uid);
-  //     console.log("User ID from Firebase Auth:", user.uid);
-  //   }
-  // }, []);
-  const { uid } = useUserData(); // Access uid from context
+  const { userData, uid } = useUserData(); // Access uid from context
 
   const baseStart = convertToStartDate(getUTCTime());
   const baseEnd = convertToStartDate(getUTCTime());
 
   console.log(baseStart);
-
-  const { userData } = useUserData(); //fetch user data from context
-
   // Data
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
@@ -70,10 +56,9 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       setError("User ID not found");
       return;
     }
-    console.log("Firebase uid: ", userData.uid);
 
     const newTrip: TripData = {
-      user: uid,
+      user: userData._id,
       trip: newTripTitle,
       title: newTripTitle,
       datatype: "Trip",
@@ -81,10 +66,12 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       end: newEnd,
       days: getEmptyDaysMap(newStart, newEnd),
     };
+    console.log("TripData: ", newTrip);
     try {
       //await createTrip(newTrip); // Call createTrip API
       updateAsync(newTrip);
       toggleModal();
+      console.log("Userdata after adding trip: ", userData);
     } catch (error) {
       console.log("failed to add trip");
       setError("Failed to create trip");
