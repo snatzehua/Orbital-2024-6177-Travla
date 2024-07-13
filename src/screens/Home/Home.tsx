@@ -8,6 +8,7 @@ import React, {
 import {
   Animated,
   Dimensions,
+  ImageBackground,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -21,19 +22,24 @@ import AddEvent from "./AddEvent";
 import MenuBar from "./MenuBar";
 import EventBanner from "../components/Banner/EventFiles/EventBanner";
 import { updateUserData } from "../shared/UserDataService";
-import { useUserData } from "../shared/UserDataContext";
+import { useUserData } from "../shared/contexts/UserDataContext";
 import {
   DateTimeDisplay,
   useDate,
   convertToStartDate,
+  isWithinDateRange,
   sortEventsByTime,
-} from "../shared/DateTimeContext";
+  getUTCTime,
+} from "../shared/contexts/DateTimeContext";
 
 const Home = () => {
   // Data
   const [refreshing, setRefreshing] = useState(false);
   const { userData, setUserData } = useUserData();
+  const [currentTrips, setCurrentTrips] = useState<string[]>([]);
   const [events, setEvents] = useState<EventData[]>([]);
+  const [upcoming, setUpcoming] = useState<EventData[]>([]);
+  const [isUpcomingVisible, setIsUpcomingVisible] = useState(false);
   const { date } = useDate();
 
   // Add Event form
@@ -58,18 +64,49 @@ const Home = () => {
     }
   };
 
-  const today = useMemo(
-    () => convertToStartDate(new Date()).toLocaleDateString(),
-    [date]
-  );
+  const today = useMemo(() => getUTCTime().toISOString().split("T")[0], [date]);
 
   useEffect(() => {
-    const currentEvents = Array.from(userData.trips.values()).flatMap(
+    // Check for today's events (works for multiple trips)
+    const tripArray = Array.from(userData.trips.values());
+    const currentEvents = tripArray.flatMap(
       (tripData) => tripData.days.get(today) || []
     );
     setEvents(sortEventsByTime(currentEvents));
+    // Check for upcoming events
+    if (userData.settings.displayUpcomingEvents && events.length == 0) {
+      const instancedDate = convertToStartDate(getUTCTime());
+      const nextWeek = getUTCTime();
+      nextWeek.setDate(instancedDate.getDate() + 7);
+      while (instancedDate <= nextWeek) {
+        const dateKey = instancedDate.toLocaleDateString(); // YYYY-MM-DD
+        const upcomingEvents = tripArray.flatMap(
+          (tripData) => tripData.days.get(dateKey) || []
+        );
+        if (upcomingEvents.length != 0) {
+          setUpcoming(upcomingEvents);
+          break;
+        }
+        instancedDate.setDate(instancedDate.getDate() + 1); // Move to the next day
+      }
+    }
+    // Check for current running trips (works for multiple trips)
+    let newCurrentTrips = [];
+    for (const trip of userData.trips.values()) {
+      if (
+        isWithinDateRange(
+          convertToStartDate(getUTCTime()),
+          trip.start,
+          trip.end
+        )
+      ) {
+        newCurrentTrips.push(trip.title);
+      }
+    }
+    setCurrentTrips(newCurrentTrips);
   }, [userData, today]);
 
+  // Currently unused
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setRefreshing(false);
@@ -105,80 +142,147 @@ const Home = () => {
 
   // Main Home screen framework
   return (
-    <View style={{ flex: 1, backgroundColor: "#EBEBEB" }}>
-      <Modal isVisible={isModalVisible}>
-        <Animated.View
-          style={{
-            transform: [{ scale: scaleValue }],
-          }}
-        >
-          <AddEvent toggleModal={toggleModal} updateAsync={updateAsync} />
-        </Animated.View>
-      </Modal>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.title_container}>
-          <Text style={styles.title_text}>Home</Text>
-          <View style={styles.date_time_display_container}>
-            <DateTimeDisplay />
+    <ImageBackground
+      source={require("../../../assets/images/login_background.png")}
+      style={styles.page_background}
+    >
+      <View style={{ flex: 1 }}>
+        <Modal isVisible={isModalVisible}>
+          <Animated.View
+            style={{
+              transform: [{ scale: scaleValue }],
+            }}
+          >
+            <AddEvent toggleModal={toggleModal} updateAsync={updateAsync} />
+          </Animated.View>
+        </Modal>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.title_container}>
+            <Text style={styles.title_text}>Home</Text>
+            <View style={styles.date_time_display_container}>
+              <DateTimeDisplay />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                marginHorizontal: "5%",
+                marginTop: 5,
+              }}
+            >
+              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
+            </View>
           </View>
           <View
             style={{
+              width: "100%",
               flexDirection: "row",
-              marginHorizontal: "5%",
-              marginTop: 5,
+              justifyContent: "center",
+              backgroundColor: "black",
+              marginVertical: 5,
+              alignSelf: "center",
+              borderColor: "black",
+              borderWidth: 8,
             }}
           >
-            <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
-          </View>
-        </View>
-        <View
-          style={{
-            flex: 1,
-            width: "95%",
-            marginTop: 5,
-            alignItems: "center",
-          }}
-        >
-          <ScrollView
-            style={styles.banner_container}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-          >
-            {events.map((datapack) => (
-              <EventBanner
-                key={datapack.title}
-                data={datapack}
-                displayEventDetails={userData.settings.displayEventDetails}
-              />
-            ))}
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                marginTop: 10,
-              }}
-            >
-              {events.length === 0 ? (
-                <Text style={{ fontFamily: "Arimo-Bold", color: "#7D7D7D" }}>
-                  No events today
-                </Text>
+            {currentTrips.length > 0 ? (
+              currentTrips.length > 1 ? (
+                <>
+                  <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
+                    {"Current Trips: "}
+                  </Text>
+                  <Text style={{ fontFamily: "Arimo-Regular", color: "white" }}>
+                    {currentTrips.join(" | ")}
+                  </Text>
+                </>
               ) : (
-                <Text style={{ fontFamily: "Arimo-Bold", color: "#7D7D7D" }}>
-                  No more events today
-                </Text>
-              )}
-            </View>
-          </ScrollView>
-        </View>
-        <View style={{ flexDirection: "row", alignItems: "center" }}></View>
-        <MenuBar toggleModal={toggleModal} />
-      </SafeAreaView>
-    </View>
+                <>
+                  <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
+                    {"Current Trip: "}
+                  </Text>
+                  <Text style={{ fontFamily: "Arimo-Regular", color: "white" }}>
+                    {currentTrips}
+                  </Text>
+                </>
+              )
+            ) : (
+              <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
+                {"No current trips"}
+              </Text>
+            )}
+          </View>
+          <View
+            style={{
+              flex: 1,
+              width: "95%",
+              marginTop: 5,
+              alignItems: "center",
+            }}
+          >
+            <ScrollView
+              style={styles.banner_container}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              overScrollMode="never"
+              bounces={false}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  marginTop: 10,
+                }}
+              >
+                {events.length === 0 ? (
+                  currentTrips.length != 0 ? (
+                    <Text
+                      style={{ fontFamily: "Arimo-Bold", color: "#404040" }}
+                    >
+                      No events added
+                    </Text>
+                  ) : (
+                    <Text
+                      style={{ fontFamily: "Arimo-Bold", color: "#404040" }}
+                    >
+                      No events today
+                    </Text>
+                  )
+                ) : (
+                  <Text style={{ fontFamily: "Arimo-Bold", color: "#404040" }}>
+                    No more events today
+                  </Text>
+                )}
+              </View>
+              <Modal isVisible={isUpcomingVisible}>
+                <View style={{ marginTop: 20 }}>
+                  {upcoming.map((datapack) => (
+                    <EventBanner
+                      key={datapack.title}
+                      data={datapack}
+                      displayEventDetails={
+                        userData.settings.displayEventDetails
+                      }
+                    />
+                  ))}
+                </View>
+              </Modal>
+            </ScrollView>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center" }}></View>
+          <MenuBar toggleModal={toggleModal} />
+        </SafeAreaView>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  page_background: {
+    flex: 1,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    resizeMode: "cover",
+  },
   add_event_container: {
     backgroundColor: "#FFB000",
     width: "90%",

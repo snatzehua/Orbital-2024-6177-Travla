@@ -5,8 +5,8 @@ import EventBody from "./EventBody";
 import EditBanner from "../Base/EditBanner";
 import Tag from "./Tag";
 import { EventData } from "..";
-import { formatTime } from "../../../shared/DateTimeContext";
-import { useUserData } from "../../../shared/UserDataContext";
+import { formatTime } from "../../../shared/contexts/DateTimeContext";
+import { useUserData } from "../../../shared/contexts/UserDataContext";
 import { updateUserData } from "../../../shared/UserDataService";
 
 type EventBannerProps = {
@@ -19,7 +19,6 @@ const EventBanner: React.FC<EventBannerProps> = ({
   displayEventDetails,
 }) => {
   const eventBody = displayEventDetails ? <EventBody data={data} /> : null;
-  const footerText = formatTime(data.start, data.end);
 
   // Extract data from wrapped datapck
   const { setUserData } = useUserData();
@@ -27,9 +26,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
   const [isViewing, setIsViewing] = useState(false);
 
   // Defining button press functions
-  const handleViewTrip = () => {
-    setIsEditing(true);
-  };
+  const handleViewTrip = () => {};
   const handleBannerEdit = () => {
     setIsEditing(true);
   };

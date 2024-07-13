@@ -14,8 +14,8 @@ interface TripData extends BannerData {
 interface EventData extends BannerData {
   trip: string;
   day: string;
-  description: string;
   location: string,
+  description: string;
   cost: {
     currency: string;
     amount: number;

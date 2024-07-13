@@ -9,7 +9,10 @@ import EditBanner from "../Base/EditBanner";
 import TripDetails from "../TripFiles/TripDetails";
 import { useUserData } from "../../../shared/UserDataContext";
 import { updateUserData } from "../../../shared/UserDataService";
-import { formatDate, formatTime } from "../../../shared/DateTimeContext";
+import {
+  formatDate,
+  formatTime,
+} from "../../../shared/contexts/DateTimeContext";
 
 type BannerProps = {
   data: EventData | TripData;

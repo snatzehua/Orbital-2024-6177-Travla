@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   SafeAreaView,
@@ -11,14 +11,19 @@ import {
 import { EventData, TripData } from "..";
 import { Dropdown } from "react-native-element-dropdown";
 
-import { Currencies } from "../../../shared/Currencies";
+import { Currencies } from "../../../shared/data/Currencies";
 import BackButton from "../../BackButton/BackButton";
 import CustomInput from "../../CustomInput/CustomInput";
 import CustomMultipleInput from "../../CustomMultipleInput.tsx/CustomMultipleInput";
 import DateTimeDropdown from "../../DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
 import CustomButton from "../../CustomButtom/CustomButton";
-import { formatDate, updateTripDates } from "../../../shared/DateTimeContext";
+import {
+  formatDate,
+  updateTripDates,
+} from "../../../shared/contexts/DateTimeContext";
+import CommonStyles from "../../../shared/CommonStyles";
+import { Tags } from "../../../shared/data/Tags";
 
 interface EditBannerProps {
   bannerData: BannerData;
@@ -46,37 +51,11 @@ const EditBanner: React.FC<EditBannerProps> = ({
   const [startDate, setStartDate] = useState<Date>(editedData.start);
   const [endDate, setEndDate] = useState<Date>(editedData.end);
 
-  const checkForIssues = () => {
-    if (editedData.datatype === "Trip") {
-      if (editedData.start < startDate || editedData.end > endDate) {
-        Alert.alert(
-          "Change Trip Dates?",
-          "Are you sure you want to do this? This may delete some existing events.",
-          [
-            {
-              text: "Cancel",
-              style: "cancel",
-            },
-            {
-              text: "Change",
-              onPress: () => {
-                updateTripDates(editedData.days, startDate, endDate);
-                handleSave();
-              },
-              style: "destructive", // Indicate a destructive action
-            },
-          ]
-        );
-      } else if (editedData.start > startDate || editedData.end < endDate) {
-        updateTripDates(editedData.days, startDate, endDate);
-        handleSave();
-      } else {
-        handleSave();
-      }
-    } else {
-      handleSave();
+  useEffect(() => {
+    if (startDate > endDate) {
+      setEndDate(startDate);
     }
-  };
+  }, [startDate]);
 
   const handleSave = () => {
     // Error handling
@@ -153,6 +132,8 @@ const EditBanner: React.FC<EditBannerProps> = ({
     } else if (key === "amount") {
       const updatedCost = { ...editedData.cost, amount: Number(value) };
       setEditedData({ ...editedData, cost: updatedCost });
+    } else if (key === "tag") {
+      setEditedData({ ...editedData, tag: value.value });
     } else {
       setEditedData({ ...editedData, [key]: value });
     }
@@ -272,6 +253,30 @@ const EditBanner: React.FC<EditBannerProps> = ({
                 >
                   <Text style={styles.input_titles}>Location</Text>
                 </View>
+                <Dropdown
+                  style={{
+                    ...CommonStyles.perfect_shadows,
+                    backgroundColor: "white",
+                    width: "90%",
+
+                    borderColor: "white",
+                    borderRadius: 20,
+
+                    padding: 10,
+                    marginVertical: 5,
+                  }}
+                  search
+                  searchPlaceholder={"Search..."}
+                  placeholder="Tag"
+                  placeholderStyle={styles.placeholderStyle2}
+                  selectedTextStyle={styles.selected_text2}
+                  itemTextStyle={styles.items_text}
+                  data={Tags}
+                  value={(editedData as EventData).tag} // Correct key for value
+                  onChange={(item) => handleInputChange("tag", item)}
+                  labelField="label"
+                  valueField="value"
+                />
                 <CustomInput
                   value={(editedData as EventData).location}
                   setValue={(value) => handleInputChange("location", value)}
@@ -361,7 +366,7 @@ const EditBanner: React.FC<EditBannerProps> = ({
           <View style={{ marginTop: 5 }}>
             <CustomButton
               text="Save"
-              onPress={checkForIssues}
+              onPress={handleSave}
               containerStyle={styles.save_container}
               textStyle={styles.save_text}
             />
@@ -447,6 +452,8 @@ const styles = StyleSheet.create({
   },
   placeholderStyle: { color: "#7D7D7D", fontSize: 14, marginLeft: 15 },
   selected_text: { color: "black", fontSize: 14, marginLeft: 15 },
+  placeholderStyle2: { color: "#7D7D7D", fontSize: 14, marginLeft: 5 },
+  selected_text2: { color: "black", fontSize: 14, marginLeft: 5 },
   items_text: { color: "black", fontSize: 14 },
   button_container: { position: "absolute" },
   // ... Add styles for other elements (e.g., error messages) as needed

@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
   Dimensions,
+  ImageBackground,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -18,16 +19,20 @@ import {
 } from "@react-navigation/native-stack";
 
 import AddTrip from "./AddTrip";
-import AddTripButton from "./AddTripButton";
+import AddButton from "./AddButton";
 import BackButton from "../components/BackButton/BackButton";
 import TripBanner from "../components/Banner/TripFiles/TripBanner";
-import { useUserData } from "../shared/UserDataContext";
-import { updateUserData } from "../shared/UserDataService";
+import { useUserData } from "../shared/contexts/UserDataContext";
+import { UserData, updateUserData } from "../shared/UserDataService";
 import {
+  useDate,
   DateTimeDisplay,
+  convertToStartDate,
   hasConflictingDates,
   sortTripsByDate,
-} from "../shared/DateTimeContext";
+  isWithinDateRange,
+  getUTCTime,
+} from "../shared/contexts/DateTimeContext";
 
 const Trips = () => {
   // Typing for navigation
@@ -40,9 +45,24 @@ const Trips = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Data
+  const { date } = useDate();
   const { userData, setUserData } = useUserData();
   const [trips, setTrips] = useState<TripData[]>([]);
-  //const [selectedTrip, setSelectedTrip] = useState<string>("");
+  const [currentTrips, setCurrentTrips] = useState<string[]>([]);
+
+  const today = useMemo(() => getUTCTime().toISOString().split("T")[0], [date]);
+
+  useEffect(() => {
+    let newCurrentTrips = [];
+    for (const trip of userData.trips.values()) {
+      if (
+        isWithinDateRange(convertToStartDate(new Date()), trip.start, trip.end)
+      ) {
+        newCurrentTrips.push(trip.title);
+      }
+    }
+    setCurrentTrips(newCurrentTrips);
+  }, [userData, today]);
 
   useEffect(() => {
     setTrips(sortTripsByDate(Array.from(userData.trips.values())));
@@ -76,7 +96,7 @@ const Trips = () => {
   };
   const updateAsync = async (newTrip: TripData) => {
     const handleTripAddition = () => {
-      setUserData((prevUserData) => {
+      setUserData((prevUserData: UserData) => {
         const newTrips = new Map(prevUserData.trips);
         newTrips.set(newTrip.title, newTrip);
         const updatedUserData = { ...prevUserData, trips: newTrips };
@@ -107,7 +127,10 @@ const Trips = () => {
   };
 
   return (
-    <>
+    <ImageBackground
+      source={require("../../../assets/images/resetPassword_background.png")}
+      style={styles.page_background}
+    >
       <SafeAreaView style={{ flex: 1 }}>
         <Modal isVisible={isModalVisible}>
           <Animated.View
@@ -143,10 +166,46 @@ const Trips = () => {
                 marginTop: 5,
               }}
             >
-              <View
-                style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }}
-              />
+              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
             </View>
+          </View>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "center",
+              backgroundColor: "black",
+              marginVertical: 5,
+              alignSelf: "center",
+              borderColor: "black",
+              borderWidth: 8,
+            }}
+          >
+            {currentTrips.length > 0 ? (
+              currentTrips.length > 1 ? (
+                <>
+                  <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
+                    {"Current Trips: "}
+                  </Text>
+                  <Text style={{ fontFamily: "Arimo-Regular", color: "white" }}>
+                    {currentTrips.join(" | ")}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
+                    {"Current Trip: "}
+                  </Text>
+                  <Text style={{ fontFamily: "Arimo-Regular", color: "white" }}>
+                    {currentTrips}
+                  </Text>
+                </>
+              )
+            ) : (
+              <Text style={{ fontFamily: "Arimo-Bold", color: "white" }}>
+                {"No current trips"}
+              </Text>
+            )}
           </View>
           <View
             style={{
@@ -156,34 +215,52 @@ const Trips = () => {
               alignItems: "center",
             }}
           >
-            <ScrollView style={styles.banner_container}>
+            <ScrollView
+              style={styles.banner_container}
+              overScrollMode="never"
+              bounces={false}
+            >
               {trips.map((datapack) => (
                 <TripBanner key={datapack.title} data={datapack} />
               ))}
-              <AddTripButton
-                onPressFunction={toggleModal}
-                text={
-                  Array.from(userData.trips.values()).length === 0
-                    ? "Add your first trip!"
-                    : "Add another trip"
-                }
-              ></AddTripButton>
               <View
                 style={{
                   flex: 1,
                   alignItems: "center",
                   marginVertical: 10,
                 }}
-              ></View>
+              >
+                {trips.length === 0 ? (
+                  <Text style={{ fontFamily: "Arimo-Bold", color: "#404040" }}>
+                    No trips added yet
+                  </Text>
+                ) : null}
+              </View>
             </ScrollView>
+            <View style={{ width: "95%", marginTop: "5%" }}>
+              <AddButton
+                onPressFunction={toggleModal}
+                text={
+                  Array.from(userData.trips.values()).length === 0
+                    ? "Add your first trip!"
+                    : "Add another trip"
+                }
+              />
+            </View>
           </View>
         </View>
       </SafeAreaView>
-    </>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  page_background: {
+    flex: 1,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    resizeMode: "cover",
+  },
   container: {
     flex: 1,
     alignItems: "center",

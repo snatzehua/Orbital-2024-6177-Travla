@@ -24,8 +24,16 @@ const BaseBanner: React.FC<BaseBannerProps> = ({
   return (
     <TouchableOpacity
       style={
-        tag && tag == "Essentials"
-          ? { ...styles.container, backgroundColor: "#FFE5CC" }
+        tag
+          ? tag == "Essentials"
+            ? { ...styles.container, backgroundColor: "#f4cccc" }
+            : tag == "Transport"
+            ? { ...styles.container, backgroundColor: "#d9ead3" }
+            : tag == "Food / Drink"
+            ? { ...styles.container, backgroundColor: "#c9daf8" }
+            : tag == "Activity"
+            ? { ...styles.container, backgroundColor: "#fff2cc" }
+            : styles.container
           : styles.container
       }
       onPress={onPress}
@@ -43,7 +51,7 @@ const BaseBanner: React.FC<BaseBannerProps> = ({
             alignItems: "flex-end",
           }}
         >
-          {tag ? <Tag tag={tag} /> : null}
+          {tag ? <Tag tag={tag} /> : <View />}
           <Text style={styles.bottom_right}>{bannerDateTime}</Text>
         </View>
       </View>
@@ -60,6 +68,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 10,
     marginBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#7D7D7D",
   },
   title: {
     fontFamily: "Arimo-Bold",

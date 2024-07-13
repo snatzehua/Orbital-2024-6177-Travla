@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, ScrollView, StyleSheet, View } from "react-native";
 
 import SelectionBoxes from "./SelectionBoxes";
-import { useUserData } from "../../shared/UserDataContext";
+import { useUserData } from "../../shared/contexts/UserDataContext";
 
 interface SelectDateProps {
   selectedTrip: string;
@@ -23,7 +23,7 @@ const SelectDate: React.FC<SelectDateProps> = ({
   }, [tripData]);
 
   return (
-    <View style={{ flex: 1, alignItems: "center" }}>
+    <View style={{ flex: 1, alignItems: "center", backgroundColor: "#EBEBEB" }}>
       <Text
         style={{
           fontFamily: "Arimo-Bold",
@@ -37,7 +37,7 @@ const SelectDate: React.FC<SelectDateProps> = ({
         style={{
           width: "90%",
           height: 1,
-          backgroundColor: "#7D7D7D",
+          backgroundColor: "black",
           marginBottom: 10,
         }}
       />
@@ -46,6 +46,8 @@ const SelectDate: React.FC<SelectDateProps> = ({
         contentContainerStyle={{
           alignItems: "center",
         }}
+        overScrollMode="never"
+        bounces={false}
       >
         {dates.map((date, index) => (
           <SelectionBoxes
@@ -69,12 +71,10 @@ const SelectDate: React.FC<SelectDateProps> = ({
             >
               ...
             </Text>
-            <Text style={styles.text}>
-              No trips, add one in the 'Trips' tabs!
-            </Text>
+            <Text style={styles.text}>No dates detected</Text>
           </>
         ) : (
-          <Text style={styles.text}>Add more trips in the 'Trips' tab!</Text>
+          <Text style={styles.text}>Change trip dates in the 'Trips' tab</Text>
         )}
       </ScrollView>
     </View>
@@ -86,7 +86,8 @@ const styles = StyleSheet.create({
     fontFamily: "Arimo-Bold",
     color: "#7D7D7D",
     justifyContent: "center",
-    marginVertical: "5%",
+    marginTop: "5%",
+    marginBottom: "10%",
   },
 });
 

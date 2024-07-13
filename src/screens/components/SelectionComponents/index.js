@@ -1,1 +1,1 @@
-export { default } from "../SelectionComponents/SelectionBoxes";
+export { default } from "./SelectionBoxes";

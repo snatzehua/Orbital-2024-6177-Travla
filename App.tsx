@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import * as Font from "expo-font";
 import { Dimensions, Image, ImageBackground, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack"; // Import from the core stack library
 import { getApps, initializeApp } from "firebase/app";
 import {
   initializeAuth,
@@ -16,8 +16,8 @@ import firebaseConfig from "./firebaseConfig";
 import {
   useUserData,
   UserDataProvider,
-} from "./src/screens/shared/UserDataContext";
-import { DateTimeProvider } from "./src/screens/shared/DateTimeContext";
+} from "./src/screens/shared/contexts/UserDataContext";
+import { DateTimeProvider } from "./src/screens/shared/contexts/DateTimeContext";
 
 import Login from "./src/screens/Auth Screens/Login";
 import Register from "./src/screens/Auth Screens/Register";
@@ -29,7 +29,7 @@ import Trips from "./src/screens/Trips Screens/Trips";
 import Map from "./src/screens/Map Screens/Map";
 import Profile from "./src/screens/Profile Screens/Profile";
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 const reactNativePersistence = (firebaseAuth as any).getReactNativePersistence;
 
 export type RootStackParamList = {
@@ -64,6 +64,7 @@ export default function App() {
   useEffect(() => {
     async function loadFonts() {
       await Font.loadAsync({
+        "Arimo-Italic": require("./assets/fonts/Arimo-Italic.ttf"),
         "Arimo-Bold": require("./assets/fonts/Arimo-Bold.ttf"),
         "Arimo-Regular": require("./assets/fonts/Arimo-Regular.ttf"),
       });
@@ -121,13 +122,27 @@ export default function App() {
     );
   }
 
+  const config = {
+    animation: "timing",
+    config: {
+      stiffness: 1000,
+      damping: 500,
+      mass: 3,
+      overshootClamping: true,
+      restDisplacementThreshold: 0.01,
+      restSpeedThreshold: 0.01,
+    },
+  };
+
   return (
     <UserDataProvider>
       <DateTimeProvider>
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName={user ? "Home" : "Login"}
-            screenOptions={{ headerShown: false }}
+            screenOptions={{
+              headerShown: false,
+            }}
           >
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />

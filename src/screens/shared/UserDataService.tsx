@@ -10,10 +10,14 @@ export interface UserData {
 
 export interface Settings {
   displayEventDetails: boolean;
+  displayUpcomingEvents: boolean;
+  domesticCurrency: string;
 }
 
 const initialSettings = {
   displayEventDetails: true,
+  displayUpcomingEvents: true,
+  domesticCurrency: "",
 };
 
 // Create empty UserData

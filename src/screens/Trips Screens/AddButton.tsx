@@ -1,15 +1,13 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import CommonStyles from "../shared/CommonStyles";
 
-interface AddTripButtonProps {
+interface AddButtonProps {
   onPressFunction: () => void; // Correct type for onPressFunction
   text: string;
 }
 
-const AddTripButton: React.FC<AddTripButtonProps> = ({
-  onPressFunction,
-  text,
-}) => {
+const AddButton: React.FC<AddButtonProps> = ({ onPressFunction, text }) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPressFunction}>
       <View>
@@ -21,6 +19,7 @@ const AddTripButton: React.FC<AddTripButtonProps> = ({
 
 const styles = StyleSheet.create({
   container: {
+    ...CommonStyles.perfect_shadows,
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
@@ -29,6 +28,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 10,
     marginBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "darkorange",
   },
   text: {
     color: "black",
@@ -41,4 +42,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddTripButton;
+export default AddButton;

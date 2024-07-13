@@ -5,8 +5,8 @@ import TripBody from "./TripBody";
 import TripDetails from "./TripDetails";
 import EditBanner from "../Base/EditBanner";
 import { TripData } from "..";
-import { formatDate } from "../../../shared/DateTimeContext";
-import { useUserData } from "../../../shared/UserDataContext";
+import { formatDate } from "../../../shared/contexts/DateTimeContext";
+import { useUserData } from "../../../shared/contexts/UserDataContext";
 import { updateUserData } from "../../../shared/UserDataService";
 
 type TripBannerProps = {

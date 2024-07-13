@@ -43,34 +43,32 @@ export const DateTimeDisplay = () => {
 };
 
 // Format dates
-export const formatDate = (
-  startDate: Date | string,
-  endDate: Date | string
-) => {
-  if (startDate instanceof Date && endDate instanceof Date) {
-    // Handle Dates
-    return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+export const formatDate = (startDate: Date, endDate: Date) => {
+  if (startDate.getTime() === endDate.getTime()) {
+    return `${startDate.toISOString().split("T")[0]}`;
   }
-  if (typeof startDate === "string" && typeof endDate === "string") {
-    // Handle strings (potentially parse them into Dates if needed)
-    const parsedStartDate = new Date(startDate);
-    const parsedEndDate = new Date(endDate);
-    return `${parsedStartDate.toLocaleDateString()} - ${parsedEndDate.toLocaleDateString()}`;
-  }
-  return "Error detected";
+  return `${startDate.toISOString().split("T")[0]} - ${
+    endDate.toISOString().split("T")[0]
+  }`;
 };
 
 // Convert 24h format to 12h format
-export const formatTime = (start: Date, end: Date) => {
-  const options: Intl.DateTimeFormatOptions = {
-    hour: "numeric",
-    minute: "2-digit",
+export const formatTime = (startDate: Date, endDate?: Date) => {
+  const formatTimeString = (date: Date) => {
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+    const period = hours >= 12 ? "PM" : "AM";
+    const formattedHours = (hours % 12 || 12).toString(); // Convert to 12-hour format
+    return `${formattedHours}:${minutes} ${period}`;
   };
-  const startTimeString = start.toLocaleTimeString([], options);
-  const endTimeString = end.toLocaleTimeString([], options);
-  if (startTimeString === endTimeString) {
-    return `${startTimeString}`;
+
+  const startTimeString = formatTimeString(startDate);
+
+  if (!endDate || startDate.getTime() === endDate.getTime()) {
+    return startTimeString;
   }
+
+  const endTimeString = formatTimeString(endDate);
   return `${startTimeString} - ${endTimeString}`;
 };
 
@@ -79,11 +77,12 @@ export const getEmptyDaysArray = (startDate: Date, endDate: Date): string[] => {
   const currentDate = new Date(startDate); // Start with the start date
 
   while (currentDate <= endDate) {
-    const dateKey = currentDate.toLocaleDateString(); // YYYY-MM-DD
+    const dateKey = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD
     days.push(dateKey);
     currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
   }
 
+  console.log(days);
   return days;
 };
 
@@ -92,14 +91,15 @@ export const getEmptyDaysMap = (
   endDate: Date
 ): Map<string, EventData[]> => {
   const days = new Map<string, EventData[]>();
-  const currentDate = new Date(startDate); // Start with the start date
+  const currentDate = new Date(startDate);
 
   while (currentDate <= endDate) {
-    const dateKey = currentDate.toLocaleDateString(); // YYYY-MM-DD
+    const dateKey = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD
     days.set(dateKey, []);
     currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
   }
 
+  console.log(days);
   return days;
 };
 
@@ -124,26 +124,28 @@ export const updateTripDates = (
 };
 
 export const convertToStartDate = (date: Date) => {
-  const newDate = date;
-  newDate.setHours(0);
-  newDate.setMinutes(0);
-  newDate.setSeconds(0);
-  newDate.setMilliseconds(0);
-  return newDate;
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  );
 };
 
 export const convertToEndDate = (date: Date) => {
-  const newDate = date;
-  newDate.setHours(23);
-  newDate.setMinutes(59);
-  newDate.setSeconds(59);
-  newDate.setMilliseconds(0);
-  return newDate;
+  return new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      23,
+      59,
+      59
+    )
+  );
 };
 
-export const isWithinDateRange = (start: Date, end: Date) => {
-  const { date } = useContext(DateTimeContext);
-
+export const isWithinDateRange = (date: Date, start: Date, end: Date) => {
+  console.log(date);
+  console.log(start);
+  console.log(end);
   return date >= start && date <= end;
 };
 
@@ -189,6 +191,15 @@ export const hasConflictingDates = (
     }
     return true;
   }
+};
+
+export const getTimezoneOffset = () => {
+  const currentTimeZoneOffsetInMinutes = new Date().getTimezoneOffset();
+  return currentTimeZoneOffsetInMinutes * 60 * 1000;
+};
+
+export const getUTCTime = () => {
+  return new Date(new Date().getTime() - getTimezoneOffset());
 };
 
 // Styles

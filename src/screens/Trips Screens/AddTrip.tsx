@@ -6,13 +6,12 @@ import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
 import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
-import { getEmptyDaysMap } from "../shared/DateTimeContext";
 import {
-  convertToStartDate,
-  convertToEndDate,
-} from "../shared/DateTimeContext";
-import { createTrip } from "../Api/tripApi"; // Import createTrip API function
-import { useUserData } from "../shared/UserDataContext"; // Import user data context
+  getEmptyDaysMap,
+  getUTCTime,
+} from "../shared/contexts/DateTimeContext";
+import { convertToStartDate } from "../shared/contexts/DateTimeContext";
+import { useUserData } from "../shared/contexts/UserDataContext"; // Import user data context
 
 interface AddTripProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
@@ -34,8 +33,10 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
   // }, []);
   const { uid } = useUserData(); // Access uid from context
 
-  const baseStart = convertToStartDate(new Date());
-  const baseEnd = convertToStartDate(new Date());
+  const baseStart = convertToStartDate(getUTCTime());
+  const baseEnd = convertToStartDate(getUTCTime());
+
+  console.log(baseStart);
 
   const { userData } = useUserData(); //fetch user data from context
 
@@ -59,10 +60,12 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       setError("Please enter a title");
       return;
     }
+    /*
     if (newStart > newEnd) {
       setError("End cannot be before start");
       return;
     }
+    */
     if (!uid) {
       setError("User ID not found");
       return;

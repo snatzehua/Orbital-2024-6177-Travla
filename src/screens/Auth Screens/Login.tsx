@@ -26,7 +26,7 @@ import {
 import CustomInput from "../components/CustomInput";
 import CustomButton from "../components/CustomButtom";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
-import { useUserData } from "../shared/UserDataContext";
+import CommonStyles from "../shared/CommonStyles";
 
 const Login = () => {
   // Typing for navigation

@@ -3,7 +3,7 @@ import { Text, ScrollView, StyleSheet, View } from "react-native";
 
 import BackButton from "../BackButton/BackButton";
 import SelectionBoxes from "./SelectionBoxes";
-import { useUserData } from "../../shared/UserDataContext";
+import { useUserData } from "../../shared/contexts/UserDataContext";
 
 interface SelectTripProps {
   setSelectedTrip: React.Dispatch<React.SetStateAction<string>>;
@@ -28,7 +28,7 @@ const SelectTrip: React.FC<SelectTripProps> = ({ setSelectedTrip }) => {
         style={{
           width: "90%",
           height: 1,
-          backgroundColor: "#7D7D7D",
+          backgroundColor: "black",
           marginBottom: 10,
         }}
       />
@@ -37,6 +37,8 @@ const SelectTrip: React.FC<SelectTripProps> = ({ setSelectedTrip }) => {
         contentContainerStyle={{
           alignItems: "center",
         }}
+        overScrollMode="never"
+        bounces={false}
       >
         {currentTrip.map((tripName) => (
           <SelectionBoxes
@@ -61,12 +63,10 @@ const SelectTrip: React.FC<SelectTripProps> = ({ setSelectedTrip }) => {
             >
               ...
             </Text>
-            <Text style={styles.text}>
-              No trips, add one in the 'Trips' tabs!
-            </Text>
+            <Text style={styles.text}>No trips added</Text>
           </>
         ) : (
-          <Text style={styles.text}>Add more trips in the 'Trips' tab!</Text>
+          <Text style={styles.text}>Add more trips in the 'Trips' tab</Text>
         )}
       </ScrollView>
     </View>
@@ -78,7 +78,8 @@ const styles = StyleSheet.create({
     fontFamily: "Arimo-Bold",
     color: "#7D7D7D",
     justifyContent: "center",
-    marginVertical: "5%",
+    marginTop: "5%",
+    marginBottom: "10%",
   },
 });
 

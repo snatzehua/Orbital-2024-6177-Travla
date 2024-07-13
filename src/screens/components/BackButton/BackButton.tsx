@@ -7,6 +7,7 @@ interface BackButtonProps {
   iconName?: string;
   containerStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  iconColour?: string;
 }
 
 const BackButton: React.FC<BackButtonProps> = ({
@@ -14,6 +15,7 @@ const BackButton: React.FC<BackButtonProps> = ({
   iconName,
   containerStyle,
   textStyle,
+  iconColour,
 }) => {
   return (
     <Button
@@ -21,7 +23,7 @@ const BackButton: React.FC<BackButtonProps> = ({
         name: iconName ?? "arrow-left",
         type: "font-awesome", // Specify the icon type
         size: 40,
-        color: "black",
+        color: iconColour ?? "black",
       }}
       type="clear"
       containerStyle={containerStyle ?? styles.container}

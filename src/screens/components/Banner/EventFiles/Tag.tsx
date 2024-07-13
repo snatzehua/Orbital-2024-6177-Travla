@@ -9,26 +9,26 @@ const Tag: React.FC<TagProps> = ({ tag }) => {
   const getStyle = () => {
     if (tag == "Activity") {
       return {
-        backgroundColor: "#fff2cc",
-        borderColor: "#fff2cc",
+        backgroundColor: "#ffe599",
+        borderColor: "#ffe599",
       };
     }
     if (tag == "Food / Drink") {
       return {
-        backgroundColor: "#c9daf8",
-        borderColor: "#c9daf8",
+        backgroundColor: "#a4c2f4",
+        borderColor: "#a4c2f4",
       };
     }
     if (tag == "Transport") {
       return {
-        backgroundColor: "#d9d9d9",
-        borderColor: "#d9d9d9",
+        backgroundColor: "#b6d7a8",
+        borderColor: "#b6d7a8",
       };
     }
     if (tag == "Essentials") {
       return {
-        backgroundColor: "#f4cccc",
-        borderColor: "#f4cccc",
+        backgroundColor: "#ea9999",
+        borderColor: "#ea9999",
       };
     }
   };

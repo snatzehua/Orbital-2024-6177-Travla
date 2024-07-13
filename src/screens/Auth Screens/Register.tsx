@@ -21,6 +21,7 @@ import { FirebaseError } from "firebase/app";
 import CustomInput from "../components/CustomInput";
 import CustomButton from "../components/CustomButtom";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
+import CommonStyles from "../shared/CommonStyles";
 
 const Register = () => {
   // Typing for navigation
@@ -252,6 +253,7 @@ const styles = StyleSheet.create({
     minHeight: 18,
   },
   register_container: {
+    ...CommonStyles.perfect_shadows,
     backgroundColor: "#FFB000",
     width: "90%",
     borderRadius: 5,

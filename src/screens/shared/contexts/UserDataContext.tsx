@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { UserData, createEmptyUserData, getUserData } from "./UserDataService";
+import { UserData, createEmptyUserData, getUserData } from "../UserDataService";
 import { getAuth } from "firebase/auth";
 
 // 1. Interface for Type Safety (with isLoading)

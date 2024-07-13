@@ -13,9 +13,9 @@ const EventBody = ({ data }: { data: EventData }) => {
   return (
     <View style={styles.container}>
       {data.location ? (
-        <Text style={styles.generic_text}>@{data.location}</Text>
+        <Text style={styles.location_text}>@{data.location}</Text>
       ) : null}
-      {data.description ? (
+      {data.description && data.description != "" ? (
         <Text style={styles.smaller_text}>{data.description}</Text>
       ) : null}
       {data.items.length != 0 ? (
@@ -28,15 +28,17 @@ const EventBody = ({ data }: { data: EventData }) => {
               flex: 1,
               height: 1,
               backgroundColor: "#7D7D7D",
-              marginVertical: 10,
+              marginVertical: 5,
             }}
           />
-          <Text style={styles.generic_text}>{data.remarks}</Text>
+          <View style={{ flexDirection: "row" }}>
+            <Text style={styles.note_text}>{data.remarks}</Text>
+          </View>
         </>
       ) : null}
       <View style={{ alignItems: "flex-end" }}>
-        {data.cost.currency != "" && data.cost.amount != 0 ? (
-          <Text style={{ fontFamily: "Arimo-Bold" }}>
+        {data.cost.amount != 0 ? (
+          <Text style={styles.cost_text}>
             {data.cost.currency} {data.cost.amount.toFixed(2)}
           </Text>
         ) : null}
@@ -47,8 +49,10 @@ const EventBody = ({ data }: { data: EventData }) => {
 
 const styles = StyleSheet.create({
   container: {},
-  generic_text: { fontFamily: "Arimo-Regular", fontSize: 14 },
-  smaller_text: { fontFamily: "Arimo-Regular", fontSize: 12, marginTop: 10 },
+  location_text: { fontFamily: "Arimo-Regular", fontSize: 14, marginBottom: 5 },
+  smaller_text: { fontFamily: "Arimo-Regular", fontSize: 12, marginTop: 5 },
+  note_text: { fontFamily: "Arimo-Italic", fontSize: 12 },
+  cost_text: { fontFamily: "Arimo-Bold", fontSize: 12 },
 });
 
 export default EventBody;

@@ -1,5 +1,12 @@
 import React from "react";
-import { Dimensions, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  ImageBackground,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
@@ -7,7 +14,7 @@ import {
 } from "@react-navigation/native-stack";
 
 import BackButton from "../components/BackButton/BackButton";
-import { DateTimeDisplay } from "../shared/DateTimeContext";
+import { DateTimeDisplay } from "../shared/contexts/DateTimeContext";
 
 const Map = () => {
   // Typing for navigation
@@ -24,49 +31,60 @@ const Map = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{
-          marginLeft: "2%",
-          alignItems: "flex-start",
-          zIndex: 1,
-        }}
-      >
-        <BackButton
-          onPress={handleNavBack}
-          containerStyle={styles.button_container}
-        />
-      </View>
-      <View style={styles.container}>
-        <View style={styles.title_container}>
-          <Text style={styles.title_text}>Map</Text>
-          <View style={styles.date_time_display_container}>
-            <DateTimeDisplay />
+    <ImageBackground
+      source={require("../../../assets/images/resetPassword_background.png")}
+      style={styles.page_background}
+    >
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            marginLeft: "2%",
+            alignItems: "flex-start",
+            zIndex: 1,
+          }}
+        >
+          <BackButton
+            onPress={handleNavBack}
+            containerStyle={styles.button_container}
+          />
+        </View>
+        <View style={styles.container}>
+          <View style={styles.title_container}>
+            <Text style={styles.title_text}>Map</Text>
+            <View style={styles.date_time_display_container}>
+              <DateTimeDisplay />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                marginHorizontal: "5%",
+                marginTop: 5,
+              }}
+            >
+              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
+            </View>
           </View>
           <View
             style={{
-              flexDirection: "row",
-              marginHorizontal: "5%",
+              flex: 1,
+              width: "95%",
               marginTop: 5,
+              alignItems: "center",
             }}
-          >
-            <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
-          </View>
+          ></View>
         </View>
-        <View
-          style={{
-            flex: 1,
-            width: "95%",
-            marginTop: 5,
-            alignItems: "center",
-          }}
-        ></View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  page_background: {
+    flex: 1,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    resizeMode: "cover",
+  },
   button_container: { marginTop: 10, position: "absolute" },
   container: {
     flex: 1,

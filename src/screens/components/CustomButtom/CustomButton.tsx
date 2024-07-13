@@ -9,6 +9,7 @@ import {
   ViewStyle,
   TextStyle,
 } from "react-native";
+import CommonStyles from "../../shared/CommonStyles";
 
 interface CustomButtonProps extends PressableProps {
   text: string;
@@ -47,7 +48,10 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     <Animated.View
       style={[
         wrapperStyle ?? styles.wrapper,
-        { opacity: animatedOpacity }, // Apply opacity animation directly
+        { opacity: animatedOpacity },
+        {
+          ...CommonStyles.perfect_shadows,
+        }, // Apply opacity animation directly
       ]}
     >
       <Pressable
@@ -65,6 +69,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
 // Default settings if no containerStyle / textStyle
 const styles = StyleSheet.create({
   wrapper: {
+    ...CommonStyles.perfect_shadows,
     width: "100%",
     alignItems: "center",
   },

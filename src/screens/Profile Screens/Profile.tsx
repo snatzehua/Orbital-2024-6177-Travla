@@ -1,12 +1,14 @@
-import React, { useContext } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   Dimensions,
+  ImageBackground,
   SafeAreaView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 import { useNavigation } from "@react-navigation/native";
 import {
   createNativeStackNavigator,
@@ -15,19 +17,20 @@ import {
 import { getAuth, signOut } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { Currencies } from "../shared/data/Currencies";
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
-import { DateTimeDisplay } from "../shared/DateTimeContext";
+import { DateTimeDisplay } from "../shared/contexts/DateTimeContext";
 import {
   createEmptyUserData,
   clearUserData,
   updateUserData,
 } from "../shared/UserDataService";
-import { useUserData } from "../shared/UserDataContext";
+import { useUserData } from "../shared/contexts/UserDataContext";
 
 const Profile = () => {
   // Data
-  const { userInfo, setUserInfo, userData, setUserData } = useUserData();
+  const { userData, setUserData } = useUserData();
 
   // Typing for navigation
   type RootStackParamList = {
@@ -75,79 +78,142 @@ const Profile = () => {
     );
   };
 
+  const handleDomesticCurrencyChange = (newCurrency: string) => {
+    setUserData((prevUserData) => {
+      const domesticCurrency = prevUserData.settings.domesticCurrency;
+      const updatedUserData = {
+        ...prevUserData,
+        settings: {
+          ...prevUserData.settings,
+          domesticCurrency: newCurrency,
+        },
+      };
+      console.log("Set to:", newCurrency);
+      updateUserData(updatedUserData);
+      return updatedUserData;
+    });
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{
-          marginLeft: "2%",
-          alignItems: "flex-start",
-          zIndex: 1,
-        }}
-      >
-        <BackButton
-          onPress={handleNavBack}
-          containerStyle={styles.button_container}
-        />
-      </View>
-      <View style={styles.container}>
-        <View style={styles.title_container}>
-          <Text style={styles.title_text}>Profile</Text>
-          <View style={styles.date_time_display_container}>
-            <DateTimeDisplay />
+    <ImageBackground
+      source={require("../../../assets/images/register_background.png")}
+      style={styles.page_background}
+    >
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            marginLeft: "2%",
+            alignItems: "flex-start",
+            zIndex: 1,
+          }}
+        >
+          <BackButton
+            onPress={handleNavBack}
+            containerStyle={styles.button_container}
+          />
+        </View>
+        <View style={styles.container}>
+          <View style={styles.title_container}>
+            <Text style={styles.title_text}>Profile</Text>
+            <View style={styles.date_time_display_container}>
+              <DateTimeDisplay />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                marginHorizontal: "5%",
+                marginTop: 5,
+              }}
+            >
+              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
+            </View>
           </View>
           <View
             style={{
-              flexDirection: "row",
-              marginHorizontal: "5%",
+              flex: 1,
+              width: "95%",
               marginTop: 5,
+              alignItems: "center",
             }}
           >
-            <View style={{ flex: 1, height: 1, backgroundColor: "#7D7D7D" }} />
+            <CustomButton
+              text="Logout"
+              onPress={handleLogout}
+              wrapperStyle={{}}
+            />
+            <CustomButton
+              text="CLEAR DATA"
+              onPress={handleClearData}
+              wrapperStyle={{}}
+            />
+            <CustomButton
+              text="Display details toggle"
+              onPress={() => {
+                setUserData((prevUserData) => {
+                  const currentDisplayEventDetails =
+                    prevUserData.settings.displayEventDetails;
+                  const updatedUserData = {
+                    ...prevUserData,
+                    settings: {
+                      ...prevUserData.settings,
+                      displayEventDetails: !currentDisplayEventDetails,
+                    },
+                  };
+                  console.log("Set to:", !currentDisplayEventDetails);
+                  updateUserData(updatedUserData);
+                  return updatedUserData;
+                });
+              }}
+              wrapperStyle={{}}
+            />
+            <CustomButton
+              text="Display upcoming events toggle"
+              onPress={() => {
+                setUserData((prevUserData) => {
+                  const currentDisplayUpcomingEvents =
+                    prevUserData.settings.displayUpcomingEvents;
+                  const updatedUserData = {
+                    ...prevUserData,
+                    settings: {
+                      ...prevUserData.settings,
+                      displayUpcomingEvents: !currentDisplayUpcomingEvents,
+                    },
+                  };
+                  console.log("Set to:", !currentDisplayUpcomingEvents);
+                  updateUserData(updatedUserData);
+                  return updatedUserData;
+                });
+              }}
+              wrapperStyle={{}}
+            />
+            <Dropdown
+              style={styles.dropdown}
+              search
+              searchPlaceholder={"Search..."}
+              placeholder="-"
+              placeholderStyle={styles.placeholderStyle1}
+              selectedTextStyle={styles.selected_text1}
+              itemTextStyle={styles.items_text}
+              data={Currencies}
+              onChange={(item) => handleDomesticCurrencyChange(item.value)}
+              labelField="label"
+              valueField="value"
+            />
+            <Text>Domestic Currency: {userData.settings.domesticCurrency}</Text>
           </View>
         </View>
-        <View
-          style={{
-            flex: 1,
-            width: "95%",
-            marginTop: 5,
-            alignItems: "center",
-          }}
-        >
-          <CustomButton
-            text="Logout"
-            onPress={handleLogout}
-            wrapperStyle={{}}
-          />
-          <CustomButton
-            text="CLEAR DATA"
-            onPress={handleClearData}
-            wrapperStyle={{}}
-          />
-          <CustomButton
-            text="Display details toggle"
-            onPress={() => {
-              setUserData((prevUserData) => {
-                const currentDisplayEventDetails =
-                  prevUserData.settings.displayEventDetails;
-                const updatedUserData = {
-                  ...prevUserData,
-                  settings: {
-                    displayEventDetails: !currentDisplayEventDetails,
-                  },
-                };
-                updateUserData(updatedUserData);
-                return updatedUserData;
-              });
-            }}
-            wrapperStyle={{}}
-          />
-        </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  page_background: {
+    flex: 1,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
+    resizeMode: "cover",
+  },
   button_container: { marginTop: 10, position: "absolute" },
   container: {
     flex: 1,
@@ -168,6 +234,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 5,
   },
+  dropdown: {
+    width: "50%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    marginVertical: 5,
+  },
+  placeholderStyle1: {
+    color: "black",
+    fontSize: 14,
+    marginLeft: 15,
+  },
+  selected_text1: { color: "black", fontSize: 14, marginLeft: 15 },
+  items_text: { color: "black", fontSize: 14 },
 });
 
 export default Profile;

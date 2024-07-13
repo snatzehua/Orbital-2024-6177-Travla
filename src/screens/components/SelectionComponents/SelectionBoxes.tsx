@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, View, TouchableOpacity } from "react-native"; // Import TouchableOpacity for interactivity
 
-import { formatDate } from "../../shared/DateTimeContext";
+import { formatDate } from "../../shared/contexts/DateTimeContext";
 import CommonStyles from "../../shared/CommonStyles";
 
 interface SelectionBoxesProps {

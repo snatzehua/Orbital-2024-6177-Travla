@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dimensions,
   SafeAreaView,
@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
-import { Currencies } from "../shared/Currencies";
-import { Tags } from "../shared/Tags";
+import { Currencies } from "../shared/data/Currencies";
+import { Tags } from "../shared/data/Tags";
 import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
 import CustomInput from "../components/CustomInput/CustomInput";
@@ -18,10 +18,14 @@ import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
 import SelectTrip from "../components/SelectionComponents/SelectTrip";
 import SelectDate from "../components/SelectionComponents/SelectDate";
-import { convertToStartDate } from "../shared/DateTimeContext";
+import {
+  convertToStartDate,
+  getUTCTime,
+} from "../shared/contexts/DateTimeContext";
 import CustomMultipleInput from "../components/CustomMultipleInput.tsx/CustomMultipleInput";
-import { useUserData } from "../shared/UserDataContext";
+import { useUserData } from "../shared/contexts/UserDataContext";
 import CommonStyles from "../shared/CommonStyles";
+import EventInputHandling from "../components/Banner/EventFiles/EventInputHandling";
 
 interface AddEventProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
@@ -35,8 +39,8 @@ interface AddEventProps {
 // Add event popup form
 const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   // Defining hooks
-  const baseStart = convertToStartDate(new Date());
-  const baseEnd = convertToStartDate(new Date());
+  const baseStart = convertToStartDate(getUTCTime());
+  const baseEnd = convertToStartDate(getUTCTime());
 
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
@@ -55,60 +59,43 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   const { user } = useUserData();
 
   // Defining button press functions (Add Event)
+
+  useEffect(() => {
+    if (newStart > newEnd) {
+      setNewEnd(newStart);
+    }
+  }, [newStart]);
+
   const handleAddEvent = async () => {
-    // Error handling
-    if (newEventTitle === "") {
-      setError("Please enter a title");
-      return;
-    }
-    if (newStart.getTime() > newEnd.getTime()) {
-      setError("End cannot be before start");
-      return;
-    }
-    if (Number(newAmount) == undefined || Number(newAmount) == null) {
-      setError("Invalid cost amount");
-      return;
-    }
-    if (Number(newAmount) > 0 && newCurrency == "") {
-      setError("Please select a currency");
-      return;
-    }
-
-    // Data trimming
-    if (items.length > 0) {
-      setItems(items.filter((item) => item != ""));
-    }
-    if ((Number(newAmount) == 0 || newAmount == "") && newCurrency != "") {
-      setNewCurrency("");
-    }
-
-    const newEvent: EventData = {
-      trip: selectedTrip,
-      day: selectedDate,
-      title: newEventTitle,
-      datatype: "Event",
-      start: newStart,
-      end: newEnd,
-      user: user,
-      location: newLocation,
-      description: newDescription,
-      cost: {
-        currency: newCurrency,
-        amount: newAmount == "" ? 0 : Number(newAmount),
-      },
-      items: items.filter((item) => item.trim() !== ""),
-      remarks: newRemarks,
-      tag: newTag,
-    };
-    updateAsync(selectedTrip, selectedDate, newEvent);
-    toggleModal();
+    setError(
+      EventInputHandling(
+        newEventTitle,
+        newStart,
+        newEnd,
+        user,
+        selectedTrip,
+        selectedDate,
+        newLocation,
+        newDescription,
+        newCurrency,
+        newAmount,
+        items,
+        newRemarks,
+        newTag,
+        (editedData) => {
+          updateAsync(selectedTrip, selectedDate, editedData);
+          toggleModal();
+        }
+      )
+    );
   };
   const handleDateBackButton = () => {
     setSelectedTrip("");
+    setError("");
   };
-
   const handleAddBackButton = () => {
     setSelectedDate("");
+    setError("");
   };
 
   return (
@@ -132,7 +119,13 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
         </>
       ) : (
         <View style={{ flex: 1 }}>
-          <View>
+          <View
+            style={{
+              backgroundColor: "#DCDCDC",
+              borderBottomWidth: 2,
+              borderBottomColor: "#D3D3D3",
+            }}
+          >
             <View
               style={{
                 justifyContent: "center",
@@ -233,6 +226,29 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               </View>
               <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
             </View>
+            <Dropdown
+              style={{
+                ...CommonStyles.perfect_shadows,
+                backgroundColor: "white",
+                width: "90%",
+
+                borderColor: "white",
+                borderRadius: 20,
+
+                padding: 10,
+                marginVertical: 5,
+              }}
+              search
+              searchPlaceholder={"Search..."}
+              placeholder="Tag"
+              placeholderStyle={styles.placeholderStyle2}
+              selectedTextStyle={styles.selected_text2}
+              itemTextStyle={styles.items_text}
+              data={Tags}
+              onChange={(item) => setNewTag(item.value)}
+              labelField="label"
+              valueField="value"
+            />
             <CustomInput
               value={newLocation}
               setValue={setNewLocation}
@@ -284,37 +300,22 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               placeholder="Remarks"
               secureTextEntry={false}
             />
-            <Dropdown
-              style={{
-                ...CommonStyles.perfect_shadows,
-                backgroundColor: "white",
-                width: "90%",
-
-                borderColor: "white",
-                borderRadius: 20,
-
-                padding: 10,
-                marginVertical: 5,
-              }}
-              search
-              searchPlaceholder={"Search..."}
-              placeholder="Tag"
-              placeholderStyle={styles.placeholderStyle2}
-              selectedTextStyle={styles.selected_text2}
-              itemTextStyle={styles.items_text}
-              data={Tags}
-              onChange={(item) => setNewTag(item.value)}
-              labelField="label"
-              valueField="value"
-            />
             <View style={{ height: Dimensions.get("window").height * 0.15 }} />
           </ScrollView>
-          <CustomButton
-            text="Add Event"
-            onPress={handleAddEvent}
-            containerStyle={styles.add_event_container}
-            textStyle={styles.add_event_text}
-          />
+          <View
+            style={{
+              backgroundColor: "#DCDCDC",
+              borderTopWidth: 2,
+              borderTopColor: "#D3D3D3",
+            }}
+          >
+            <CustomButton
+              text="Add Event"
+              onPress={handleAddEvent}
+              containerStyle={styles.add_event_container}
+              textStyle={styles.add_event_text}
+            />
+          </View>
         </View>
       )}
     </SafeAreaView>
@@ -336,13 +337,16 @@ const styles = StyleSheet.create({
   },
   to: { marginVertical: 5 },
   add_event_container: {
+    ...CommonStyles.perfect_shadows,
     backgroundColor: "#FFB000",
     width: "90%",
     borderRadius: 5,
     alignItems: "center",
     padding: 10,
-    marginTop: 5,
+    marginTop: "5%",
     marginBottom: "5%",
+    borderBottomWidth: 1,
+    borderBottomColor: "darkorange",
   },
   add_event_text: {
     fontFamily: "Arimo-Bold",
@@ -363,13 +367,6 @@ const styles = StyleSheet.create({
   },
   placeholderStyle1: { color: "#7D7D7D", fontSize: 14, marginLeft: 15 },
   placeholderStyle2: { color: "#7D7D7D", fontSize: 14, marginLeft: 5 },
-  blurOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 50, // Adjust this for the desired blur height
-  },
   selected_text1: { color: "black", fontSize: 14, marginLeft: 15 },
   selected_text2: { color: "black", fontSize: 14, marginLeft: 5 },
   items_text: { color: "black", fontSize: 14 },
