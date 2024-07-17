@@ -4,7 +4,9 @@ import {
   Dimensions,
   ImageBackground,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from "react-native";
@@ -14,7 +16,7 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut, sendPasswordResetEmail } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Currencies } from "../shared/data/Currencies";
@@ -31,6 +33,13 @@ import { useUserData } from "../shared/contexts/UserDataContext";
 const Profile = () => {
   // Data
   const { userData, setUserData } = useUserData();
+  const email = getAuth().currentUser?.email;
+  const [displayEventDetailsState, setDisplayEventDetailsState] = useState(
+    userData.settings.displayEventDetails
+  );
+  const [displayUpcomingEvents, setDisplayUpcomingEvents] = useState(
+    userData.settings.displayUpcomingEvents
+  );
 
   // Typing for navigation
   type RootStackParamList = {
@@ -76,6 +85,45 @@ const Profile = () => {
         },
       ]
     );
+  };
+
+  const handlePasswordResetEmail = async () => {
+    // Check fields are filled
+    if (email != null && email != "") {
+      try {
+        const auth = getAuth();
+        const userCredential = await sendPasswordResetEmail(auth, email);
+        Alert.alert(
+          "Sent Reset Email",
+          "Password reset email has been sent.\nPlease check your inbox."
+        );
+        // Check for cases
+      } catch (error: any) {
+        Alert.alert("Error Detected", error);
+      }
+    } else {
+      Alert.alert(
+        "Email not Detected",
+        "Please try again after restarting the application"
+      );
+    }
+  };
+
+  const handleSettingsBooleanChange = (key: keyof typeof userData.settings) => {
+    return (newValue: boolean) =>
+      setUserData((prevUserData) => {
+        const changedSetting = !userData.settings[key];
+        const updatedUserData = {
+          ...prevUserData,
+          settings: {
+            ...prevUserData.settings,
+            [key]: changedSetting,
+          },
+        };
+        console.log("Set to:", changedSetting);
+        updateUserData(updatedUserData);
+        return updatedUserData;
+      });
   };
 
   const handleDomesticCurrencyChange = (newCurrency: string) => {
@@ -128,79 +176,165 @@ const Profile = () => {
               <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
             </View>
           </View>
-          <View
+          <ScrollView
+            bounces={false}
+            overScrollMode="never"
             style={{
               flex: 1,
               width: "95%",
               marginTop: 5,
-              alignItems: "center",
             }}
           >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginHorizontal: "2.5%",
+                marginVertical: 5,
+              }}
+            >
+              <View style={{ flex: 1, height: 2, backgroundColor: "black" }} />
+              <View>
+                <Text
+                  style={{
+                    color: "black",
+                    textAlign: "center",
+                    fontSize: Dimensions.get("window").height * 0.022,
+                    fontFamily: "Arimo-Bold",
+                    marginHorizontal: "2.5%",
+                  }}
+                >
+                  USER
+                </Text>
+              </View>
+              <View style={{ flex: 1, height: 2, backgroundColor: "black" }} />
+            </View>
+            <View style={styles.white_background}>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.settings_header}>UID: </Text>
+                <Text>{userData.uid != "" ? userData.uid : "-"}</Text>
+              </View>
+              <View style={{ flexDirection: "row" }}>
+                <Text style={styles.settings_header}>Email: </Text>
+                <Text>{email}</Text>
+              </View>
+            </View>
+            <CustomButton
+              text="Request password reset"
+              onPress={handlePasswordResetEmail}
+              containerStyle={styles.logout_container}
+              textStyle={styles.logout_text}
+            />
+            <View style={{ height: "4%" }} />
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginHorizontal: "2.5%",
+                marginVertical: 5,
+              }}
+            >
+              <View style={{ flex: 1, height: 2, backgroundColor: "black" }} />
+              <View>
+                <Text
+                  style={{
+                    color: "black",
+                    textAlign: "center",
+                    fontSize: Dimensions.get("window").height * 0.022,
+                    fontFamily: "Arimo-Bold",
+                    marginHorizontal: "2.5%",
+                  }}
+                >
+                  SETTINGS
+                </Text>
+              </View>
+              <View style={{ flex: 1, height: 2, backgroundColor: "black" }} />
+            </View>
+            <View style={styles.white_background}>
+              <Text style={styles.settings_header}>Display Event Details</Text>
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text style={{ flexShrink: 1, marginRight: 5 }}>
+                  Allows the display of additional information of Events, such
+                  as location and cost.
+                </Text>
+                <Switch
+                  style={{ alignSelf: "flex-end" }}
+                  trackColor={{ false: "#767577", true: "#FFB000" }}
+                  thumbColor={"#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={handleSettingsBooleanChange(
+                    "displayEventDetails"
+                  )}
+                  value={userData.settings.displayEventDetails}
+                />
+              </View>
+            </View>
+            <View style={styles.white_background}>
+              <Text style={styles.settings_header}>
+                Display Upcoming Events
+              </Text>
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text style={{ flexShrink: 1, marginRight: 5 }}>
+                  Allows the display of upcoming Events on the home screen along
+                  with current Events
+                </Text>
+                <Switch
+                  style={{ alignSelf: "flex-end" }}
+                  trackColor={{ false: "#767577", true: "#FFB000" }}
+                  thumbColor={"#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={handleSettingsBooleanChange(
+                    "displayUpcomingEvents"
+                  )}
+                  value={userData.settings.displayUpcomingEvents}
+                />
+              </View>
+            </View>
+            <View style={styles.white_background}>
+              <Text style={styles.settings_header}>Domestic Currency:</Text>
+              <Dropdown
+                style={styles.dropdown}
+                search
+                searchPlaceholder={"Search..."}
+                placeholder="-"
+                placeholderStyle={styles.placeholderStyle1}
+                selectedTextStyle={styles.selected_text1}
+                itemTextStyle={styles.items_text}
+                data={Currencies}
+                onChange={(item) => handleDomesticCurrencyChange(item.value)}
+                labelField="label"
+                valueField="value"
+                value={userData.settings.domesticCurrency}
+              />
+            </View>
             <CustomButton
               text="Logout"
               onPress={handleLogout}
               wrapperStyle={{}}
+              containerStyle={styles.logout_container}
+              textStyle={styles.logout_text}
             />
             <CustomButton
-              text="CLEAR DATA"
-              onPress={handleClearData}
+              text="Clear All Data (Press and Hold)"
+              onPress={() => {}}
+              onLongPress={handleClearData}
               wrapperStyle={{}}
+              containerStyle={styles.clear_items_container}
+              textStyle={styles.clear_items_text}
             />
-            <CustomButton
-              text="Display details toggle"
-              onPress={() => {
-                setUserData((prevUserData) => {
-                  const currentDisplayEventDetails =
-                    prevUserData.settings.displayEventDetails;
-                  const updatedUserData = {
-                    ...prevUserData,
-                    settings: {
-                      ...prevUserData.settings,
-                      displayEventDetails: !currentDisplayEventDetails,
-                    },
-                  };
-                  console.log("Set to:", !currentDisplayEventDetails);
-                  updateUserData(updatedUserData);
-                  return updatedUserData;
-                });
-              }}
-              wrapperStyle={{}}
-            />
-            <CustomButton
-              text="Display upcoming events toggle"
-              onPress={() => {
-                setUserData((prevUserData) => {
-                  const currentDisplayUpcomingEvents =
-                    prevUserData.settings.displayUpcomingEvents;
-                  const updatedUserData = {
-                    ...prevUserData,
-                    settings: {
-                      ...prevUserData.settings,
-                      displayUpcomingEvents: !currentDisplayUpcomingEvents,
-                    },
-                  };
-                  console.log("Set to:", !currentDisplayUpcomingEvents);
-                  updateUserData(updatedUserData);
-                  return updatedUserData;
-                });
-              }}
-              wrapperStyle={{}}
-            />
-            <Dropdown
-              style={styles.dropdown}
-              search
-              searchPlaceholder={"Search..."}
-              placeholder="-"
-              placeholderStyle={styles.placeholderStyle1}
-              selectedTextStyle={styles.selected_text1}
-              itemTextStyle={styles.items_text}
-              data={Currencies}
-              onChange={(item) => handleDomesticCurrencyChange(item.value)}
-              labelField="label"
-              valueField="value"
-            />
-            <Text>Domestic Currency: {userData.settings.domesticCurrency}</Text>
-          </View>
+          </ScrollView>
         </View>
       </SafeAreaView>
     </ImageBackground>
@@ -234,11 +368,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 5,
   },
+  white_background: {
+    backgroundColor: "#FFFFFF50",
+    padding: 15,
+    marginVertical: 5,
+    borderRadius: 20,
+  },
+  settings_header: { fontFamily: "Arimo-Bold", marginBottom: 5 },
   dropdown: {
-    width: "50%",
+    alignSelf: "center",
+    width: "100%",
     backgroundColor: "white",
     borderRadius: 20,
     marginVertical: 5,
+    paddingVertical: 3,
   },
   placeholderStyle1: {
     color: "black",
@@ -247,6 +390,30 @@ const styles = StyleSheet.create({
   },
   selected_text1: { color: "black", fontSize: 14, marginLeft: 15 },
   items_text: { color: "black", fontSize: 14 },
+  logout_container: {
+    backgroundColor: "#FFB000",
+    width: "100%",
+    borderRadius: 5,
+    alignItems: "center",
+    padding: 10,
+    marginTop: 10,
+  },
+  logout_text: {
+    color: "black",
+    fontFamily: "Arimo-Bold",
+  },
+  clear_items_container: {
+    backgroundColor: "#E62E00",
+    width: "100%",
+    borderRadius: 5,
+    alignItems: "center",
+    padding: 10,
+    marginTop: 10,
+  },
+  clear_items_text: {
+    color: "white",
+    fontFamily: "Arimo-Bold",
+  },
 });
 
 export default Profile;
