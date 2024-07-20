@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 
-import AddEvent from "./AddEvent";
+import AddEvent from "../components/Banner/EventFiles/AddEvent";
 import MenuBar from "./MenuBar";
 import EventBanner from "../components/Banner/EventFiles/EventBanner";
 import { updateUserData } from "../shared/UserDataService";
@@ -31,6 +31,7 @@ import {
   sortEventsByTime,
   getUTCTime,
 } from "../shared/contexts/DateTimeContext";
+import AddButton from "../Trips Screens/AddButton";
 
 const Home = () => {
   // Data
@@ -269,6 +270,14 @@ const Home = () => {
             </ScrollView>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}></View>
+          <AddButton
+            onPressFunction={() => {
+              for (const trip of userData.trips.values()) {
+                console.log(trip.accommodation);
+              }
+            }}
+            text={"debuggerButton"}
+          />
           <MenuBar toggleModal={toggleModal} />
         </SafeAreaView>
       </View>

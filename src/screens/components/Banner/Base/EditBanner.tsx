@@ -20,6 +20,7 @@ import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
 import CustomButton from "../../CustomButtom/CustomButton";
 import {
   formatDate,
+  updateAccomsDates,
   updateTripDates,
 } from "../../../shared/contexts/DateTimeContext";
 import CommonStyles from "../../../shared/CommonStyles";
@@ -92,6 +93,11 @@ const EditBanner: React.FC<EditBannerProps> = ({
 
       // Trip
     } else if (editedData.datatype === "Trip") {
+      if (editedData.start != startDate || editedData.end != endDate) {
+        console.log("Procced!");
+        updateTripDates(editedData.days, startDate, endDate);
+        updateAccomsDates(editedData.accommodation, startDate, endDate);
+      }
       onUpdate(bannerData.title, {
         ...editedData,
         start: startDate,

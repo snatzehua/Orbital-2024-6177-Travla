@@ -33,6 +33,7 @@ import { useUserData } from "../shared/contexts/UserDataContext";
 const Profile = () => {
   // Data
   const { userData, setUserData } = useUserData();
+  const UID = getAuth().currentUser?.uid;
   const email = getAuth().currentUser?.email;
   const [displayEventDetailsState, setDisplayEventDetailsState] = useState(
     userData.settings.displayEventDetails
@@ -212,7 +213,7 @@ const Profile = () => {
             <View style={styles.white_background}>
               <View style={{ flexDirection: "row" }}>
                 <Text style={styles.settings_header}>UID: </Text>
-                <Text>{userData.uid != "" ? userData.uid : "-"}</Text>
+                <Text>{UID}</Text>
               </View>
               <View style={{ flexDirection: "row" }}>
                 <Text style={styles.settings_header}>Email: </Text>
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   white_background: {
-    backgroundColor: "#FFFFFF50",
+    backgroundColor: "#FFFFFF80",
     padding: 15,
     marginVertical: 5,
     borderRadius: 20,

@@ -56,9 +56,27 @@ export const getUserData = async (): Promise<UserData> => {
           ]
         )
       );
+      const miscArray = typedTripData.misc.map((misc) => ({
+        ...misc,
+        cost: { ...misc.cost },
+      }));
+      const accomsMap = new Map(
+        Object.entries(typedTripData.accommodation).map(
+          ([dateStr, accommodation]) => [
+            dateStr,
+            // Assuming `Accommodation` has start/end dates, adjust as needed:
+            accommodation,
+          ]
+        )
+      );
 
       // Update the tripData object in the Map
-      tripsMap.set(tripId, { ...typedTripData, days: daysMap });
+      tripsMap.set(tripId, {
+        ...typedTripData,
+        days: daysMap,
+        accommodation: accomsMap,
+        misc: miscArray,
+      });
     }
 
     const userData: UserData = {
@@ -91,11 +109,24 @@ export const updateUserData = async (newUserData: UserData): Promise<void> => {
           ])
         );
 
+        // Serialize Accommodation
+        const accomsForJson = Object.fromEntries(
+          Array.from(tripData.accommodation, ([dateStr, accom]) => [
+            dateStr,
+            accom,
+          ])
+        );
+
         return [
           tripId,
           {
             ...tripData,
             days: daysForJson,
+            accommodation: accomsForJson,
+            misc: tripData.misc.map((miscItem) => ({
+              ...miscItem,
+              cost: { ...miscItem.cost }, // Deep copy cost
+            })),
           },
         ];
       })

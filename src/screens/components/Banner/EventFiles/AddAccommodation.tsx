@@ -9,93 +9,113 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
-import { Currencies } from "../shared/data/Currencies";
-import { Tags } from "../shared/data/Tags";
-import BackButton from "../components/BackButton/BackButton";
-import CustomButton from "../components/CustomButtom/CustomButton";
-import CustomInput from "../components/CustomInput/CustomInput";
-import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
-import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
-import SelectTrip from "../components/SelectionComponents/SelectTrip";
-import SelectDate from "../components/SelectionComponents/SelectDate";
+import { Currencies } from "../../../shared/data/Currencies";
+import BackButton from "../../BackButton/BackButton";
+import CustomButton from "../../CustomButtom/CustomButton";
+import CustomInput from "../../CustomInput/CustomInput";
+import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
+import SelectTrip from "../../SelectionComponents/SelectTrip";
+import SelectDate from "../../SelectionComponents/SelectDate";
 import {
   convertToStartDate,
   getUTCTime,
-} from "../shared/contexts/DateTimeContext";
-import CustomMultipleInput from "../components/CustomMultipleInput.tsx/CustomMultipleInput";
-import { useUserData } from "../shared/contexts/UserDataContext";
-import CommonStyles from "../shared/CommonStyles";
-import EventInputHandling from "../components/Banner/EventFiles/EventInputHandling";
+} from "../../../shared/contexts/DateTimeContext";
+import CommonStyles from "../../../shared/CommonStyles";
+import { useUserData } from "../../../shared/contexts/UserDataContext";
 
-interface AddEventProps {
+interface AddAccomodationProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
   updateAsync: (
     selectedTrip: string,
-    selectedDate: string,
-    newEvent: EventData
+    selectedStart: number,
+    selectedEnd: number,
+    newAccomodation: Accommodation
   ) => Promise<void>;
+  providedTrip?: string;
+  providedDate?: string;
+  daysArray?: string[];
 }
 
 // Add event popup form
-const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
+const AddAccomodation = ({
+  toggleModal,
+  updateAsync,
+  providedTrip,
+  providedDate,
+  daysArray,
+}: AddAccomodationProps) => {
   // Defining hooks
   const baseStart = convertToStartDate(getUTCTime());
   const baseEnd = convertToStartDate(getUTCTime());
 
+  const { userData } = useUserData();
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
-  const [newEventTitle, setNewEventTitle] = useState("");
-  const [newStart, setNewStart] = useState(baseStart);
-  const [newEnd, setNewEnd] = useState(baseEnd);
-  const [newDescription, setNewDescription] = useState("");
-  const [newLocation, setNewLocation] = useState("");
-  const [items, setItems] = useState<string[]>([]);
+  const [newAccommodation, setNewAccommodation] = useState("");
   const [newCurrency, setNewCurrency] = useState("");
   const [newAmount, setNewAmount] = useState("");
-  const [newRemarks, setNewRemarks] = useState("");
-  const [newTag, setNewTag] = useState("");
-  const [selectedTrip, setSelectedTrip] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
-  const { user } = useUserData();
-
-  // Defining button press functions (Add Event)
+  const [selectedTrip, setSelectedTrip] = useState(providedTrip ?? "");
+  const [selectedDate, setSelectedDate] = useState(providedDate ?? "");
+  const [selectedStart, setSelectedStart] = useState(0);
+  const [selectedEnd, setSelectedEnd] = useState(0);
+  const days = daysArray!.map((day, index) => ({
+    label: `Day ${index + 1} (${day})`,
+    value: `${index}`,
+  }));
+  const [daysEdited, setDaysEdited] = useState(days);
 
   useEffect(() => {
-    if (newStart > newEnd) {
-      setNewEnd(newStart);
-    }
-  }, [newStart]);
+    setDaysEdited(days.slice(selectedStart));
+  }, [selectedStart]);
 
-  const handleAddEvent = async () => {
-    setError(
-      EventInputHandling(
-        newEventTitle,
-        newStart,
-        newEnd,
-        user,
-        selectedTrip,
-        selectedDate,
-        newLocation,
-        newDescription,
-        newCurrency,
-        newAmount,
-        items,
-        newRemarks,
-        newTag,
-        (editedData) => {
-          updateAsync(selectedTrip, selectedDate, editedData);
-          toggleModal();
-        }
-      )
-    );
+  // Defining button press functions (Add Event)
+  const handleAddAccomodation = () => {
+    if (newAccommodation.trim() === "") {
+      setError("Please enter a title");
+      return;
+    }
+    if (
+      Number(newAmount) == undefined ||
+      Number(newAmount) == null ||
+      Number(newAmount) < 0
+    ) {
+      setError("Invalid cost amount");
+      return;
+    }
+    if (Number(newAmount) > 0 && newCurrency == "") {
+      setError("Please select a currency");
+      return;
+    }
+    const trimmedCost = () => {
+      return Number(newAmount) == 0 || newAmount == ""
+        ? { currency: "", amount: 0 }
+        : {
+            currency: newCurrency,
+            amount: newAmount == "" ? 0 : Number(newAmount),
+          };
+    };
+    const editedData: Accommodation = {
+      name: newAccommodation,
+      cost: trimmedCost(),
+    };
+    updateAsync(selectedTrip, selectedStart, selectedEnd, editedData);
+    toggleModal();
   };
   const handleDateBackButton = () => {
-    setSelectedTrip("");
-    setError("");
+    if (providedTrip != undefined) {
+      toggleModal();
+    } else {
+      setSelectedTrip("");
+      setError("");
+    }
   };
   const handleAddBackButton = () => {
-    setSelectedDate("");
-    setError("");
+    if (providedDate != undefined) {
+      toggleModal();
+    } else {
+      setSelectedDate("");
+      setError("");
+    }
   };
 
   return (
@@ -175,33 +195,61 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
             </View>
             <CustomInput
-              value={newEventTitle}
-              setValue={setNewEventTitle}
+              value={newAccommodation}
+              setValue={setNewAccommodation}
               placeholder="Event title"
               secureTextEntry={false}
             />
             <View style={styles.line} />
-            <View style={styles.time_dropdown}>
-              <Text style={{ fontFamily: "Arimo-Bold", fontSize: 20 }}>
-                Start :
-              </Text>
-              <DateTimeDropdown
-                datatype={"Event"}
-                date={newStart}
-                setDate={setNewStart}
-              />
-            </View>
+            <Dropdown
+              style={{
+                ...CommonStyles.perfect_shadows,
+                backgroundColor: "white",
+                width: "90%",
+
+                borderColor: "white",
+                borderRadius: 20,
+
+                padding: 10,
+                marginVertical: 5,
+              }}
+              search
+              searchPlaceholder={"Search..."}
+              placeholder="Start"
+              placeholderStyle={styles.placeholderStyle2}
+              selectedTextStyle={styles.selected_text2}
+              itemTextStyle={styles.items_text}
+              data={days}
+              onChange={(item) => setSelectedStart(Number(item.value))}
+              labelField="label"
+              valueField="value"
+              value={selectedStart.toString()}
+            />
             <Text style={styles.to}> - </Text>
-            <View style={styles.time_dropdown}>
-              <Text style={{ fontFamily: "Arimo-Bold", fontSize: 20 }}>
-                End :
-              </Text>
-              <DateTimeDropdown
-                datatype={"Event"}
-                date={newEnd}
-                setDate={setNewEnd}
-              />
-            </View>
+            <Dropdown
+              style={{
+                ...CommonStyles.perfect_shadows,
+                backgroundColor: "white",
+                width: "90%",
+
+                borderColor: "white",
+                borderRadius: 20,
+
+                padding: 10,
+                marginVertical: 5,
+              }}
+              search
+              searchPlaceholder={"Search..."}
+              placeholder="End"
+              placeholderStyle={styles.placeholderStyle2}
+              selectedTextStyle={styles.selected_text2}
+              itemTextStyle={styles.items_text}
+              data={daysEdited}
+              onChange={(item) => setSelectedEnd(Number(item.value))}
+              labelField="label"
+              valueField="value"
+              value={selectedEnd.toString()}
+            />
             <View style={styles.line} />
             <View style={{ paddingVertical: 10 }} />
             <View
@@ -226,43 +274,6 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               </View>
               <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
             </View>
-            <Dropdown
-              style={{
-                ...CommonStyles.perfect_shadows,
-                backgroundColor: "white",
-                width: "90%",
-
-                borderColor: "white",
-                borderRadius: 20,
-
-                padding: 10,
-                marginVertical: 5,
-              }}
-              search
-              searchPlaceholder={"Search..."}
-              placeholder="Tag"
-              placeholderStyle={styles.placeholderStyle2}
-              selectedTextStyle={styles.selected_text2}
-              itemTextStyle={styles.items_text}
-              data={Tags}
-              onChange={(item) => setNewTag(item.value)}
-              labelField="label"
-              valueField="value"
-            />
-            <CustomInput
-              value={newLocation}
-              setValue={setNewLocation}
-              placeholder="Location"
-              secureTextEntry={false}
-            />
-            <CustomInput
-              value={newDescription}
-              setValue={setNewDescription}
-              placeholder="Description"
-              secureTextEntry={false}
-              multiline={true}
-              numberOfLines={5}
-            />
             <View style={{ flex: 1, flexDirection: "row", width: "90%" }}>
               <Dropdown
                 style={styles.dropdown}
@@ -293,13 +304,6 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
                 />
               </View>
             </View>
-            <CustomMultipleInput items={items} setItems={setItems} />
-            <CustomInput
-              value={newRemarks}
-              setValue={setNewRemarks}
-              placeholder="Remarks"
-              secureTextEntry={false}
-            />
             <View style={{ height: Dimensions.get("window").height * 0.15 }} />
           </ScrollView>
           <View
@@ -310,8 +314,8 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
             }}
           >
             <CustomButton
-              text="Add Event"
-              onPress={handleAddEvent}
+              text="Add Accommodation"
+              onPress={handleAddAccomodation}
               containerStyle={styles.add_event_container}
               textStyle={styles.add_event_text}
             />
@@ -372,4 +376,4 @@ const styles = StyleSheet.create({
   items_text: { color: "black", fontSize: 14 },
 });
 
-export default AddEvent;
+export default AddAccomodation;

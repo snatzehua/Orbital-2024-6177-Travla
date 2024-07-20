@@ -9,6 +9,8 @@ import {
   Text,
   View,
 } from "react-native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faArrowsLeftRight } from "@fortawesome/free-solid-svg-icons";
 
 import BackButton from "../components/BackButton/BackButton";
 import CommonStyles from "../shared/CommonStyles";
@@ -24,20 +26,24 @@ interface FinancesProps {
 const Finances: React.FC<FinancesProps> = ({ trip, toggleFinances }) => {
   const { userData } = useUserData();
   const [viewDimensions, setViewDimensions] = useState({ width: 0, height: 0 });
+
   const [totalCost, setTotalCost] = useState(0);
   const [activityCost, setActivityCost] = useState(0);
   const [foodDrinkCost, setFoodDrinkCost] = useState(0);
   const [transportCost, setTransportCost] = useState(0);
   const [essentialsCost, setEssentialsCost] = useState(0);
+  const [accomodationsCost, setAccomodationsCost] = useState(0);
+  const [miscCost, setMiscCost] = useState(0);
+
   const [data, setData] = useState<
     { label: string; value: number; color: string }[]
   >([]);
-  const tripdata = userData.trips.get(trip);
+  const tripData = userData.trips.get(trip);
 
   useEffect(() => {
-    const tripdata = userData.trips.get(trip);
-    if (tripdata) {
-      const allEvents = Array.from(tripdata.days.values()).flat();
+    const tripData = userData.trips.get(trip);
+    if (tripData) {
+      const allEvents = Array.from(tripData.days.values()).flat();
       setTotalCost(
         allEvents.reduce(
           (total: number, event: EventData) => total + event.cost.amount,
@@ -87,10 +93,10 @@ const Finances: React.FC<FinancesProps> = ({ trip, toggleFinances }) => {
 
   useEffect(() => {
     setData([
-      { label: "Activity", value: activityCost, color: "#ffe599" },
-      { label: "Food / Drink", value: foodDrinkCost, color: "#a4c2f4" },
-      { label: "Transport", value: transportCost, color: "#b6d7a8" },
-      { label: "Essentials", value: essentialsCost, color: "#ea9999" },
+      { label: "Activity", value: activityCost, color: "#FFC107" }, // Amber (Google Yellow variant)
+      { label: "Food / Drink", value: foodDrinkCost, color: "#2196F3" }, // Lighter Blue
+      { label: "Transport", value: transportCost, color: "#4CAF50" }, // Slightly Darker Green
+      { label: "Essentials", value: essentialsCost, color: "#F44336" }, // Google Red
     ]);
   }, [totalCost, activityCost, foodDrinkCost, transportCost, essentialsCost]);
 
@@ -124,98 +130,174 @@ const Finances: React.FC<FinancesProps> = ({ trip, toggleFinances }) => {
         </View>
         <View
           style={{
-            width: "90%",
-            height: 1,
+            width: "100%",
+            height: 3,
             backgroundColor: "black",
-            marginBottom: 10,
           }}
         />
         <View
           style={{
             flex: 1,
-            width: "90%",
-            justifyContent: "center",
-            alignItems: "center",
+            backgroundColor: "white",
+            borderBottomWidth: 3,
           }}
         >
-          <View
-            style={{
-              width: "100%",
-              flex: 1,
-              alignItems: "center",
-              marginVertical: 10,
-            }}
-            onLayout={handleLayout}
-          >
-            <PieChart data={data} dimensions={viewDimensions} />
-          </View>
-          <View style={[{ marginVertical: 10 }, CommonStyles.perfect_shadows]}>
-            <PieChartLegend data={data} />
-          </View>
-        </View>
-        <View style={{ width: "100%", alignItems: "center" }}>
           <ScrollView
-            style={{ width: "90%" }}
-            overScrollMode="never"
-            bounces={false}
+            horizontal={true}
+            snapToInterval={Dimensions.get("window").width}
+            decelerationRate={"fast"}
           >
             <View
-              style={[
-                styles.white_padding,
-                {
-                  marginBottom: 5,
-                },
-              ]}
+              style={{
+                flex: 1,
+                width: Dimensions.get("window").width,
+                alignItems: "center",
+              }}
             >
-              <Text
+              <View
                 style={{
-                  fontFamily: "Arimo-Regular",
-                  color: "#7D7D7D",
-                  fontSize: 20,
+                  flex: 1,
+                  width: "95%",
+                  alignItems: "center",
                   marginTop: 10,
+                  marginBottom: 10,
+                  borderWidth: 5,
+                  borderRadius: 5,
+                  borderColor: "#EFEFEF",
                 }}
               >
-                Total Expenditure
-              </Text>
-              <Text style={{ fontSize: 30, marginBottom: 10 }}>
-                {numberAsCurrency(totalCost)}
-              </Text>
+                <View style={{ backgroundColor: "#EFEFEF", width: "100%" }}>
+                  <Text
+                    style={{
+                      fontFamily: "Arimo-Bold",
+                      margin: 5,
+                      marginBottom: 10,
+                    }}
+                  >
+                    Event Cost Breakdown
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    width: "90%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      width: "100%",
+                      flex: 1,
+                      alignItems: "center",
+                      marginVertical: 10,
+                    }}
+                    onLayout={handleLayout}
+                  >
+                    <PieChart data={data} dimensions={viewDimensions} />
+                  </View>
+                  <View
+                    style={[
+                      { marginVertical: 10 },
+                      CommonStyles.perfect_shadows,
+                    ]}
+                  >
+                    <PieChartLegend data={data} />
+                  </View>
+                </View>
+              </View>
+              <View
+                style={{
+                  width: "100%",
+                  alignItems: "center",
+                  marginBottom: 10,
+                }}
+              >
+                <ScrollView
+                  style={{ width: "95%" }}
+                  overScrollMode="never"
+                  bounces={false}
+                >
+                  <View
+                    style={[
+                      styles.white_padding,
+                      {
+                        marginBottom: 5,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Arimo-Regular",
+                        color: "#7D7D7D",
+                        fontSize: 20,
+                        marginTop: 10,
+                      }}
+                    >
+                      Total Expenditure
+                    </Text>
+                    <Text style={{ fontSize: 30, marginBottom: 10 }}>
+                      {numberAsCurrency(totalCost)}
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: "row" }}>
+                    <View style={styles.view_left}>
+                      <View style={styles.white_padding}>
+                        <Text style={styles.component_title}>Activity</Text>
+                        <Text style={styles.component_number}>
+                          {numberAsCurrency(activityCost)}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.view_right}>
+                      <View style={styles.white_padding}>
+                        <Text style={styles.component_title}>Food / Drink</Text>
+                        <Text style={styles.component_number}>
+                          {numberAsCurrency(foodDrinkCost)}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: "row" }}>
+                    <View style={styles.view_left}>
+                      <View style={styles.white_padding}>
+                        <Text style={styles.component_title}>Transport</Text>
+                        <Text style={styles.component_number}>
+                          {numberAsCurrency(transportCost)}
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.view_right}>
+                      <View style={styles.white_padding}>
+                        <Text style={styles.component_title}>Essentials</Text>
+                        <Text style={styles.component_number}>
+                          {numberAsCurrency(essentialsCost)}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <Text style={{ alignSelf: "center" }}>Pg 1 of 2</Text>
+                </ScrollView>
+              </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={styles.view_left}>
-                <View style={styles.white_padding}>
-                  <Text style={styles.component_title}>Activity</Text>
-                  <Text style={styles.component_number}>
-                    {numberAsCurrency(activityCost)}
-                  </Text>
+            <View
+              style={{
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+            >
+              <ScrollView
+                contentContainerStyle={{ flex: 1 }}
+                style={{
+                  height: "100%",
+                  width: Dimensions.get("window").width,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text></Text>
                 </View>
-              </View>
-              <View style={styles.view_right}>
-                <View style={styles.white_padding}>
-                  <Text style={styles.component_title}>Food / Drink</Text>
-                  <Text style={styles.component_number}>
-                    {numberAsCurrency(foodDrinkCost)}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={styles.view_left}>
-                <View style={styles.white_padding}>
-                  <Text style={styles.component_title}>Transport</Text>
-                  <Text style={styles.component_number}>
-                    {numberAsCurrency(transportCost)}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.view_right}>
-                <View style={styles.white_padding}>
-                  <Text style={styles.component_title}>Essentials</Text>
-                  <Text style={styles.component_number}>
-                    {numberAsCurrency(essentialsCost)}
-                  </Text>
-                </View>
-              </View>
+                <Text style={{ alignSelf: "center" }}>Pg 2 of 2</Text>
+              </ScrollView>
             </View>
           </ScrollView>
         </View>

@@ -18,7 +18,7 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 
-import AddTrip from "./AddTrip";
+import AddTrip from "../components/Banner/TripFiles/AddTrip";
 import AddButton from "./AddButton";
 import BackButton from "../components/BackButton/BackButton";
 import TripBanner from "../components/Banner/TripFiles/TripBanner";
@@ -107,7 +107,7 @@ const Trips = () => {
     if (hasConflictingDates(trips, newTrip.start, newTrip.end)) {
       Alert.alert(
         "Conflicting Dates",
-        "Are you sure you want to add this trip? This trip conflicts with existing trips.",
+        "Having overlapping trips may break certain features. Continue adding?",
         [
           {
             text: "Cancel",

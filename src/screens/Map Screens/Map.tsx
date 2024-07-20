@@ -13,6 +13,8 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 
+import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+
 import BackButton from "../components/BackButton/BackButton";
 import { DateTimeDisplay } from "../shared/contexts/DateTimeContext";
 
@@ -71,7 +73,9 @@ const Map = () => {
               marginTop: 5,
               alignItems: "center",
             }}
-          ></View>
+          >
+            <MapView style={{ height: "100%", width: "100%" }}></MapView>
+          </View>
         </View>
       </SafeAreaView>
     </ImageBackground>

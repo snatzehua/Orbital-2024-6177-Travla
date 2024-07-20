@@ -17,12 +17,11 @@ import {
 } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 import { CalendarList } from "react-native-calendars";
-import * as Localization from "expo-localization";
-import moment from "moment";
 
 import BackButton from "../components/BackButton/BackButton";
 import InsightComponent from "./InsightComponent";
 import Finances from "./Finances";
+import Logistics from "./Logistics";
 import { useUserData } from "../shared/contexts/UserDataContext";
 import { DateTimeDisplay } from "../shared/contexts/DateTimeContext";
 import { Dropdown } from "react-native-element-dropdown";
@@ -40,21 +39,51 @@ const Settings = () => {
   // Data
   const { userData } = useUserData();
   const [selectedTrip, setSelectedTrip] = useState<string>("");
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [markedDates, setMarkedDates] = useState<markedDatesObject>({});
+
   const [totalCost, setTotalCost] = useState("");
   const [logistics, setLogistics] = useState([]);
   const [packingList, setPackingList] = useState<string[]>([]);
+
   const [isFinancesVisible, setIsFinancesVisible] = useState(false);
   const [isLogisticsVisible, setIsLogisticsVisible] = useState(false);
   const [isPackingVisible, setIsPackingVisible] = useState(false);
 
-  const locale = Localization.locale;
-  moment.locale(locale);
+  useEffect(() => {
+    setMarkedDates(generateMarkedDates(userData.trips, "#301934"));
+  }, []);
 
   useEffect(() => {
     setTotalCost(getTotalCost(selectedTrip));
     setPackingList(getPackingList(selectedTrip));
-    setCurrentDate(userData.trips.get(selectedTrip)?.start ?? new Date());
+    setMarkedDates((prevMarkedDates) => {
+      const newMarkedDates = generateMarkedDates(userData.trips, "#301934"); // Set all dates to base color
+
+      console.log(newMarkedDates);
+      const currStart = userData.trips
+        .get(selectedTrip)
+        ?.start.toISOString()
+        .split("T")[0];
+      const currEnd = userData.trips
+        .get(selectedTrip)
+        ?.end.toISOString()
+        .split("T")[0];
+
+      console.log(currStart, " to ", currEnd);
+      if (currStart && currEnd) {
+        newMarkedDates[currStart] = {
+          ...newMarkedDates[currStart], // Get properties from base color setting
+          color: "#FFB000",
+        };
+        newMarkedDates[currEnd] = {
+          ...newMarkedDates[currEnd],
+          color: "#FFB000",
+        };
+      }
+      return newMarkedDates;
+    });
   }, [selectedTrip]);
 
   const getTotalCost = (trip_name: string) => {
@@ -111,13 +140,34 @@ const Settings = () => {
       );
     }
   };
-  const handleLogisticsDetails = async () => {};
-  const handlePackingDetails = async () => {};
+  const toggleLogistics = async () => {
+    if (selectedTrip != "") {
+      setIsLogisticsVisible(!isLogisticsVisible);
+    } else {
+      Alert.alert(
+        "No Trip Selected",
+        "Please select a trip in the dropdown menu above to view trip insights."
+      );
+    }
+  };
+  const togglePacking = async () => {
+    if (selectedTrip != "") {
+      setIsPackingVisible(!isFinancesVisible);
+    } else {
+      Alert.alert(
+        "No Trip Selected",
+        "Please select a trip in the dropdown menu above to view trip insights."
+      );
+    }
+  };
 
   interface markedDatesObject {
     [key: string]: any;
   }
-  const generateMarkedDates = (trips: Map<string, TripData>, color: string) => {
+  const generateMarkedDates = (
+    trips: Map<string, TripData>,
+    color: string
+  ): markedDatesObject => {
     const markedDates: markedDatesObject = {};
 
     // Iterate through all trips in userData
@@ -226,7 +276,7 @@ const Settings = () => {
               style={{
                 justifyContent: "flex-start",
                 flex: 1,
-                backgroundColor: "#FFFFFF50",
+                backgroundColor: "#FFFFFF85",
                 width: "100%",
               }}
             >
@@ -244,8 +294,26 @@ const Settings = () => {
                 </Text>
               </View>
               <CalendarList
-                onDayPress={() => {
-                  console.log("Pressed");
+                onDayPress={(date) => {
+                  console.log(isLoading);
+                  if (
+                    userData.trips.get(selectedTrip)?.days.has(date.dateString)
+                  ) {
+                    return;
+                  } else {
+                    setIsLoading(true);
+                    for (const [tripName, trip] of userData.trips) {
+                      if (tripName == selectedTrip) {
+                        continue;
+                      }
+                      if (trip.days.has(date.dateString)) {
+                        console.log(isLoading);
+                        setSelectedTrip(tripName);
+                        return;
+                      }
+                    }
+                    setSelectedTrip("");
+                  }
                 }}
                 disabledByDefault={true}
                 firstDay={1}
@@ -255,22 +323,20 @@ const Settings = () => {
                 pagingEnabled={true}
                 style={{ marginBottom: 0 }}
                 theme={{
+                  textDayHeaderFontFamily: "Arimo-Bold",
                   monthTextColor: "black",
                   backgroundColor: "transparent", // Background color of the whole calendar
                   calendarBackground: "transparent",
                   textSectionTitleColor: "white",
                   selectedDayBackgroundColor: "black",
                   selectedDayTextColor: "white",
-                  todayTextColor: "red",
                   dayTextColor: "white",
                   textDisabledColor: "black", // Background color of the month view
                   // ... other theme properties (see documentation) ...
                 }}
                 calendarWidth={Dimensions.get("window").width}
-                current={currentDate.toISOString().split("T")[0]} // Format the date as YYYY-MM-DD
-                key={currentDate.toISOString().split("T")[0]}
                 markingType={"period"}
-                markedDates={generateMarkedDates(userData.trips, "#301934")}
+                markedDates={markedDates}
               />
             </View>
             <LinearGradient
@@ -319,7 +385,7 @@ const Settings = () => {
                         : "None found"
                       : "No trip selected"
                   }
-                  onPress={handleLogisticsDetails}
+                  onPress={toggleLogistics}
                 />
                 <InsightComponent
                   baseColor="#689F38"
@@ -334,7 +400,7 @@ const Settings = () => {
                         : "None found"
                       : "No trip selected"
                   }
-                  onPress={handlePackingDetails}
+                  onPress={togglePacking}
                 />
                 <View
                   style={{ width: Dimensions.get("screen").width * 0.15 }}
@@ -363,6 +429,20 @@ const Settings = () => {
       >
         <View style={{ alignItems: "flex-start" }}></View>
         <Finances trip={selectedTrip} toggleFinances={toggleFinances} />
+      </Modal>
+      <Modal
+        isVisible={isLogisticsVisible}
+        onBackdropPress={() => {
+          if (selectedTrip !== "") {
+            setIsLogisticsVisible(false);
+          }
+        }}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+        style={{ margin: 0 }}
+      >
+        <View style={{ alignItems: "flex-start" }}></View>
+        <Logistics trip={selectedTrip} toggleLogistics={toggleLogistics} />
       </Modal>
     </>
   );
