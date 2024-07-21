@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Dimensions,
+  FlatList,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -26,6 +27,7 @@ import CustomMultipleInput from "../../CustomMultipleInput.tsx/CustomMultipleInp
 import { useUserData } from "../../../shared/contexts/UserDataContext";
 import CommonStyles from "../../../shared/CommonStyles";
 import EventInputHandling from "./EventInputHandling";
+import GooglePlacesInput from "../../GooglePlacesAuto/GooglePlacesAutoInput";
 
 interface AddEventProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
@@ -56,6 +58,10 @@ const AddEvent = ({
   const [newEnd, setNewEnd] = useState(baseEnd);
   const [newDescription, setNewDescription] = useState("");
   const [newLocation, setNewLocation] = useState("");
+  const [newGeometry, setNewGeometry] = useState<{ lat: number; lng: number }>({
+    lat: 0,
+    lng: 0,
+  });
   const [items, setItems] = useState<string[]>([]);
   const [newCurrency, setNewCurrency] = useState("");
   const [newAmount, setNewAmount] = useState("");
@@ -74,6 +80,7 @@ const AddEvent = ({
   }, [newStart]);
 
   const handleAddEvent = async () => {
+    console.log(newLocation);
     setError(
       EventInputHandling(
         newEventTitle,
@@ -83,6 +90,7 @@ const AddEvent = ({
         selectedTrip,
         selectedDate,
         newLocation,
+        newGeometry,
         newDescription,
         newCurrency,
         newAmount,
@@ -162,6 +170,7 @@ const AddEvent = ({
             </View>
           </View>
           <ScrollView
+            keyboardShouldPersistTaps={"handled"}
             contentContainerStyle={{ alignItems: "center" }}
             style={{
               flex: 1,
@@ -215,6 +224,7 @@ const AddEvent = ({
                 datatype={"Event"}
                 date={newEnd}
                 setDate={setNewEnd}
+                minimumDate={newStart}
               />
             </View>
             <View style={styles.line} />
@@ -264,12 +274,12 @@ const AddEvent = ({
               labelField="label"
               valueField="value"
             />
-            <CustomInput
-              value={newLocation}
-              setValue={setNewLocation}
-              placeholder="Location"
-              secureTextEntry={false}
-            />
+            <View style={{ width: "90%", marginTop: 5 }}>
+              <GooglePlacesInput
+                setSelectedLocation={setNewLocation}
+                setGeometry={setNewGeometry}
+              />
+            </View>
             <CustomInput
               value={newDescription}
               setValue={setNewDescription}

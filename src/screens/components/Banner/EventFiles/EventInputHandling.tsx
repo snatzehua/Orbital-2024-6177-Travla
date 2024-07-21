@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import BaseInputHandling from "../Base/BaseInputHandling";
+import { getLocationGeometry } from "../../../shared/UserDataService";
 
 const EventInputHandling = (
   title: string,
@@ -10,6 +11,7 @@ const EventInputHandling = (
   trip: string,
   day: string,
   location: string,
+  geometry: { lat: number; lng: number },
   description: string,
   currency: string,
   amount: string,
@@ -68,6 +70,7 @@ const EventInputHandling = (
     trip: trip,
     day: day,
     location: location.trim(),
+    geometry: geometry,
     description: trimMultilineString(description),
     cost: trimmedCost(),
     items: items.filter((item) => item != ""),

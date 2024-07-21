@@ -25,6 +25,7 @@ interface EventData extends BannerData {
   trip: string;
   day: string;
   location: string,
+  geometry: {lat: number, lng: number},
   description: string;
   cost: {
     currency: string;

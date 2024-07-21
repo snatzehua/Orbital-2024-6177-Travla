@@ -197,7 +197,7 @@ const AddAccomodation = ({
             <CustomInput
               value={newAccommodation}
               setValue={setNewAccommodation}
-              placeholder="Event title"
+              placeholder="Accommodation"
               secureTextEntry={false}
             />
             <View style={styles.line} />

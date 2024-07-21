@@ -38,9 +38,10 @@ const Home = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { userData, setUserData } = useUserData();
   const [currentTrips, setCurrentTrips] = useState<string[]>([]);
+  const [accommodation, setAccommodation] = useState<string[]>([]);
   const [events, setEvents] = useState<EventData[]>([]);
   const [upcoming, setUpcoming] = useState<EventData[]>([]);
-  const [isUpcomingVisible, setIsUpcomingVisible] = useState(false);
+  const [upcomingDate, setUpcomingDate] = useState("");
   const { date } = useDate();
 
   // Add Event form
@@ -73,22 +74,30 @@ const Home = () => {
     const currentEvents = tripArray.flatMap(
       (tripData) => tripData.days.get(today) || []
     );
+    const currentAccommodations = tripArray.flatMap(
+      (tripData) => tripData.accommodation.get(today)?.name || []
+    );
+    setAccommodation(currentAccommodations);
     setEvents(sortEventsByTime(currentEvents));
     // Check for upcoming events
-    if (userData.settings.displayUpcomingEvents && events.length == 0) {
+    if (userData.settings.displayUpcomingEvents) {
       const instancedDate = convertToStartDate(getUTCTime());
       const nextWeek = getUTCTime();
       nextWeek.setDate(instancedDate.getDate() + 7);
       while (instancedDate <= nextWeek) {
-        const dateKey = instancedDate.toLocaleDateString(); // YYYY-MM-DD
+        instancedDate.setDate(instancedDate.getDate() + 1); // Move to the next day
+        const dateKey = instancedDate.toISOString().slice(0, -14); // YYYY-MM-DD
         const upcomingEvents = tripArray.flatMap(
           (tripData) => tripData.days.get(dateKey) || []
         );
         if (upcomingEvents.length != 0) {
           setUpcoming(upcomingEvents);
+          setUpcomingDate(dateKey);
           break;
+        } else {
+          setUpcoming([]);
+          setUpcomingDate("");
         }
-        instancedDate.setDate(instancedDate.getDate() + 1); // Move to the next day
       }
     }
     // Check for current running trips (works for multiple trips)
@@ -213,6 +222,27 @@ const Home = () => {
           </View>
           <View
             style={{
+              width: Dimensions.get("window").width,
+              flexDirection: "row",
+              justifyContent: "center",
+              backgroundColor: "white",
+              alignSelf: "center",
+              borderColor: "white",
+              borderWidth: 8,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Arimo-Bold",
+                color: "black",
+              }}
+            >
+              Accommodation:{" "}
+              {accommodation.length == 0 ? "None" : accommodation.join(" | ")}
+            </Text>
+          </View>
+          <View
+            style={{
               flex: 1,
               width: "95%",
               marginTop: 5,
@@ -249,35 +279,74 @@ const Home = () => {
                     </Text>
                   )
                 ) : (
-                  <Text style={{ fontFamily: "Arimo-Bold", color: "#404040" }}>
-                    No more events today
-                  </Text>
+                  <>
+                    <View style={{ marginBottom: 10 }}>
+                      {events.map((datapack) => (
+                        <EventBanner
+                          key={datapack.title}
+                          data={datapack}
+                          displayEventDetails={
+                            userData.settings.displayEventDetails
+                          }
+                        />
+                      ))}
+                    </View>
+                    <Text
+                      style={{ fontFamily: "Arimo-Bold", color: "#404040" }}
+                    >
+                      No more events today
+                    </Text>
+                  </>
                 )}
               </View>
-              <Modal isVisible={isUpcomingVisible}>
-                <View style={{ marginTop: 20 }}>
-                  {upcoming.map((datapack) => (
-                    <EventBanner
-                      key={datapack.title}
-                      data={datapack}
-                      displayEventDetails={
-                        userData.settings.displayEventDetails
-                      }
-                    />
-                  ))}
+              {userData.settings.displayUpcomingEvents &&
+              upcoming.length != 0 ? (
+                <View
+                  style={{
+                    backgroundColor: "#F8F8F8",
+                    width: "100%",
+                    alignItems: "center",
+                    marginTop: 20,
+                    borderRadius: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      alignItems: "center",
+                      paddingVertical: 7,
+                    }}
+                  >
+                    <Text style={{ fontFamily: "Arimo-Bold" }}>
+                      Upcoming Events on {upcomingDate}
+                    </Text>
+                  </View>
+                  <View style={{ width: "95%" }}>
+                    {upcoming.map((datapack) => (
+                      <EventBanner
+                        key={datapack.title}
+                        data={datapack}
+                        displayEventDetails={
+                          userData.settings.displayEventDetails
+                        }
+                      />
+                    ))}
+                  </View>
                 </View>
-              </Modal>
+              ) : null}
+              <View style={{ height: 15 }} />
             </ScrollView>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}></View>
-          <AddButton
-            onPressFunction={() => {
-              for (const trip of userData.trips.values()) {
-                console.log(trip.accommodation);
-              }
-            }}
-            text={"debuggerButton"}
-          />
+          {false ? (
+            <View style={{ width: "95%" }}>
+              <AddButton
+                onPressFunction={() => {
+                  console.log(accommodation);
+                }}
+                text={"debuggerButton"}
+              />
+            </View>
+          ) : null}
           <MenuBar toggleModal={toggleModal} />
         </SafeAreaView>
       </View>

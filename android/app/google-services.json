@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "589456840073",
+    "firebase_url": "https://travla-a85e6-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "travla-a85e6",
+    "storage_bucket": "travla-a85e6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589456840073:android:e25d64a7986ffc744a7d58",
+        "android_client_info": {
+          "package_name": "com.snatzehua.travla"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "589456840073-425lgpjb1fvb9dsjh7356ov8od0ik9k0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNoPr40xqJBYCrpqKxPkMED29eXsEWq9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "589456840073-425lgpjb1fvb9dsjh7356ov8od0ik9k0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "589456840073-5u71gr5s4gvt42gu01gqdk4ecdvtf8u3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.snatzehua.travla"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

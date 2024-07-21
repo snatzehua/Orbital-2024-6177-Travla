@@ -18,7 +18,9 @@ export const DateTimeProvider = ({
   const [date, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentDate(new Date()), 1000);
+    const interval = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 

@@ -51,6 +51,14 @@ const Settings = () => {
   const [isLogisticsVisible, setIsLogisticsVisible] = useState(false);
   const [isPackingVisible, setIsPackingVisible] = useState(false);
 
+  const trip_names = [
+    { label: "-", value: "" },
+    ...Array.from(userData.trips.keys()).map((trip_name) => ({
+      label: trip_name,
+      value: trip_name,
+    })),
+  ];
+
   useEffect(() => {
     setMarkedDates(generateMarkedDates(userData.trips, "#301934"));
   }, []);
@@ -117,14 +125,6 @@ const Settings = () => {
     }
     return [];
   };
-
-  const trip_names = [
-    { label: "-", value: "" },
-    ...Array.from(userData.trips.keys()).map((trip_name) => ({
-      label: trip_name,
-      value: trip_name,
-    })),
-  ];
 
   // Handle button presses
   const handleNavBack = async () => {

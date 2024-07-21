@@ -156,3 +156,24 @@ export const clearUserData = async () => {
     console.error("Error clearing user data:", error);
   }
 };
+
+export const getLocationGeometry = async (
+  placeId: string
+): Promise<{ lat: number; lng: number }> => {
+  const apiKey = "YOUR_GOOGLE_MAPS_API_KEY"; // Replace with your actual API key
+  const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&key=${apiKey}`;
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.status === "OK") {
+      const location = data.result.geometry.location;
+      return location; // Return object with lat and lng properties
+    } else {
+      throw new Error("Place details request failed");
+    }
+  } catch (error) {
+    console.error("Error fetching place details:", error);
+    return { lat: 0, lng: 0 };
+  }
+};

@@ -16,7 +16,10 @@ import AddButton from "../../../Trips Screens/AddButton";
 import EventBanner from "../EventFiles/EventBanner";
 import BackButton from "../../BackButton/BackButton";
 import AddEvent from "../EventFiles/AddEvent";
-import { updateUserData } from "../../../shared/UserDataService";
+import {
+  getLocationGeometry,
+  updateUserData,
+} from "../../../shared/UserDataService";
 import { useUserData } from "../../../shared/contexts/UserDataContext";
 import AddAccomodation from "../EventFiles/AddAccommodation";
 import CustomButton from "../../CustomButtom/CustomButton";
@@ -148,7 +151,10 @@ const TripDetails: React.FC<TripDetailsProps> = ({
           source={require("../../../../../assets/images/resetPassword_background.png")}
           style={styles.page_background}
         >
-          <Modal isVisible={isModalVisible}>
+          <Modal
+            isVisible={isModalVisible}
+            supportedOrientations={["portrait", "landscape"]}
+          >
             <Animated.View
               style={{
                 transform: [{ scale: scaleValue }],
@@ -368,6 +374,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
                                   </View>
                                 )}
                               </View>
+                              <View style={{ height: 100 }}></View>
                             </ScrollView>
                           </View>
                         </View>
