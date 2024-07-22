@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/userRoutes');
 const tripRoutes = require('./routes/tripRoutes');
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 
@@ -21,6 +22,6 @@ app.use(bodyParser.json());
 app.use('/api', userRoutes);
 app.use('/api', tripRoutes);
 
-app.listen(3001, () => {
-  console.log('Server is running on port 3001');
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
