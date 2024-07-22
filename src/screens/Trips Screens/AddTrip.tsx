@@ -47,18 +47,13 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       setError("Please enter a title");
       return;
     }
-    /*
-    if (newStart > newEnd) {
-      setError("End cannot be before start");
-      return;
-    }
-    */
+
     if (!uid) {
       setError("User ID not found");
       return;
     }
 
-    const newTrip: TripData = {
+    const newTrip: Omit<TripData, '_id'> = {
       user: userData._id,
       trip: newTripTitle,
       title: newTripTitle,
@@ -69,8 +64,8 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
     };
     console.log("TripData: ", newTrip);
     try {
-      await createTrip(newTrip); // Call createTrip API
-      updateAsync(newTrip);
+      const savedTrip = await createTrip(newTrip); // Call createTrip API
+      updateAsync({ ...newTrip, _id: savedTrip._id }); // Include the _id in the trip data
       toggleModal();
       console.log("Userdata after adding trip: ", userData);
     } catch (error) {

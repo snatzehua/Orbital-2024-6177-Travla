@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('./user');
 
 // Define the BannerData schema (base for both Event and Trip)
 const bannerDataSchema = new mongoose.Schema({

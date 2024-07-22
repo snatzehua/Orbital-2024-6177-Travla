@@ -98,8 +98,8 @@ const Trips = () => {
     const handleTripAddition = () => {
       setUserData((prevUserData: UserData) => {
         const newTrips = new Map(prevUserData.trips);
-        newTrips.set(newTrip.title, newTrip);
-        const updatedUserData = { ...prevUserData, trips: newTrips };
+        newTrips.set(newTrip._id!, newTrip);
+        const updatedUserData = { ...prevUserData, trips: newTrips, _id: prevUserData._id };
         updateUserData(updatedUserData);
         return updatedUserData;
       });

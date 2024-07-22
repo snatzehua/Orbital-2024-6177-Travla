@@ -22,7 +22,6 @@ import BackButton from "../components/BackButton/BackButton";
 import CustomButton from "../components/CustomButtom/CustomButton";
 import { DateTimeDisplay } from "../shared/contexts/DateTimeContext";
 import {
-  createEmptyUserData,
   clearUserData,
   updateUserData,
 } from "../shared/UserDataService";
@@ -70,7 +69,8 @@ const Profile = () => {
           text: "Clear",
           onPress: () => {
             clearUserData();
-            setUserData(createEmptyUserData());
+            // I dont think this is needed anymore with how data is managed
+            //setUserData(createEmptyUserData());
           },
           style: "destructive", // Indicate a destructive action
         },

@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const USER_DATA_KEY = "userData";
 
 export interface UserData {
+  _id: string;
   uid: string;
   trips: Map<string, TripData>;
   settings: Settings;
@@ -20,14 +21,17 @@ const initialSettings = {
   domesticCurrency: "",
 };
 
-// Create empty UserData
+// Not needed anymore due to fetching from online database
+/*
 export const createEmptyUserData: () => UserData = () => ({
+  _id: "",
   uid: "",
   trips: new Map<string, TripData>(),
   settings: initialSettings,
 });
 
-// Get UserData
+
+
 export const getUserData = async (): Promise<UserData> => {
   try {
     const jsonValue = await AsyncStorage.getItem(USER_DATA_KEY);
@@ -73,7 +77,7 @@ export const getUserData = async (): Promise<UserData> => {
     return createEmptyUserData();
   }
 };
-
+*/
 // Update UserData
 export const updateUserData = async (newUserData: UserData): Promise<void> => {
   try {

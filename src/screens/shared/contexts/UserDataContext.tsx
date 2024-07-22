@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-//import { createEmptyUserData, getUserData } from "./UserDataService";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { fetchUserById, createUser, fetchTripsByUser } from "../../Api/userApi";
-import { fetchTripById } from "../../Api/tripApi";
+import { fetchUserById, createUser } from "../../Api/userApi";
+import { fetchTrip } from "../../Api/tripApi";
 
 interface UserData {
   _id: string;
@@ -11,12 +10,16 @@ interface UserData {
   settings: Settings;
 }
 
-interface Settings {
+export interface Settings {
   displayEventDetails: boolean;
+  displayUpcomingEvents: boolean;
+  domesticCurrency: string;
 }
 
 const initialSettings = {
   displayEventDetails: true,
+  displayUpcomingEvents: true,
+  domesticCurrency: "",
 };
 
 // 1. Interface for Type Safety (with isLoading)
@@ -68,36 +71,12 @@ export const UserDataProvider = ({
       if (user) {
         console.log("Fetching user data for UID within UserDataProvider:", uid);
         try {
-          
+
           const existingUser = await fetchUserById(uid);
           console.log("Fetched user within UserDataProvider:", existingUser);
-          console.log("trips of user: ", existingUser.trips);
           if (existingUser != null) {
-            
-            /*
-            const tripsMap = new Map<string, TripData>(
-              Object.entries(existingUser.trips).map(([tripId, tripData]) => {
-                const typedTripData = tripData as TripData;
-                typedTripData.start = new Date(typedTripData.start);
-                typedTripData.end = new Date(typedTripData.end);
-                const daysMap = new Map<string, EventData[]>(
-                  Object.entries(typedTripData.days).map(
-                    ([dateStr, events]): [string, EventData[]] => [
-                      dateStr,
-                      events.map((event: any) => ({
-                        ...event,
-                        start: new Date(event.start),
-                        end: new Date(event.end),
-                      })),
-                    ]
-                  )
-                );
-                return [tripId, { ...typedTripData, days: daysMap }];
-              })
-            );
-            */
             // Fetch each trip by its ObjectId
-            const tripFetchPromises = existingUser.trips.map((tripId: string) => fetchTripById(tripId)); // Create promises for fetching each trip by its ID
+            const tripFetchPromises = existingUser.trips.map((tripId: string) => fetchTrip(tripId)); // Create promises for fetching each trip by its ID
             const trips = await Promise.all(tripFetchPromises);
 
             // Convert trips to a map
@@ -129,7 +108,6 @@ export const UserDataProvider = ({
             console.log("UserData: ", userData);
           } else {
             const newUser = { uid: uid };
-            console.log("reached creating user in UserDataProvider, uid: ", uid);
             const createdUser = await createUser(newUser);
             setUserData({ ...createdUser, trips: new Map<string, TripData>() });
             console.log("Created user within UserDataProvider:", createdUser);

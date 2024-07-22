@@ -143,9 +143,9 @@ export const convertToEndDate = (date: Date) => {
 };
 
 export const isWithinDateRange = (date: Date, start: Date, end: Date) => {
-  console.log(date);
-  console.log(start);
-  console.log(end);
+  // console.log(date);
+  // console.log(start);
+  // console.log(end);
   return date >= start && date <= end;
 };
 

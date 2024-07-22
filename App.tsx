@@ -12,7 +12,6 @@ import {
 import * as firebaseAuth from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import firebaseConfig from "./firebaseConfig";
-import { fetchUserById, createUser } from "./src/screens/Api/userApi"; 
 import {
   useUserData,
   UserDataProvider,

@@ -7,11 +7,13 @@ interface BannerData {
 }
 
 interface TripData extends BannerData {
+  _id?: string;
   trip: string;
   days: Map<string, EventData[]>;
 }
 
 interface EventData extends BannerData {
+  _id: string;
   trip: string;
   day: string;
   location: string,
