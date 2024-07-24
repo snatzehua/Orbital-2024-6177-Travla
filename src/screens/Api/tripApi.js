@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'https://travla-server.onrender.com/api';
 
 // Create a new trip
 export const createTrip = async (tripData) => {

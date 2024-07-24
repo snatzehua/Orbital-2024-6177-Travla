@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api';
+const API_URL = 'https://travla-server.onrender.com/api';
+console.log("API_URL:", API_URL);  // Add this line to verify the API URL
+
 
 export const fetchUsers = async () => {
   try {

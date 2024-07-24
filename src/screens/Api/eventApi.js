@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_URL = 'http://localhost:3001/api'; // Adjust according to your setup
+const API_URL = 'https://travla-server.onrender.com/api';
 
 export const createEvent = async (event) => {
   try {
