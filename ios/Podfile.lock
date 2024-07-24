@@ -18,7 +18,7 @@ PODS:
     - ExpoModulesCore
   - EXManifests (0.14.3):
     - ExpoModulesCore
-  - Expo (51.0.21):
+  - Expo (51.0.22):
     - ExpoModulesCore
   - expo-dev-client (4.0.20):
     - EXManifests
@@ -1546,10 +1546,10 @@ PODS:
     - React-Core
   - RNDateTimePicker (8.2.0):
     - React-Core
-  - RNFBApp (20.2.1):
+  - RNFBApp (20.3.0):
     - Firebase/CoreOnly (= 10.29.0)
     - React-Core
-  - RNFBAuth (20.2.1):
+  - RNFBAuth (20.3.0):
     - Firebase/Auth (= 10.29.0)
     - React-Core
     - RNFBApp
@@ -1953,7 +1953,7 @@ SPEC CHECKSUMS:
   EXJSONUtils: 30c17fd9cc364d722c0946a550dfbf1be92ef6a4
   EXLocation: 43e9b582ca63a23c6f0a18d8cbe2145b3a388b55
   EXManifests: c1fab4c3237675e7b0299ea8df0bcb14baca4f42
-  Expo: 6ff8c293719c5e5d23204e3f5fc9f472b5d0fd32
+  Expo: 8b7948e45627e848c2d7b6be7cf5851a505aef19
   expo-dev-client: d24806e84d072563b0a26537c22ec902443e77d6
   expo-dev-launcher: 9ec4a77189b7ba5340c26399885887bec84e71f2
   expo-dev-menu: 02f7aa39ee32f4730815cb5fe0c38d7bfda76ab7
@@ -2039,8 +2039,8 @@ SPEC CHECKSUMS:
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
   RNDateTimePicker: 40ffda97d071a98a10fdca4fa97e3977102ccd14
-  RNFBApp: 5548f7e415d10dd7d167684400c41b539544380b
-  RNFBAuth: b78dbebae463105bb44f329c5df66b17553a60c4
+  RNFBApp: a7aff07a7f212149539fce51a1326c6d208b03ad
+  RNFBAuth: 3ed676e60d0ca3b2c71023240658e1f02bc752d7
   RNGestureHandler: 2282cfbcf86c360d29f44ace393203afd5c6cff7
   RNGoogleSignin: 08dc4ba7eac2096c7fecfe109f0950fa4683c803
   RNReanimated: 35f9ac9c3ac42d0497ebd1cce5c39d7687a8493e

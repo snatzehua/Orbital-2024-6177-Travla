@@ -22,6 +22,7 @@ import {
 } from "../../../shared/contexts/DateTimeContext";
 import CommonStyles from "../../../shared/CommonStyles";
 import { useUserData } from "../../../shared/contexts/UserDataContext";
+import { Switch } from "react-native-gesture-handler";
 
 interface AddAccomodationProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
@@ -58,6 +59,7 @@ const AddAccomodation = ({
   const [selectedDate, setSelectedDate] = useState(providedDate ?? "");
   const [selectedStart, setSelectedStart] = useState(0);
   const [selectedEnd, setSelectedEnd] = useState(0);
+  const [isPerNightCost, setIsPerNightCost] = useState(false);
   const days = daysArray!.map((day, index) => ({
     label: `Day ${index + 1} (${day})`,
     value: `${index}`,
@@ -65,7 +67,7 @@ const AddAccomodation = ({
   const [daysEdited, setDaysEdited] = useState(days);
 
   useEffect(() => {
-    setDaysEdited(days.slice(selectedStart));
+    setDaysEdited(days.slice(selectedStart + 1));
   }, [selectedStart]);
 
   // Defining button press functions (Add Event)
@@ -86,12 +88,19 @@ const AddAccomodation = ({
       setError("Please select a currency");
       return;
     }
+    if (selectedEnd <= selectedStart) {
+      setError("Invalid date range");
+      return;
+    }
     const trimmedCost = () => {
+      const totalNights = selectedEnd - selectedStart;
       return Number(newAmount) == 0 || newAmount == ""
         ? { currency: "", amount: 0 }
         : {
             currency: newCurrency,
-            amount: newAmount == "" ? 0 : Number(newAmount),
+            amount: isPerNightCost
+              ? Number(newAmount)
+              : Number(newAmount) / totalNights,
           };
     };
     const editedData: Accommodation = {
@@ -303,6 +312,35 @@ const AddAccomodation = ({
                   containerStyle={styles.custom_input}
                 />
               </View>
+            </View>
+            <View
+              style={{
+                width: "85.5%",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <View style={{ marginTop: 5 }}>
+                <Text style={{ fontFamily: "Arimo-Bold" }}>
+                  Toggle Amount Options
+                </Text>
+                <Text>
+                  {isPerNightCost
+                    ? '(Amount stated is "per night")'
+                    : '(Amount stated is "total amount")'}
+                </Text>
+              </View>
+              <Switch
+                style={{ alignSelf: "flex-end" }}
+                trackColor={{ false: "#767577", true: "#FFB000" }}
+                thumbColor={"#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={() => {
+                  setIsPerNightCost(!isPerNightCost);
+                }}
+                value={isPerNightCost}
+              />
             </View>
             <View style={{ height: Dimensions.get("window").height * 0.15 }} />
           </ScrollView>

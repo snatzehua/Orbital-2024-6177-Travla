@@ -17,7 +17,7 @@ export interface Settings {
 const initialSettings = {
   displayEventDetails: true,
   displayUpcomingEvents: true,
-  domesticCurrency: "",
+  domesticCurrency: "USD",
 };
 
 // Create empty UserData

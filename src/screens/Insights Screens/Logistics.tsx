@@ -13,9 +13,6 @@ import {
 import BackButton from "../components/BackButton/BackButton";
 import CommonStyles from "../shared/CommonStyles";
 import { useUserData } from "../shared/contexts/UserDataContext";
-import PieChart from "../components/PieChart/PieChart";
-import PieChartLegend from "../components/PieChart/PieChartLegend";
-import { CalendarList } from "react-native-calendars";
 
 interface LogisticsProps {
   trip: string;
@@ -23,88 +20,52 @@ interface LogisticsProps {
 }
 
 const Logistics: React.FC<LogisticsProps> = ({ trip, toggleLogistics }) => {
-  const { userData } = useUserData();
-  const [viewDimensions, setViewDimensions] = useState({ width: 0, height: 0 });
-  const [totalCost, setTotalCost] = useState(0);
-  const [activityCost, setActivityCost] = useState(0);
-  const [foodDrinkCost, setFoodDrinkCost] = useState(0);
-  const [transportCost, setTransportCost] = useState(0);
-  const [essentialsCost, setEssentialsCost] = useState(0);
-  const [data, setData] = useState<
-    { label: string; value: number; color: string }[]
-  >([]);
+  const { exchangeRate, userData } = useUserData();
   const tripData = userData.trips.get(trip);
 
-  useEffect(() => {
-    const tripData = userData.trips.get(trip);
+  const getDateRange = (title: string) => {
+    let start = "";
+    let end = "";
     if (tripData) {
-      const allEvents = Array.from(tripData.days.values()).flat();
-      setTotalCost(
-        allEvents.reduce(
-          (total: number, event: EventData) => total + event.cost.amount,
-          0
-        )
-      );
-      setActivityCost(
-        allEvents
-          .filter((event) => event.tag === "Activity")
-          .reduce(
-            (total: number, event: EventData) => total + event.cost.amount,
-            0
-          )
-      );
-      setFoodDrinkCost(
-        allEvents
-          .filter((event) => event.tag === "Food / Drink")
-          .reduce(
-            (total: number, event: EventData) => total + event.cost.amount,
-            0
-          )
-      );
-      setTransportCost(
-        allEvents
-          .filter((event) => event.tag === "Transport")
-          .reduce(
-            (total: number, event: EventData) => total + event.cost.amount,
-            0
-          )
-      );
-      setEssentialsCost(
-        allEvents
-          .filter((event) => event.tag === "Essentials")
-          .reduce(
-            (total: number, event: EventData) => total + event.cost.amount,
-            0
-          )
-      );
-    } else {
-      setTotalCost(0);
-      setActivityCost(0);
-      setFoodDrinkCost(0);
-      setTransportCost(0);
-      setEssentialsCost(0);
+      const keys = Array.from(tripData.accommodation.keys());
+      const values = Array.from(tripData.accommodation.values());
+      for (let i = 0; i < values.length; i += 1) {
+        if (values[i].name == title) {
+          start = keys[i];
+          for (let j = i; j < values.length; j += 1) {
+            if (values[j].name == title) {
+              end = keys[j];
+            }
+          }
+        }
+      }
+      if (start == "" || end == "") {
+        return ["Error", "Error"];
+      }
+      return [start, end];
     }
-  }, []);
-
-  useEffect(() => {
-    setData([
-      { label: "Activity", value: activityCost, color: "#FFC107" }, // Amber (Google Yellow variant)
-      { label: "Food / Drink", value: foodDrinkCost, color: "#2196F3" }, // Lighter Blue
-      { label: "Transport", value: transportCost, color: "#4CAF50" }, // Slightly Darker Green
-      { label: "Essentials", value: essentialsCost, color: "#F44336" }, // Google Red
-    ]);
-  }, [totalCost, activityCost, foodDrinkCost, transportCost, essentialsCost]);
-
-  const numberAsCurrency = (num: number) => {
-    return "$" + num.toFixed(2);
+    return ["Invalid tripData", "Invalid tripData"];
   };
 
-  const handleLayout = (event: LayoutChangeEvent) => {
-    const { width, height } = event.nativeEvent.layout;
-    setViewDimensions({ width, height });
+  const convertCurrencies = (cost: { currency: string; amount: number }) => {
+    const unconvertedCurrency = cost.currency.toLowerCase();
+    const usdAmount = cost.amount / exchangeRate["usd"][unconvertedCurrency];
+    const targetCurrency = userData.settings.domesticCurrency.toLowerCase();
+    const finalAmount = usdAmount * exchangeRate["usd"][targetCurrency];
+    return finalAmount;
   };
 
-  const markedDates = {}; // Initialize an empty object for markedDates
+  const getPrice = (title: string) => {
+    if (tripData) {
+      const accoms = Array.from(tripData.accommodation.values());
+      for (const accom of accoms) {
+        if (accom.name == title) {
+          return convertCurrencies(accom.cost);
+        }
+      }
+    }
+    return 0;
+  };
 
   return (
     <ImageBackground
@@ -134,104 +95,93 @@ const Logistics: React.FC<LogisticsProps> = ({ trip, toggleLogistics }) => {
         />
         <View
           style={{
-            backgroundColor: "white",
             flex: 1,
-            width: "100%",
+            backgroundColor: "white",
             borderBottomWidth: 3,
-            alignItems: "center",
           }}
         >
-          <CalendarList
-            disabledByDefault={true}
-            firstDay={1}
-            hideArrows={true}
-            horizontal={true}
-            // Enable paging on horizontal, default = false
-            pagingEnabled={true}
-            style={{
-              marginBottom: 0,
-            }}
-            theme={{
-              textDayHeaderFontFamily: "Arimo-Bold",
-              monthTextColor: "black",
-              backgroundColor: "transparent", // Background color of the whole calendar
-              calendarBackground: "transparent",
-              textSectionTitleColor: "black",
-              selectedDayBackgroundColor: "black",
-              selectedDayTextColor: "black",
-              dayTextColor: "black",
-            }}
-            calendarWidth={Dimensions.get("window").width}
-            markingType={"period"}
-            markedDates={markedDates}
-          />
           <View
-            style={{ width: "100%", alignItems: "center", marginBottom: 10 }}
+            style={{
+              alignItems: "center",
+              marginBottom: 10,
+            }}
           >
-            <ScrollView
-              style={{ width: "95%" }}
-              overScrollMode="never"
-              bounces={false}
+            <View
+              style={{
+                alignItems: "center",
+                flex: 1,
+                height: "100%",
+                width: Dimensions.get("window").width,
+              }}
             >
               <View
-                style={[
-                  styles.white_padding,
-                  {
-                    marginBottom: 5,
-                  },
-                ]}
+                style={{
+                  flex: 1,
+                  width: "95%",
+                  marginTop: 10,
+                  marginBottom: 10,
+                  borderWidth: 5,
+                  borderRadius: 5,
+                  borderColor: "#EFEFEF",
+                }}
               >
-                <Text
-                  style={{
-                    fontFamily: "Arimo-Regular",
-                    color: "#7D7D7D",
-                    fontSize: 20,
-                    marginTop: 10,
-                  }}
-                >
-                  Total Expenditure
-                </Text>
-                <Text style={{ fontSize: 30, marginBottom: 10 }}>
-                  {numberAsCurrency(totalCost)}
-                </Text>
+                <View style={{ backgroundColor: "#EFEFEF", width: "100%" }}>
+                  <Text
+                    style={{
+                      fontFamily: "Arimo-Bold",
+                      margin: 5,
+                      marginBottom: 10,
+                    }}
+                  >
+                    List of Accommodations
+                  </Text>
+                </View>
+                <ScrollView overScrollMode="never" bounces={false}>
+                  {tripData ? (
+                    Object.entries(
+                      Array.from(tripData.accommodation.values())
+                        .filter((value) => value.name != "")
+                        .reduce((counts, accom) => {
+                          counts[accom.name] = (counts[accom.name] || 0) + 1;
+                          return counts;
+                        }, {} as { [name: string]: number })
+                    ).map((value, index) => {
+                      return (
+                        <View
+                          key={index + value[0] + value[1] + index}
+                          style={{
+                            ...CommonStyles.perfect_shadows,
+                            alignItems: "center",
+                            backgroundColor: "white",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            margin: 5,
+                            marginBottom: 0,
+                            padding: 5,
+                            borderRadius: 10,
+                          }}
+                        >
+                          <View style={{ flex: 2 }}>
+                            <Text style={{ marginLeft: 5 }}>
+                              {index + 1}. {value[0]}
+                            </Text>
+                          </View>
+                          <View style={{ flex: 3 }}>
+                            <Text>
+                              {value[1]} nights @
+                              {userData.settings.domesticCurrency}{" "}
+                              {getPrice(value[0]).toFixed(2)} / night
+                            </Text>
+                          </View>
+                        </View>
+                      );
+                    })
+                  ) : (
+                    <Text>Error</Text>
+                  )}
+                </ScrollView>
               </View>
-              <View style={{ flexDirection: "row" }}>
-                <View style={styles.view_left}>
-                  <View style={styles.white_padding}>
-                    <Text style={styles.component_title}>Activity</Text>
-                    <Text style={styles.component_number}>
-                      {numberAsCurrency(activityCost)}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.view_right}>
-                  <View style={styles.white_padding}>
-                    <Text style={styles.component_title}>Food / Drink</Text>
-                    <Text style={styles.component_number}>
-                      {numberAsCurrency(foodDrinkCost)}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-              <View style={{ flexDirection: "row" }}>
-                <View style={styles.view_left}>
-                  <View style={styles.white_padding}>
-                    <Text style={styles.component_title}>Transport</Text>
-                    <Text style={styles.component_number}>
-                      {numberAsCurrency(transportCost)}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.view_right}>
-                  <View style={styles.white_padding}>
-                    <Text style={styles.component_title}>Essentials</Text>
-                    <Text style={styles.component_number}>
-                      {numberAsCurrency(essentialsCost)}
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </ScrollView>
+            </View>
           </View>
         </View>
       </SafeAreaView>

@@ -29,6 +29,7 @@ import {
   updateUserData,
 } from "../shared/UserDataService";
 import { useUserData } from "../shared/contexts/UserDataContext";
+import CommonStyles from "../shared/CommonStyles";
 
 const Profile = () => {
   // Data
@@ -210,7 +211,7 @@ const Profile = () => {
               </View>
               <View style={{ flex: 1, height: 2, backgroundColor: "black" }} />
             </View>
-            <View style={styles.white_background}>
+            <View style={styles.component_background}>
               <View style={{ flexDirection: "row" }}>
                 <Text style={styles.settings_header}>UID: </Text>
                 <Text>{UID}</Text>
@@ -251,7 +252,7 @@ const Profile = () => {
               </View>
               <View style={{ flex: 1, height: 2, backgroundColor: "black" }} />
             </View>
-            <View style={styles.white_background}>
+            <View style={styles.component_background}>
               <Text style={styles.settings_header}>Display Event Details</Text>
               <View
                 style={{
@@ -276,7 +277,7 @@ const Profile = () => {
                 />
               </View>
             </View>
-            <View style={styles.white_background}>
+            <View style={styles.component_background}>
               <Text style={styles.settings_header}>
                 Display Upcoming Events
               </Text>
@@ -303,8 +304,11 @@ const Profile = () => {
                 />
               </View>
             </View>
-            <View style={styles.white_background}>
+            <View style={styles.component_background}>
               <Text style={styles.settings_header}>Domestic Currency:</Text>
+              <Text style={{ flexShrink: 1, marginRight: 5, marginBottom: 5 }}>
+                Currency in which finances are displayed
+              </Text>
               <Dropdown
                 style={styles.dropdown}
                 search
@@ -369,11 +373,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginVertical: 5,
   },
-  white_background: {
-    backgroundColor: "#FFFFFF80",
+  component_background: {
+    ...CommonStyles.perfect_shadows,
+    borderBottomColor: "grey",
+    borderBottomWidth: 1,
+    backgroundColor: "#EFEFEF",
     padding: 15,
     marginVertical: 5,
     borderRadius: 20,
+  },
+  white_background: {
+    backgroundColor: "white",
+    borderRadius: 5,
+    padding: 8,
   },
   settings_header: { fontFamily: "Arimo-Bold", marginBottom: 5 },
   dropdown: {

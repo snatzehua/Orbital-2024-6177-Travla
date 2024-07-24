@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserData, createEmptyUserData, getUserData } from "../UserDataService";
 import { getAuth } from "firebase/auth";
+import { fetchExchangeRate } from "../CurrencyDataService";
+import { ExchangeRateOffline } from "../data/ExchangeRateOffline";
 
 // 1. Interface for Type Safety (with isLoading)
 interface UserDataContextType {
@@ -12,6 +14,7 @@ interface UserDataContextType {
   setUserInfo: React.Dispatch<React.SetStateAction<string>>;
   userData: UserData;
   setUserData: React.Dispatch<React.SetStateAction<UserData>>;
+  exchangeRate: { [key: string]: any };
   isLoading: boolean;
   error: string | null;
 }
@@ -26,6 +29,7 @@ const UserDataContext = createContext<UserDataContextType>({
   setUserInfo: () => {},
   userData: createEmptyUserData(),
   setUserData: () => {},
+  exchangeRate: {},
   isLoading: true, // Initial loading state is true
   error: null,
 });
@@ -40,6 +44,9 @@ export const UserDataProvider = ({
   const [user, setUser] = useState<any>(null);
   const [userInfo, setUserInfo] = useState<string>("");
   const [userData, setUserData] = useState<UserData>(createEmptyUserData());
+  const [exchangeRate, setExchangeRate] = useState<{ [key: string]: any }>(
+    ExchangeRateOffline
+  );
   const [isLoading, setIsLoading] = useState(true); // State for loading
   const [error, setError] = useState<string | null>(null);
 
@@ -54,6 +61,14 @@ export const UserDataProvider = ({
         setIsLoading(false);
       }
     };
+    const getExchangeRateObject = async () => {
+      try {
+        const exchangeRateObject = await fetchExchangeRate();
+        setExchangeRate(exchangeRateObject);
+      } catch (e) {
+        console.error(e);
+      }
+    };
     const auth = getAuth();
     const user = auth.currentUser;
     if (user) {
@@ -62,6 +77,8 @@ export const UserDataProvider = ({
     }
 
     fetchUserData();
+    getExchangeRateObject();
+    console.log(exchangeRate);
   }, []);
 
   useEffect(() => {
@@ -79,6 +96,7 @@ export const UserDataProvider = ({
         setUser,
         userData,
         setUserData,
+        exchangeRate,
         isLoading,
         error,
       }}

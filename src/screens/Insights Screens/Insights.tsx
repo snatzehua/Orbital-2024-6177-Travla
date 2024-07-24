@@ -25,6 +25,7 @@ import Logistics from "./Logistics";
 import { useUserData } from "../shared/contexts/UserDataContext";
 import { DateTimeDisplay } from "../shared/contexts/DateTimeContext";
 import { Dropdown } from "react-native-element-dropdown";
+import Packing from "./Packing";
 
 const Settings = () => {
   // Typing for navigation
@@ -37,14 +38,14 @@ const Settings = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   // Data
-  const { userData } = useUserData();
+  const { userData, exchangeRate } = useUserData();
   const [selectedTrip, setSelectedTrip] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [markedDates, setMarkedDates] = useState<markedDatesObject>({});
 
   const [totalCost, setTotalCost] = useState("");
-  const [logistics, setLogistics] = useState([]);
+  const [logistics, setLogistics] = useState<string[]>([]);
   const [packingList, setPackingList] = useState<string[]>([]);
 
   const [isFinancesVisible, setIsFinancesVisible] = useState(false);
@@ -65,6 +66,8 @@ const Settings = () => {
 
   useEffect(() => {
     setTotalCost(getTotalCost(selectedTrip));
+    setLogistics(getLogistics(selectedTrip));
+    console.log("Logistics", logistics);
     setPackingList(getPackingList(selectedTrip));
     setMarkedDates((prevMarkedDates) => {
       const newMarkedDates = generateMarkedDates(userData.trips, "#301934"); // Set all dates to base color
@@ -95,20 +98,43 @@ const Settings = () => {
   }, [selectedTrip]);
 
   const getTotalCost = (trip_name: string) => {
+    const convertCurrencies = (cost: { currency: string; amount: number }) => {
+      const unconvertedCurrency = cost.currency.toLowerCase();
+      const usdAmount = cost.amount / exchangeRate["usd"][unconvertedCurrency];
+      const targetCurrency = userData.settings.domesticCurrency.toLowerCase();
+      const finalAmount = usdAmount * exchangeRate["usd"][targetCurrency];
+      return finalAmount;
+    };
     const trip = userData.trips.get(trip_name);
     if (trip) {
       return (
-        "$" +
         Array.from(trip.days.values())
           .flat()
-          .reduce(
-            (total: number, event: EventData) => total + event.cost.amount,
-            0
-          )
-          .toFixed(2)
-      );
+          .map((value) => convertCurrencies(value.cost))
+          .filter((value) => !Number.isNaN(value))
+          .reduce((total: number, value: number) => total + value, 0) +
+        Array.from(trip.accommodation.values())
+          .map((value) => convertCurrencies(value.cost))
+          .filter((value) => !Number.isNaN(value))
+          .reduce((total: number, value: number) => total + value, 0)
+      ).toFixed(2);
     }
-    return "$0.00";
+    return "0.00";
+  };
+
+  const getLogistics = (trip_name: string) => {
+    const trip = userData.trips.get(trip_name);
+    if (trip) {
+      return Array.from(trip.accommodation.values())
+        .filter((value) => value.name == "")
+        .reduce(
+          (merged: string[], value: Accommodation) => [
+            ...new Set([...merged, value.name]),
+          ],
+          []
+        );
+    }
+    return [];
   };
 
   const getPackingList = (trip_name: string) => {
@@ -152,7 +178,7 @@ const Settings = () => {
   };
   const togglePacking = async () => {
     if (selectedTrip != "") {
-      setIsPackingVisible(!isFinancesVisible);
+      setIsPackingVisible(!isPackingVisible);
     } else {
       Alert.alert(
         "No Trip Selected",
@@ -369,7 +395,11 @@ const Settings = () => {
                   shadowColor="#FF8C00"
                   title="Finances"
                   text="Total Expenditure:"
-                  subtext={selectedTrip != "" ? totalCost : "No trip selected"}
+                  subtext={
+                    selectedTrip != ""
+                      ? userData.settings.domesticCurrency + " " + totalCost
+                      : "No trip selected"
+                  }
                   onPress={toggleFinances}
                 />
                 <InsightComponent
@@ -443,6 +473,20 @@ const Settings = () => {
       >
         <View style={{ alignItems: "flex-start" }}></View>
         <Logistics trip={selectedTrip} toggleLogistics={toggleLogistics} />
+      </Modal>
+      <Modal
+        isVisible={isPackingVisible}
+        onBackdropPress={() => {
+          if (selectedTrip !== "") {
+            setIsPackingVisible(false);
+          }
+        }}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+        style={{ margin: 0 }}
+      >
+        <View style={{ alignItems: "flex-start" }}></View>
+        <Packing trip={selectedTrip} togglePacking={togglePacking} />
       </Modal>
     </>
   );

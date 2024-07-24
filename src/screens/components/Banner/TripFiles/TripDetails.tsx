@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   FlatList,
@@ -24,6 +25,8 @@ import { useUserData } from "../../../shared/contexts/UserDataContext";
 import AddAccomodation from "../EventFiles/AddAccommodation";
 import CustomButton from "../../CustomButtom/CustomButton";
 import CommonStyles from "../../../shared/CommonStyles";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import SelectTrip from "../../SelectionComponents/SelectTrip";
 
 interface TripDetailsProps {
   tripData: TripData;
@@ -121,7 +124,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
       const updatedTrip = { ...prevUserData.trips.get(selectedTrip)! };
       const updatedAccommodation = new Map(updatedTrip.accommodation);
 
-      for (var i = selectedStart; i <= selectedEnd; i += 1) {
+      for (var i = selectedStart; i < selectedEnd; i += 1) {
         updatedAccommodation.set(dates[i], newAccommodation);
       }
       const updatedUserData = {
@@ -134,6 +137,18 @@ const TripDetails: React.FC<TripDetailsProps> = ({
       updateUserData(updatedUserData);
       return updatedUserData;
     });
+  };
+
+  const deleteAccommodation = () => {
+    tripData.accommodation.set(dates[selectedDay - 1], {
+      name: "",
+      cost: {
+        currency: "",
+        amount: 0,
+      },
+    });
+    userData.trips.set(tripData.title, tripData);
+    updateUserData(userData);
   };
 
   return (
@@ -178,7 +193,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
                 toggleModal={toggleSecondaryModal}
                 updateAsync={updateAsyncAccommodation}
                 providedTrip={tripData.trip}
-                providedDate={Array.from(tripData.days.keys())[selectedDay - 1]}
+                providedDate={dates[selectedDay - 1]}
                 daysArray={dates}
               />
             </Animated.View>
@@ -290,7 +305,10 @@ const TripDetails: React.FC<TripDetailsProps> = ({
                               justifyContent: "center",
                               backgroundColor: "white",
                               marginTop: 5,
+                              paddingVertical:
+                                accommodations[index].name == "" ? 3 : 0,
                               alignSelf: "center",
+                              alignItems: "center",
                               borderColor: "white",
                               borderWidth: 8,
                             }}
@@ -306,6 +324,44 @@ const TripDetails: React.FC<TripDetailsProps> = ({
                                 ? "None"
                                 : accommodations[index].name}
                             </Text>
+                            {accommodations[index].name == "" ? null : (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  Alert.alert(
+                                    "Confirm Deletion",
+                                    "Delete accommodation for this day? This decision is irreversible.",
+                                    [
+                                      {
+                                        text: "Cancel",
+                                        style: "cancel",
+                                      },
+                                      {
+                                        text: "Confirm",
+                                        onPress: () => {
+                                          deleteAccommodation();
+                                        },
+                                      },
+                                    ]
+                                  );
+                                }}
+                                style={{
+                                  backgroundColor: "red",
+                                  paddingVertical: 3,
+                                  paddingHorizontal: 6,
+                                  borderRadius: 6,
+                                  marginLeft: 10,
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontFamily: "Arimo-Bold",
+                                    color: "white",
+                                  }}
+                                >
+                                  Delete
+                                </Text>
+                              </TouchableOpacity>
+                            )}
                           </View>
                           <View
                             style={{

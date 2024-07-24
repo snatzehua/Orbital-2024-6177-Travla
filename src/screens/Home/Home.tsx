@@ -337,14 +337,9 @@ const Home = () => {
             </ScrollView>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}></View>
-          {false ? (
+          {true ? (
             <View style={{ width: "95%" }}>
-              <AddButton
-                onPressFunction={() => {
-                  console.log(accommodation);
-                }}
-                text={"debuggerButton"}
-              />
+              <AddButton onPressFunction={() => {}} text={"debuggerButton"} />
             </View>
           ) : null}
           <MenuBar toggleModal={toggleModal} />

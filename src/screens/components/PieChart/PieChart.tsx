@@ -1,6 +1,7 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
-import Svg, { G, Circle, Defs } from "react-native-svg";
+import { StyleSheet } from "react-native";
+import Svg, { G, Circle, Text } from "react-native-svg";
+import { useUserData } from "../../shared/contexts/UserDataContext";
 
 interface PieChartProps {
   data: { label: string; value: number; color: string }[];
@@ -8,9 +9,11 @@ interface PieChartProps {
 }
 
 const PieChart: React.FC<PieChartProps> = ({ data, dimensions }) => {
+  const { userData } = useUserData();
   const radius = 70;
   const circleCircumference = 2 * Math.PI * radius;
   const total = data.reduce((total, item) => total + item.value, 0);
+  console.log(total);
 
   const length = Math.min(dimensions.width, dimensions.height);
 
@@ -60,6 +63,16 @@ const PieChart: React.FC<PieChartProps> = ({ data, dimensions }) => {
             );
           })}
         </G>
+        <Text
+          x="50%"
+          y="50%"
+          fontSize={20}
+          textAnchor="middle"
+          alignmentBaseline="central"
+          fill="black"
+        >
+          {userData.settings.domesticCurrency + " " + total.toFixed(2)}
+        </Text>
       </Svg>
     </>
   );
