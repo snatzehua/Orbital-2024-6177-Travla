@@ -6,6 +6,7 @@ import CustomButton from "../../CustomButtom/CustomButton";
 import CustomInput from "../../CustomInput/CustomInput";
 import DateTimeDropdown from "../../DateTimeDropdown/DateTimeDropdown";
 import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
+import { createTrip } from "../../../Api/tripApi";
 import {
   getEmptyAccommodationMap,
   getEmptyDaysMap,
@@ -21,26 +22,12 @@ interface AddTripProps {
 
 // Add Trip popup form
 const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
-  // const [uid, setUid] = useState<string | null>(null);
-
-  // // Fetch UID from Firebase Auth
-  // useEffect(() => {
-  //   const auth = getAuth();
-  //   const user = auth.currentUser;
-  //   if (user) {
-  //     setUid(user.uid);
-  //     console.log("User ID from Firebase Auth:", user.uid);
-  //   }
-  // }, []);
-  const { uid } = useUserData(); // Access uid from context
+  const { userData, uid } = useUserData(); // Access uid from context
 
   const baseStart = convertToStartDate(getUTCTime());
   const baseEnd = convertToStartDate(getUTCTime());
 
-  console.log(baseStart);
-
-  const { userData } = useUserData(); //fetch user data from context
-
+  //console.log(baseStart);
   // Data
   const [backButtonHeight, setBackButtonHeight] = useState(0);
   const [error, setError] = useState("");
@@ -61,20 +48,14 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       setError("Please enter a title");
       return;
     }
-    /*
-    if (newStart > newEnd) {
-      setError("End cannot be before start");
-      return;
-    }
-    */
+
     if (!uid) {
       setError("User ID not found");
       return;
     }
-    console.log("Firebase uid: ", userData.uid);
 
-    const newTrip: TripData = {
-      user: uid,
+    const newTrip: Omit<TripData, "_id"> = {
+      user: userData._id,
       trip: newTripTitle,
       title: newTripTitle,
       datatype: "Trip",
@@ -84,10 +65,12 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       accommodation: getEmptyAccommodationMap(newStart, newEnd),
       misc: [],
     };
+    console.log("TripData: ", newTrip);
     try {
-      //await createTrip(newTrip); // Call createTrip API
-      updateAsync(newTrip);
+      const savedTrip = await createTrip(newTrip); // Call createTrip API
+      updateAsync({ ...newTrip, _id: savedTrip._id }); // Include the _id in the trip data
       toggleModal();
+      console.log("Userdata after adding trip: ", userData);
     } catch (error) {
       console.log("failed to add trip");
       setError("Failed to create trip");

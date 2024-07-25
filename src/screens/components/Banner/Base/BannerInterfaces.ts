@@ -7,6 +7,7 @@ interface BannerData {
 }
 
 interface TripData extends BannerData {
+  _id?: string;
   trip: string;
   days: Map<string, EventData[]>;
   accommodation: Map<string, Accommodation>
@@ -22,6 +23,7 @@ interface Miscellaneous {
 }
 
 interface EventData extends BannerData {
+  _id: string;
   trip: string;
   day: string;
   location: string,

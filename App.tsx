@@ -12,7 +12,6 @@ import {
 import * as firebaseAuth from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import firebaseConfig from "./firebaseConfig";
-
 import {
   useUserData,
   UserDataProvider,
@@ -44,10 +43,11 @@ export type RootStackParamList = {
   Profile: undefined;
 };
 
-export default function App() {
-  const [initializing, setInitializing] = useState(true);
+const MainApp = () => {
+  const [initializing, setInitializing] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [auth, setAuth] = useState<any>(null);
+  const { setUid, userData, uid } = useUserData(); // Get setUid from context
 
   // Initialise Firebase
   useEffect(() => {
@@ -73,7 +73,6 @@ export default function App() {
     loadFonts();
   }, []);
 
-  // Handle Auth State Changes
   useEffect(() => {
     let unsubscribeAuth = () => {}; // Default empty function
 
@@ -86,8 +85,12 @@ export default function App() {
       );
 
       // Listen for Auth State Changes
-      unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-        setUser(user);
+      unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const firebaseUid = user.uid;
+          console.log("firebase uid: ", firebaseUid);
+          setUid(firebaseUid); // Set UID in context
+        }
         setInitializing(false); // Set initializing to false
       });
     }
@@ -95,17 +98,6 @@ export default function App() {
     return unsubscribeAuth; // Cleanup on unmount
   }, [auth]);
 
-  // Load fonts
-  useEffect(() => {
-    async function loadFonts() {
-      await Font.loadAsync({
-        "Arimo-Bold": require("./assets/fonts/Arimo-Bold.ttf"),
-        "Arimo-Regular": require("./assets/fonts/Arimo-Regular.ttf"),
-      });
-    }
-
-    loadFonts();
-  }, []);
 
   // Conditional Rendering
   if (initializing) {
@@ -135,8 +127,6 @@ export default function App() {
   };
 
   return (
-    <UserDataProvider>
-      <DateTimeProvider>
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName={user ? "Home" : "Login"}
@@ -159,6 +149,14 @@ export default function App() {
             <Stack.Screen name="Profile" component={Profile} />
           </Stack.Navigator>
         </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <UserDataProvider>
+      <DateTimeProvider>
+        <MainApp />
       </DateTimeProvider>
     </UserDataProvider>
   );

@@ -1,52 +1,44 @@
-const { Trip } = require('../models/trip'); 
-const { User } = require('../models/user'); 
+const  { Trip } = require('../models/trip'); 
+const  User  = require('../models/user');
 
 // Create a new trip
 const createTrip = async (req, res) => {
-  const { user, title, start, end, trip, days } = req.body; // Destructure days if it's part of the request
-  console.log('Request body:', req.body);
+  const { user, title, start, end, trip, days } = req.body;
 
   try {
-    if (!user) {
+    const userDoc = await User.findById(user);
+    if (!userDoc) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     const tripData = new Trip({
       title,
       datatype: 'Trip',
       start,
       end,
-      user,
+      user, // Link the trip to the MongoDB user ID
       trip, 
-      days 
+      days
     });
+    const savedTrip = await tripData.save(); // Save the trip first
 
-    const newTrip = await tripData.save();
-    res.status(201).json(newTrip);
+    // Link the trip to the user in the users collection
+    const UpdatedUser = await User.findByIdAndUpdate(
+      user,
+      { $push: { trips: savedTrip._id } },
+      { new: true }
+    );
+    res.status(201).json(savedTrip);
   } catch (error) {
+    console.error("error creating trip: ", error);
     res.status(400).json({ message: error.message });
   }
 };
 
-const getTrips = async (req, res) => {
-  const uid = req.user.uid; // Assuming the user is authenticated and uid is available in req.user
-
+const fetchTripById = async (req, res) => {
   try {
-    const user = await User.findOne({ uid }); //getting user from firebase uid
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const trips = await Trip.find({ user: user._id }); //getting all trips that have the objectId of the user
-    res.status(200).json(trips);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const getTripById = async (req, res) => {
-  try {
-    const trip = await Trip.findById(req.params.id);
+    const tripId = req.params.tripId;
+    console.log("tripId: ", tripId);
+    const trip = await Trip.findById(tripId);
     if (!trip) {
       return res.status(404).json({ message: 'Trip not found' });
     }
@@ -56,16 +48,37 @@ const getTripById = async (req, res) => {
   }
 };
 
+const updateTripById = async (req, res) => {
+  const { tripId } = req.params;
+  const newTripData = req.body;
+  console.log("tripId: ", tripId);
+  console.log("updated trip data: ", newTripData);
+  try {
+    const updatedTrip = await Trip.findByIdAndUpdate(tripId, newTripData, { new: true });
+    if (!updatedTrip) {
+      return res.status(404).json({ message: 'Trip not found' });
+    }
+    res.status(200).json(updatedTrip);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const deleteTripById = async (req, res) => {
   try {
-    const trip = await Trip.findByIdAndDelete(req.params.id);
+    const tripId = req.params.tripId;
+    const trip = await Trip.findById(tripId);
+    console.log("trip being deleted: ", trip);
     if (!trip) {
       return res.status(404).json({ message: 'Trip not found' });
     }
+    await Trip.findByIdAndDelete(tripId);
+    await User.findByIdAndUpdate(trip.user, { $pull: { trips: tripId } });
+
     res.status(200).json({ message: 'Trip deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { createTrip, getTrips, getTripById, deleteTripById };
+module.exports = { createTrip, fetchTripById, updateTripById, deleteTripById };

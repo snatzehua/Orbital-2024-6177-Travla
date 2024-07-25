@@ -1,8 +1,28 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { UserData, createEmptyUserData, getUserData } from "../UserDataService";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { fetchUserById, createUser } from "../../Api/userApi";
+import { fetchTrip } from "../../Api/tripApi";
 import { fetchExchangeRate } from "../CurrencyDataService";
 import { ExchangeRateOffline } from "../data/ExchangeRateOffline";
+
+interface UserData {
+  _id: string;
+  uid: string;
+  trips: Map<string, TripData>;
+  settings: Settings;
+}
+
+export interface Settings {
+  displayEventDetails: boolean;
+  displayUpcomingEvents: boolean;
+  domesticCurrency: string;
+}
+
+const initialSettings = {
+  displayEventDetails: true,
+  displayUpcomingEvents: true,
+  domesticCurrency: "",
+};
 
 // 1. Interface for Type Safety (with isLoading)
 interface UserDataContextType {
@@ -27,7 +47,12 @@ const UserDataContext = createContext<UserDataContextType>({
   setUser: () => {},
   userInfo: "",
   setUserInfo: () => {},
-  userData: createEmptyUserData(),
+  userData: {
+    _id: "",
+    uid: "",
+    trips: new Map<string, TripData>(),
+    settings: initialSettings,
+  },
   setUserData: () => {},
   exchangeRate: {},
   isLoading: true, // Initial loading state is true
@@ -43,47 +68,85 @@ export const UserDataProvider = ({
   const [uid, setUid] = useState<string>("");
   const [user, setUser] = useState<any>(null);
   const [userInfo, setUserInfo] = useState<string>("");
-  const [userData, setUserData] = useState<UserData>(createEmptyUserData());
   const [exchangeRate, setExchangeRate] = useState<{ [key: string]: any }>(
     ExchangeRateOffline
   );
+  const [userData, setUserData] = useState<UserData>({
+    _id: "",
+    uid: "",
+    trips: new Map<string, TripData>(),
+    settings: initialSettings,
+  });
   const [isLoading, setIsLoading] = useState(true); // State for loading
   const [error, setError] = useState<string | null>(null);
 
+  // In the useEffect for fetching user data
   useEffect(() => {
     const fetchUserData = async () => {
-      try {
-        const fetchedData = await getUserData();
-        setUserData(fetchedData ?? createEmptyUserData());
-      } catch (err) {
-        setError("Error fetching user data");
-      } finally {
-        setIsLoading(false);
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        console.log("Fetching user data for UID within UserDataProvider:", uid);
+        try {
+          const existingUser = await fetchUserById(uid);
+          console.log("Fetched user within UserDataProvider:", existingUser);
+          if (existingUser != null) {
+            // Fetch each trip by its ObjectId
+            const tripFetchPromises = existingUser.trips.map((tripId: string) =>
+              fetchTrip(tripId)
+            ); // Create promises for fetching each trip by its ID
+            const trips = await Promise.all(tripFetchPromises);
+
+            // Convert trips to a map
+            const tripsMap = new Map<string, TripData>(
+              trips.map((trip) => {
+                const typedTripData = trip as TripData;
+                typedTripData.start = new Date(typedTripData.start);
+                typedTripData.end = new Date(typedTripData.end);
+                const daysMap = new Map<string, EventData[]>(
+                  Object.entries(typedTripData.days).map(
+                    ([dateStr, events]): [string, EventData[]] => [
+                      dateStr,
+                      events.map((event: any) => ({
+                        ...event,
+                        start: new Date(event.start),
+                        end: new Date(event.end),
+                      })),
+                    ]
+                  )
+                );
+                return [trip._id, { ...typedTripData, days: daysMap }];
+              })
+            );
+            const userData: UserData = {
+              ...existingUser,
+              trips: tripsMap,
+            };
+            setUserData(userData);
+            console.log("UserData: ", userData);
+          } else {
+            const newUser = { uid: uid };
+            const createdUser = await createUser(newUser);
+            setUserData({ ...createdUser, trips: new Map<string, TripData>() });
+            console.log("Created user within UserDataProvider:", createdUser);
+          }
+        } catch (error) {
+          console.error(
+            "Error fetching user data within UserDataProvider:",
+            error
+          );
+          setError("Error fetching user data");
+        }
+        setIsLoading(false); // Set loading to false
       }
     };
-    const getExchangeRateObject = async () => {
-      try {
-        const exchangeRateObject = await fetchExchangeRate();
-        setExchangeRate(exchangeRateObject);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (user) {
-      setUid(user.uid);
-      console.log("User ID from Firebase Auth:", user.uid);
-    }
 
     fetchUserData();
-    getExchangeRateObject();
-    console.log(exchangeRate);
-  }, []);
+  }, [uid]);
 
   useEffect(() => {
-    console.log("Changed... : ", userData);
-  }, [userData]);
+    console.log("Verifying UID in component:", uid);
+  }, [uid]);
 
   return (
     <UserDataContext.Provider

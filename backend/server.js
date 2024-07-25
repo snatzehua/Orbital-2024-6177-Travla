@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/userRoutes');
 const tripRoutes = require('./routes/tripRoutes');
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 
@@ -17,10 +18,14 @@ mongoose.connect('mongodb+srv://jiaming:orbital2024@travla.5qt8iwx.mongodb.net/t
   process.exit(1); // Exit the application if MongoDB connection fails
 });
 
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
+
 app.use(bodyParser.json());
 app.use('/api', userRoutes);
 app.use('/api', tripRoutes);
 
-app.listen(3001, () => {
-  console.log('Server is running on port 3001');
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });

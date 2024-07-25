@@ -99,11 +99,13 @@ const AddEvent = ({
         newTag,
         (editedData) => {
           updateAsync(selectedTrip, selectedDate, editedData);
+          console.log("selectedTrip: ", selectedTrip);
           toggleModal();
         }
       )
     );
   };
+
   const handleDateBackButton = () => {
     if (providedTrip != undefined) {
       toggleModal();

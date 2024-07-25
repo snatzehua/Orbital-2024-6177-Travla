@@ -189,6 +189,9 @@ export const convertDateKeyToUTC = (string: string) => {
 };
 
 export const isWithinDateRange = (date: Date, start: Date, end: Date) => {
+  // console.log(date);
+  // console.log(start);
+  // console.log(end);
   return date >= start && date <= end;
 };
 

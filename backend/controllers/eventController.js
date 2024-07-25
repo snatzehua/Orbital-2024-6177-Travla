@@ -1,2 +1,3 @@
-const { Trip } = require('../models/trip');
+const { Event, Trip } = require('../models/trip');
+
 
