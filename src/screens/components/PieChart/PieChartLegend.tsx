@@ -59,6 +59,6 @@ const styles = StyleSheet.create({
   colorBox: { height: 10, width: 10, marginRight: "5%" },
   label: {
     fontFamily: "Arimo-Regular",
-    fontSize: Dimensions.get("window").height * 0.02,
+    fontSize: Dimensions.get("window").height * 0.015,
   },
 });

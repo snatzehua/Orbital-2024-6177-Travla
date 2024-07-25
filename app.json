@@ -14,7 +14,10 @@
     "ios": {
       "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": true,
-      "bundleIdentifier": "com.snatzehua.travla"
+      "bundleIdentifier": "com.snatzehua.travla",
+      "config": {
+        "googleMapsApiKey": "AIzaSyDE3eWu9UshMUNy_Orv5Jqz81pyWQ3ubGg" // Add this line
+      }
     },
     "android": {
       "googleServicesFile": "./google-services.json",

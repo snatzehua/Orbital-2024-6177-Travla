@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { getAuth } from "firebase/auth";
-import BackButton from "../components/BackButton/BackButton";
-import CustomButton from "../components/CustomButtom/CustomButton";
-import CustomInput from "../components/CustomInput/CustomInput";
-import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
-import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
-import { createTrip } from "../Api/tripApi";
+import BackButton from "../../BackButton/BackButton";
+import CustomButton from "../../CustomButtom/CustomButton";
+import CustomInput from "../../CustomInput/CustomInput";
+import DateTimeDropdown from "../../DateTimeDropdown/DateTimeDropdown";
+import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
+import { createTrip } from "../../../Api/tripApi";
 import {
+  getEmptyAccommodationMap,
   getEmptyDaysMap,
   getUTCTime,
-} from "../shared/contexts/DateTimeContext";
-import { convertToStartDate } from "../shared/contexts/DateTimeContext";
-import { useUserData } from "../shared/contexts/UserDataContext"; // Import user data context
+} from "../../../shared/contexts/DateTimeContext";
+import { convertToStartDate } from "../../../shared/contexts/DateTimeContext";
+import { useUserData } from "../../../shared/contexts/UserDataContext"; // Import user data context
 
 interface AddTripProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
@@ -53,7 +54,7 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       return;
     }
 
-    const newTrip: Omit<TripData, '_id'> = {
+    const newTrip: Omit<TripData, "_id"> = {
       user: userData._id,
       trip: newTripTitle,
       title: newTripTitle,
@@ -61,6 +62,8 @@ const AddTrip = ({ toggleModal, updateAsync }: AddTripProps) => {
       start: newStart,
       end: newEnd,
       days: getEmptyDaysMap(newStart, newEnd),
+      accommodation: getEmptyAccommodationMap(newStart, newEnd),
+      misc: [],
     };
     console.log("TripData: ", newTrip);
     try {

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import {
+  Alert,
   Animated,
   Dimensions,
   FlatList,
@@ -15,9 +16,17 @@ import Modal from "react-native-modal";
 import AddButton from "../../../Trips Screens/AddButton";
 import EventBanner from "../EventFiles/EventBanner";
 import BackButton from "../../BackButton/BackButton";
-import AddEvent from "../../../Home/AddEvent";
-import { updateUserData } from "../../../shared/UserDataService";
+import AddEvent from "../EventFiles/AddEvent";
+import {
+  getLocationGeometry,
+  updateUserData,
+} from "../../../shared/UserDataService";
 import { useUserData } from "../../../shared/contexts/UserDataContext";
+import AddAccomodation from "../EventFiles/AddAccommodation";
+import CustomButton from "../../CustomButtom/CustomButton";
+import CommonStyles from "../../../shared/CommonStyles";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import SelectTrip from "../../SelectionComponents/SelectTrip";
 
 interface TripDetailsProps {
   tripData: TripData;
@@ -33,15 +42,16 @@ const TripDetails: React.FC<TripDetailsProps> = ({
   const { userData, setUserData } = useUserData();
   const events = Array.from(tripData.days.values());
   const dates = Array.from(tripData.days.keys());
+  const accommodations = Array.from(tripData.accommodation.values());
   const [selectedDay, setselectedDay] = useState(1);
 
   // Add event form
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isSecondaryModalVisible, setSecondaryModalVisible] = useState(false);
   const scaleValue = useRef(new Animated.Value(0)).current;
 
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
-    console.log(isModalVisible);
 
     if (!isModalVisible) {
       // If modal is about to become visible, start zoom animation
@@ -58,7 +68,25 @@ const TripDetails: React.FC<TripDetailsProps> = ({
     }
   };
 
-  const updateAsync = async (
+  const toggleSecondaryModal = () => {
+    setSecondaryModalVisible(!isSecondaryModalVisible);
+
+    if (!isSecondaryModalVisible) {
+      // If modal is about to become visible, start zoom animation
+      Animated.spring(scaleValue, {
+        toValue: 1,
+        useNativeDriver: true, // For smoother animation
+      }).start();
+    } else {
+      Animated.spring(scaleValue, {
+        // Reverse the animation on hiding
+        toValue: 0,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
+  const updateAsyncEvent = async (
     selectedTrip: string,
     selectedDate: string,
     newEvent: EventData
@@ -86,6 +114,43 @@ const TripDetails: React.FC<TripDetailsProps> = ({
     });
   };
 
+  const updateAsyncAccommodation = async (
+    selectedTrip: string,
+    selectedStart: number,
+    selectedEnd: number,
+    newAccommodation: Accommodation
+  ) => {
+    setUserData((prevUserData) => {
+      const updatedTrip = { ...prevUserData.trips.get(selectedTrip)! };
+      const updatedAccommodation = new Map(updatedTrip.accommodation);
+
+      for (var i = selectedStart; i < selectedEnd; i += 1) {
+        updatedAccommodation.set(dates[i], newAccommodation);
+      }
+      const updatedUserData = {
+        ...prevUserData,
+        trips: new Map(prevUserData.trips).set(selectedTrip, {
+          ...updatedTrip,
+          accommodation: updatedAccommodation,
+        }),
+      };
+      updateUserData(updatedUserData);
+      return updatedUserData;
+    });
+  };
+
+  const deleteAccommodation = () => {
+    tripData.accommodation.set(dates[selectedDay - 1], {
+      name: "",
+      cost: {
+        currency: "",
+        amount: 0,
+      },
+    });
+    userData.trips.set(tripData.title, tripData);
+    updateUserData(userData);
+  };
+
   return (
     <>
       <Modal
@@ -101,13 +166,36 @@ const TripDetails: React.FC<TripDetailsProps> = ({
           source={require("../../../../../assets/images/resetPassword_background.png")}
           style={styles.page_background}
         >
-          <Modal isVisible={isModalVisible}>
+          <Modal
+            isVisible={isModalVisible}
+            supportedOrientations={["portrait", "landscape"]}
+          >
             <Animated.View
               style={{
                 transform: [{ scale: scaleValue }],
               }}
             >
-              <AddEvent toggleModal={toggleModal} updateAsync={updateAsync} />
+              <AddEvent
+                toggleModal={toggleModal}
+                updateAsync={updateAsyncEvent}
+                providedTrip={tripData.trip}
+                providedDate={Array.from(tripData.days.keys())[selectedDay - 1]}
+              />
+            </Animated.View>
+          </Modal>
+          <Modal isVisible={isSecondaryModalVisible}>
+            <Animated.View
+              style={{
+                transform: [{ scale: scaleValue }],
+              }}
+            >
+              <AddAccomodation
+                toggleModal={toggleSecondaryModal}
+                updateAsync={updateAsyncAccommodation}
+                providedTrip={tripData.trip}
+                providedDate={dates[selectedDay - 1]}
+                daysArray={dates}
+              />
             </Animated.View>
           </Modal>
           <View style={{ flex: 1 }}>
@@ -212,6 +300,71 @@ const TripDetails: React.FC<TripDetailsProps> = ({
                           </View>
                           <View
                             style={{
+                              width: Dimensions.get("window").width,
+                              flexDirection: "row",
+                              justifyContent: "center",
+                              backgroundColor: "white",
+                              marginTop: 5,
+                              paddingVertical:
+                                accommodations[index].name == "" ? 3 : 0,
+                              alignSelf: "center",
+                              alignItems: "center",
+                              borderColor: "white",
+                              borderWidth: 8,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontFamily: "Arimo-Bold",
+                                color: "black",
+                              }}
+                            >
+                              Accommodation:{" "}
+                              {accommodations[index].name == ""
+                                ? "None"
+                                : accommodations[index].name}
+                            </Text>
+                            {accommodations[index].name == "" ? null : (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  Alert.alert(
+                                    "Confirm Deletion",
+                                    "Delete accommodation for this day? This decision is irreversible.",
+                                    [
+                                      {
+                                        text: "Cancel",
+                                        style: "cancel",
+                                      },
+                                      {
+                                        text: "Confirm",
+                                        onPress: () => {
+                                          deleteAccommodation();
+                                        },
+                                      },
+                                    ]
+                                  );
+                                }}
+                                style={{
+                                  backgroundColor: "red",
+                                  paddingVertical: 3,
+                                  paddingHorizontal: 6,
+                                  borderRadius: 6,
+                                  marginLeft: 10,
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontFamily: "Arimo-Bold",
+                                    color: "white",
+                                  }}
+                                >
+                                  Delete
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                          <View
+                            style={{
                               width: Dimensions.get("window").width * 0.9,
                             }}
                           >
@@ -277,6 +430,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
                                   </View>
                                 )}
                               </View>
+                              <View style={{ height: 100 }}></View>
                             </ScrollView>
                           </View>
                         </View>
@@ -288,9 +442,49 @@ const TripDetails: React.FC<TripDetailsProps> = ({
               <View
                 style={{ alignSelf: "center", width: "95%", marginTop: "5%" }}
               >
-                <AddButton
-                  onPressFunction={() => toggleModal()}
+                <CustomButton
+                  onPress={() => toggleModal()}
                   text={"Add an event"}
+                  containerStyle={{
+                    ...CommonStyles.perfect_shadows,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    backgroundColor: "#FFB000",
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    borderRadius: 10,
+                    marginBottom: 5,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "darkorange",
+                  }}
+                  textStyle={{
+                    color: "black",
+                    fontFamily: "Arimo-Bold",
+                    marginBottom: 1,
+                  }}
+                />
+                <CustomButton
+                  onPress={() => toggleSecondaryModal()}
+                  text={"Add accommodation"}
+                  containerStyle={{
+                    ...CommonStyles.perfect_shadows,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    backgroundColor: "#FFB000",
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    borderRadius: 10,
+                    marginBottom: 5,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "darkorange",
+                  }}
+                  textStyle={{
+                    color: "black",
+                    fontFamily: "Arimo-Bold",
+                    marginBottom: 1,
+                  }}
                 />
               </View>
             </SafeAreaView>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Dimensions,
+  FlatList,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -9,23 +10,24 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
-import { Currencies } from "../shared/data/Currencies";
-import { Tags } from "../shared/data/Tags";
-import BackButton from "../components/BackButton/BackButton";
-import CustomButton from "../components/CustomButtom/CustomButton";
-import CustomInput from "../components/CustomInput/CustomInput";
-import DateTimeDropdown from "../components/DateTimeDropdown/DateTimeDropdown";
-import ErrorDisplay from "../components/ErrorDisplay/ErrorDisplay";
-import SelectTrip from "../components/SelectionComponents/SelectTrip";
-import SelectDate from "../components/SelectionComponents/SelectDate";
+import { Currencies } from "../../../shared/data/Currencies";
+import { Tags } from "../../../shared/data/Tags";
+import BackButton from "../../BackButton/BackButton";
+import CustomButton from "../../CustomButtom/CustomButton";
+import CustomInput from "../../CustomInput/CustomInput";
+import DateTimeDropdown from "../../DateTimeDropdown/DateTimeDropdown";
+import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
+import SelectTrip from "../../SelectionComponents/SelectTrip";
+import SelectDate from "../../SelectionComponents/SelectDate";
 import {
   convertToStartDate,
   getUTCTime,
-} from "../shared/contexts/DateTimeContext";
-import CustomMultipleInput from "../components/CustomMultipleInput.tsx/CustomMultipleInput";
-import { useUserData } from "../shared/contexts/UserDataContext";
-import CommonStyles from "../shared/CommonStyles";
-import EventInputHandling from "../components/Banner/EventFiles/EventInputHandling";
+} from "../../../shared/contexts/DateTimeContext";
+import CustomMultipleInput from "../../CustomMultipleInput.tsx/CustomMultipleInput";
+import { useUserData } from "../../../shared/contexts/UserDataContext";
+import CommonStyles from "../../../shared/CommonStyles";
+import EventInputHandling from "./EventInputHandling";
+import GooglePlacesInput from "../../GooglePlacesAuto/GooglePlacesAutoInput";
 
 interface AddEventProps {
   toggleModal: () => void; // Function that takes no arguments and returns void
@@ -34,10 +36,17 @@ interface AddEventProps {
     selectedDate: string,
     newEvent: EventData
   ) => Promise<void>;
+  providedTrip?: string;
+  providedDate?: string;
 }
 
 // Add event popup form
-const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
+const AddEvent = ({
+  toggleModal,
+  updateAsync,
+  providedTrip,
+  providedDate,
+}: AddEventProps) => {
   // Defining hooks
   const baseStart = convertToStartDate(getUTCTime());
   const baseEnd = convertToStartDate(getUTCTime());
@@ -49,13 +58,17 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   const [newEnd, setNewEnd] = useState(baseEnd);
   const [newDescription, setNewDescription] = useState("");
   const [newLocation, setNewLocation] = useState("");
+  const [newGeometry, setNewGeometry] = useState<{ lat: number; lng: number }>({
+    lat: 0,
+    lng: 0,
+  });
   const [items, setItems] = useState<string[]>([]);
   const [newCurrency, setNewCurrency] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newRemarks, setNewRemarks] = useState("");
   const [newTag, setNewTag] = useState("");
-  const [selectedTrip, setSelectedTrip] = useState("");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTrip, setSelectedTrip] = useState(providedTrip ?? "");
+  const [selectedDate, setSelectedDate] = useState(providedDate ?? "");
   const { user } = useUserData();
 
   // Defining button press functions (Add Event)
@@ -67,6 +80,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   }, [newStart]);
 
   const handleAddEvent = async () => {
+    console.log(newLocation);
     setError(
       EventInputHandling(
         newEventTitle,
@@ -76,6 +90,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
         selectedTrip,
         selectedDate,
         newLocation,
+        newGeometry,
         newDescription,
         newCurrency,
         newAmount,
@@ -92,12 +107,20 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
   };
 
   const handleDateBackButton = () => {
-    setSelectedTrip("");
-    setError("");
+    if (providedTrip != undefined) {
+      toggleModal();
+    } else {
+      setSelectedTrip("");
+      setError("");
+    }
   };
   const handleAddBackButton = () => {
-    setSelectedDate("");
-    setError("");
+    if (providedDate != undefined) {
+      toggleModal();
+    } else {
+      setSelectedDate("");
+      setError("");
+    }
   };
 
   return (
@@ -149,6 +172,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
             </View>
           </View>
           <ScrollView
+            keyboardShouldPersistTaps={"handled"}
             contentContainerStyle={{ alignItems: "center" }}
             style={{
               flex: 1,
@@ -202,6 +226,7 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
                 datatype={"Event"}
                 date={newEnd}
                 setDate={setNewEnd}
+                minimumDate={newStart}
               />
             </View>
             <View style={styles.line} />
@@ -251,12 +276,12 @@ const AddEvent = ({ toggleModal, updateAsync }: AddEventProps) => {
               labelField="label"
               valueField="value"
             />
-            <CustomInput
-              value={newLocation}
-              setValue={setNewLocation}
-              placeholder="Location"
-              secureTextEntry={false}
-            />
+            <View style={{ width: "90%", marginTop: 5 }}>
+              <GooglePlacesInput
+                setSelectedLocation={setNewLocation}
+                setGeometry={setNewGeometry}
+              />
+            </View>
             <CustomInput
               value={newDescription}
               setValue={setNewDescription}

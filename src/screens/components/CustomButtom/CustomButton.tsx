@@ -14,6 +14,7 @@ import CommonStyles from "../../shared/CommonStyles";
 interface CustomButtonProps extends PressableProps {
   text: string;
   onPress: () => void;
+  onLongPress?: () => void;
   wrapperStyle?: StyleProp<ViewStyle>;
   containerStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -22,6 +23,7 @@ interface CustomButtonProps extends PressableProps {
 const CustomButton: React.FC<CustomButtonProps> = ({
   text,
   onPress,
+  onLongPress,
   wrapperStyle,
   containerStyle,
   textStyle,
@@ -58,6 +60,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
+        onLongPress={onLongPress}
         style={containerStyle ?? styles.container}
       >
         <Text style={textStyle ?? styles.text}>{text}</Text>

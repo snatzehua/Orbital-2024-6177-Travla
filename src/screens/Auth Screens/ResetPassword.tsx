@@ -15,11 +15,7 @@ import {
   createNativeStackNavigator,
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
-import {
-  fetchSignInMethodsForEmail,
-  getAuth,
-  sendPasswordResetEmail,
-} from "firebase/auth";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
 import CustomInput from "../components/CustomInput";
 import CustomButton from "../components/CustomButtom";

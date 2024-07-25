@@ -18,7 +18,7 @@ export interface Settings {
 const initialSettings = {
   displayEventDetails: true,
   displayUpcomingEvents: true,
-  domesticCurrency: "",
+  domesticCurrency: "USD",
 };
 
 // Not needed anymore due to fetching from online database
@@ -60,9 +60,27 @@ export const getUserData = async (): Promise<UserData> => {
           ]
         )
       );
+      const miscArray = typedTripData.misc.map((misc) => ({
+        ...misc,
+        cost: { ...misc.cost },
+      }));
+      const accomsMap = new Map(
+        Object.entries(typedTripData.accommodation).map(
+          ([dateStr, accommodation]) => [
+            dateStr,
+            // Assuming `Accommodation` has start/end dates, adjust as needed:
+            accommodation,
+          ]
+        )
+      );
 
       // Update the tripData object in the Map
-      tripsMap.set(tripId, { ...typedTripData, days: daysMap });
+      tripsMap.set(tripId, {
+        ...typedTripData,
+        days: daysMap,
+        accommodation: accomsMap,
+        misc: miscArray,
+      });
     }
 
     const userData: UserData = {
@@ -95,11 +113,24 @@ export const updateUserData = async (newUserData: UserData): Promise<void> => {
           ])
         );
 
+        // Serialize Accommodation
+        const accomsForJson = Object.fromEntries(
+          Array.from(tripData.accommodation, ([dateStr, accom]) => [
+            dateStr,
+            accom,
+          ])
+        );
+
         return [
           tripId,
           {
             ...tripData,
             days: daysForJson,
+            accommodation: accomsForJson,
+            misc: tripData.misc.map((miscItem) => ({
+              ...miscItem,
+              cost: { ...miscItem.cost }, // Deep copy cost
+            })),
           },
         ];
       })
@@ -127,5 +158,26 @@ export const clearUserData = async () => {
     console.log("User data cleared from AsyncStorage");
   } catch (error) {
     console.error("Error clearing user data:", error);
+  }
+};
+
+export const getLocationGeometry = async (
+  placeId: string
+): Promise<{ lat: number; lng: number }> => {
+  const apiKey = "YOUR_GOOGLE_MAPS_API_KEY"; // Replace with your actual API key
+  const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&key=${apiKey}`;
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.status === "OK") {
+      const location = data.result.geometry.location;
+      return location; // Return object with lat and lng properties
+    } else {
+      throw new Error("Place details request failed");
+    }
+  } catch (error) {
+    console.error("Error fetching place details:", error);
+    return { lat: 0, lng: 0 };
   }
 };

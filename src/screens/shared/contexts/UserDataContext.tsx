@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { fetchUserById, createUser } from "../../Api/userApi";
 import { fetchTrip } from "../../Api/tripApi";
+import { fetchExchangeRate } from "../CurrencyDataService";
+import { ExchangeRateOffline } from "../data/ExchangeRateOffline";
 
 interface UserData {
   _id: string;
@@ -32,6 +34,7 @@ interface UserDataContextType {
   setUserInfo: React.Dispatch<React.SetStateAction<string>>;
   userData: UserData;
   setUserData: React.Dispatch<React.SetStateAction<UserData>>;
+  exchangeRate: { [key: string]: any };
   isLoading: boolean;
   error: string | null;
 }
@@ -44,8 +47,14 @@ const UserDataContext = createContext<UserDataContextType>({
   setUser: () => {},
   userInfo: "",
   setUserInfo: () => {},
-  userData: { _id: "", uid: "", trips: new Map<string, TripData>(), settings: initialSettings},
+  userData: {
+    _id: "",
+    uid: "",
+    trips: new Map<string, TripData>(),
+    settings: initialSettings,
+  },
   setUserData: () => {},
+  exchangeRate: {},
   isLoading: true, // Initial loading state is true
   error: null,
 });
@@ -59,7 +68,15 @@ export const UserDataProvider = ({
   const [uid, setUid] = useState<string>("");
   const [user, setUser] = useState<any>(null);
   const [userInfo, setUserInfo] = useState<string>("");
-  const [userData, setUserData] = useState<UserData>({ _id: "", uid: "", trips: new Map<string, TripData>(), settings: initialSettings });
+  const [exchangeRate, setExchangeRate] = useState<{ [key: string]: any }>(
+    ExchangeRateOffline
+  );
+  const [userData, setUserData] = useState<UserData>({
+    _id: "",
+    uid: "",
+    trips: new Map<string, TripData>(),
+    settings: initialSettings,
+  });
   const [isLoading, setIsLoading] = useState(true); // State for loading
   const [error, setError] = useState<string | null>(null);
 
@@ -71,17 +88,18 @@ export const UserDataProvider = ({
       if (user) {
         console.log("Fetching user data for UID within UserDataProvider:", uid);
         try {
-
           const existingUser = await fetchUserById(uid);
           console.log("Fetched user within UserDataProvider:", existingUser);
           if (existingUser != null) {
             // Fetch each trip by its ObjectId
-            const tripFetchPromises = existingUser.trips.map((tripId: string) => fetchTrip(tripId)); // Create promises for fetching each trip by its ID
+            const tripFetchPromises = existingUser.trips.map((tripId: string) =>
+              fetchTrip(tripId)
+            ); // Create promises for fetching each trip by its ID
             const trips = await Promise.all(tripFetchPromises);
 
             // Convert trips to a map
             const tripsMap = new Map<string, TripData>(
-              trips.map(trip => {
+              trips.map((trip) => {
                 const typedTripData = trip as TripData;
                 typedTripData.start = new Date(typedTripData.start);
                 typedTripData.end = new Date(typedTripData.end);
@@ -113,7 +131,10 @@ export const UserDataProvider = ({
             console.log("Created user within UserDataProvider:", createdUser);
           }
         } catch (error) {
-          console.error("Error fetching user data within UserDataProvider:", error);
+          console.error(
+            "Error fetching user data within UserDataProvider:",
+            error
+          );
           setError("Error fetching user data");
         }
         setIsLoading(false); // Set loading to false
@@ -138,6 +159,7 @@ export const UserDataProvider = ({
         setUser,
         userData,
         setUserData,
+        exchangeRate,
         isLoading,
         error,
       }}

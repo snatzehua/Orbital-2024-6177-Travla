@@ -18,7 +18,9 @@ export const DateTimeProvider = ({
   const [date, setCurrentDate] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => setCurrentDate(new Date()), 1000);
+    const interval = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -45,11 +47,11 @@ export const DateTimeDisplay = () => {
 // Format dates
 export const formatDate = (startDate: Date, endDate: Date) => {
   if (startDate.getTime() === endDate.getTime()) {
-    return `${startDate.toISOString().split("T")[0]}`;
+    return `${startDate.toUTCString().slice(0, -13)}`;
   }
-  return `${startDate.toISOString().split("T")[0]} - ${
-    endDate.toISOString().split("T")[0]
-  }`;
+  return `${startDate.toUTCString().slice(0, -13)} - ${endDate
+    .toUTCString()
+    .slice(0, -13)}`;
 };
 
 // Convert 24h format to 12h format
@@ -103,6 +105,23 @@ export const getEmptyDaysMap = (
   return days;
 };
 
+export const getEmptyAccommodationMap = (
+  startDate: Date,
+  endDate: Date
+): Map<string, Accommodation> => {
+  const accoms = new Map<string, Accommodation>();
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    const dateKey = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD
+    accoms.set(dateKey, { name: "", cost: { currency: "", amount: 0 } });
+    currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+  }
+
+  console.log(accoms);
+  return accoms;
+};
+
 export const updateTripDates = (
   dates: Map<string, EventData[]>,
   newStart: Date,
@@ -119,6 +138,26 @@ export const updateTripDates = (
   for (const dateKey of dateKeys) {
     if (!dates.has(dateKey)) {
       dates.set(dateKey, []); // Add with empty array
+    }
+  }
+};
+
+export const updateAccomsDates = (
+  accoms: Map<string, Accommodation>,
+  newStart: Date,
+  newEnd: Date
+) => {
+  const dateKeys = getEmptyDaysArray(newStart, newEnd);
+  for (const existingKey of accoms.keys()) {
+    if (!dateKeys.includes(existingKey)) {
+      accoms.delete(existingKey);
+    }
+  }
+
+  // Add new keys (if not already present)
+  for (const dateKey of dateKeys) {
+    if (!accoms.has(dateKey)) {
+      accoms.set(dateKey, { name: "", cost: { currency: "", amount: 0 } }); // Add with empty array
     }
   }
 };
@@ -140,6 +179,13 @@ export const convertToEndDate = (date: Date) => {
       59
     )
   );
+};
+
+export const convertDateKeyToUTC = (string: string) => {
+  console.log(string);
+  const adjusted = new Date(string + "T00:00:00.000Z");
+  console.log(adjusted);
+  return adjusted;
 };
 
 export const isWithinDateRange = (date: Date, start: Date, end: Date) => {

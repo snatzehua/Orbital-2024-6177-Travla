@@ -20,10 +20,12 @@ import ErrorDisplay from "../../ErrorDisplay/ErrorDisplay";
 import CustomButton from "../../CustomButtom/CustomButton";
 import {
   formatDate,
+  updateAccomsDates,
   updateTripDates,
 } from "../../../shared/contexts/DateTimeContext";
 import CommonStyles from "../../../shared/CommonStyles";
 import { Tags } from "../../../shared/data/Tags";
+import GooglePlacesInput from "../../GooglePlacesAuto/GooglePlacesAutoInput";
 
 interface EditBannerProps {
   bannerData: BannerData;
@@ -50,6 +52,11 @@ const EditBanner: React.FC<EditBannerProps> = ({
   const [items, setItems] = useState<string[]>(editedData?.items ?? []);
   const [startDate, setStartDate] = useState<Date>(editedData.start);
   const [endDate, setEndDate] = useState<Date>(editedData.end);
+
+  const [newLocation, setNewLocation] = useState(editedData?.location ?? "");
+  const [newGeometry, setNewGeometry] = useState(
+    editedData?.geometry ?? { lat: 0, lng: 0 }
+  );
 
   useEffect(() => {
     if (startDate > endDate) {
@@ -88,10 +95,17 @@ const EditBanner: React.FC<EditBannerProps> = ({
         items: items.filter((item) => item.trim() !== ""),
         start: startDate,
         end: endDate,
+        location: newLocation,
+        geometry: newGeometry,
       });
 
       // Trip
     } else if (editedData.datatype === "Trip") {
+      if (editedData.start != startDate || editedData.end != endDate) {
+        console.log("Procced!");
+        updateTripDates(editedData.days, startDate, endDate);
+        updateAccomsDates(editedData.accommodation, startDate, endDate);
+      }
       onUpdate(bannerData.title, {
         ...editedData,
         start: startDate,
@@ -251,7 +265,7 @@ const EditBanner: React.FC<EditBannerProps> = ({
                     marginTop: 10,
                   }}
                 >
-                  <Text style={styles.input_titles}>Location</Text>
+                  <Text style={styles.input_titles}>Tag</Text>
                 </View>
                 <Dropdown
                   style={{
@@ -277,12 +291,22 @@ const EditBanner: React.FC<EditBannerProps> = ({
                   labelField="label"
                   valueField="value"
                 />
-                <CustomInput
-                  value={(editedData as EventData).location}
-                  setValue={(value) => handleInputChange("location", value)}
-                  placeholder="..."
-                  secureTextEntry={false}
-                />
+                <View
+                  style={{
+                    width: "90%",
+                    alignItems: "flex-start",
+                    marginTop: 10,
+                  }}
+                >
+                  <Text style={styles.input_titles}>Location</Text>
+                </View>
+                <View style={{ width: "90%", marginTop: 5 }}>
+                  <GooglePlacesInput
+                    setSelectedLocation={setNewLocation}
+                    setGeometry={setNewGeometry}
+                    placeholder={newLocation}
+                  />
+                </View>
                 <View
                   style={{
                     width: "90%",
