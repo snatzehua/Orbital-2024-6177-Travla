@@ -46,7 +46,7 @@ const Trips = () => {
 
   // Data
   const { date } = useDate();
-  const { userData, setUserData } = useUserData();
+  const { uid, userData, setUserData } = useUserData();
   const [trips, setTrips] = useState<TripData[]>([]);
   const [currentTrips, setCurrentTrips] = useState<string[]>([]);
 
@@ -100,7 +100,7 @@ const Trips = () => {
         const newTrips = new Map(prevUserData.trips);
         newTrips.set(newTrip.title, newTrip);
         const updatedUserData = { ...prevUserData, trips: newTrips };
-        updateUserData(updatedUserData);
+        updateUserData(updatedUserData, uid);
         return updatedUserData;
       });
     };

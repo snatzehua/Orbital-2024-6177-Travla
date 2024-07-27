@@ -17,10 +17,7 @@ import AddButton from "../../../Trips Screens/AddButton";
 import EventBanner from "../EventFiles/EventBanner";
 import BackButton from "../../BackButton/BackButton";
 import AddEvent from "../EventFiles/AddEvent";
-import {
-  getLocationGeometry,
-  updateUserData,
-} from "../../../shared/UserDataService";
+import { updateUserData } from "../../../shared/UserDataService";
 import { useUserData } from "../../../shared/contexts/UserDataContext";
 import AddAccomodation from "../EventFiles/AddAccommodation";
 import CustomButton from "../../CustomButtom/CustomButton";
