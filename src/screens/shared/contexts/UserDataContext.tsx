@@ -3,8 +3,6 @@ import { UserData, createEmptyUserData, getUserData } from "../UserDataService";
 import { getAuth } from "firebase/auth";
 import { fetchExchangeRate } from "../CurrencyDataService";
 import { ExchangeRateOffline } from "../data/ExchangeRateOffline";
-import { addData, retrieveData, upsertData } from "../SupabaseService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // 1. Interface for Type Safety (with isLoading)
 interface UserDataContextType {
@@ -55,37 +53,8 @@ export const UserDataProvider = ({
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        let fetchedSupaData = null;
-        let supaTimestamp: Date | null = null;
-        if (uid) {
-          setUid(uid);
-          console.log("Set UID to: ", uid);
-          const dataSupa = await retrieveData(uid);
-          fetchedSupaData = dataSupa?.userData;
-          supaTimestamp = dataSupa?.lastUpdated
-            ? new Date(dataSupa.lastUpdated)
-            : null;
-        }
-        const fetchedAsyncData = await getUserData(uid);
-        const asyncTimestampString = await AsyncStorage.getItem(
-          uid + "lastUpdated"
-        );
-        const asyncTimestamp = asyncTimestampString
-          ? new Date(asyncTimestampString)
-          : null;
-        if (!fetchedSupaData && !fetchedAsyncData) {
-          setUserData(createEmptyUserData());
-        } else if (fetchedSupaData == null || fetchedSupaData == undefined) {
-          setUserData(fetchedAsyncData);
-        } else if (fetchedAsyncData == null) {
-          setUserData(fetchedSupaData);
-        } else {
-          if (fetchedSupaData > fetchedAsyncData) {
-            setUserData(fetchedSupaData);
-          } else {
-            setUserData(fetchedAsyncData);
-          }
-        }
+        const fetchedData = await getUserData();
+        setUserData(fetchedData ?? createEmptyUserData());
       } catch (err) {
         setError("Error fetching user data");
       } finally {
@@ -106,6 +75,7 @@ export const UserDataProvider = ({
       setUid(user.uid);
       console.log("User ID from Firebase Auth:", user.uid);
     }
+
     fetchUserData();
     getExchangeRateObject();
     console.log(exchangeRate);

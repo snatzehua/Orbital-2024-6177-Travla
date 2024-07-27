@@ -33,7 +33,8 @@ import CommonStyles from "../shared/CommonStyles";
 
 const Profile = () => {
   // Data
-  const { uid, userData, setUserData } = useUserData();
+  const { userData, setUserData } = useUserData();
+  const UID = getAuth().currentUser?.uid;
   const email = getAuth().currentUser?.email;
   const [displayEventDetailsState, setDisplayEventDetailsState] = useState(
     userData.settings.displayEventDetails
@@ -79,7 +80,7 @@ const Profile = () => {
         {
           text: "Clear",
           onPress: () => {
-            clearUserData(uid);
+            clearUserData();
             setUserData(createEmptyUserData());
           },
           style: "destructive", // Indicate a destructive action
@@ -122,7 +123,7 @@ const Profile = () => {
           },
         };
         console.log("Set to:", changedSetting);
-        updateUserData(updatedUserData, uid);
+        updateUserData(updatedUserData);
         return updatedUserData;
       });
   };
@@ -138,7 +139,7 @@ const Profile = () => {
         },
       };
       console.log("Set to:", newCurrency);
-      updateUserData(updatedUserData, uid);
+      updateUserData(updatedUserData);
       return updatedUserData;
     });
   };
@@ -213,7 +214,7 @@ const Profile = () => {
             <View style={styles.component_background}>
               <View style={{ flexDirection: "row" }}>
                 <Text style={styles.settings_header}>UID: </Text>
-                <Text>{uid}</Text>
+                <Text>{UID}</Text>
               </View>
               <View style={{ flexDirection: "row" }}>
                 <Text style={styles.settings_header}>Email: </Text>

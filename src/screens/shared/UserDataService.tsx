@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const USER_DATA_KEY = "userData";
+
 export interface UserData {
   uid: string;
   trips: Map<string, TripData>;
@@ -26,9 +28,9 @@ export const createEmptyUserData: () => UserData = () => ({
 });
 
 // Get UserData
-export const getUserData = async (uid: string): Promise<UserData> => {
+export const getUserData = async (): Promise<UserData> => {
   try {
-    const jsonValue = await AsyncStorage.getItem(uid);
+    const jsonValue = await AsyncStorage.getItem(USER_DATA_KEY);
     if (!jsonValue) {
       return createEmptyUserData();
     }
@@ -91,10 +93,7 @@ export const getUserData = async (uid: string): Promise<UserData> => {
 };
 
 // Update UserData
-export const updateUserData = async (
-  newUserData: UserData,
-  uid: string
-): Promise<void> => {
+export const updateUserData = async (newUserData: UserData): Promise<void> => {
   try {
     const tripsForJson = Object.fromEntries(
       Array.from(newUserData.trips, ([tripId, tripData]) => {
@@ -110,11 +109,20 @@ export const updateUserData = async (
           ])
         );
 
+        // Serialize Accommodation
+        const accomsForJson = Object.fromEntries(
+          Array.from(tripData.accommodation, ([dateStr, accom]) => [
+            dateStr,
+            accom,
+          ])
+        );
+
         return [
           tripId,
           {
             ...tripData,
             days: daysForJson,
+            accommodation: accomsForJson,
             misc: tripData.misc.map((miscItem) => ({
               ...miscItem,
               cost: { ...miscItem.cost }, // Deep copy cost
@@ -124,25 +132,48 @@ export const updateUserData = async (
       })
     );
 
-    await AsyncStorage.setItem(
-      uid,
-      JSON.stringify({
+    // Serialize Full UserData
+    const jsonData = JSON.stringify(
+      {
         ...newUserData,
-        trips: tripsForJson,
-      })
-    );
-    await AsyncStorage.setItem(uid + "lastUpdated", new Date().toISOString());
+        trips: tripsForJson, // Replace with the serialized trips
+      },
+      null,
+      2
+    ); // Pretty-print with indentation
+    await AsyncStorage.setItem(USER_DATA_KEY, jsonData);
   } catch (error) {
     console.error("Error updating user data:", error);
   }
 };
 
 // Clear UserData
-export const clearUserData = async (uid: string) => {
+export const clearUserData = async () => {
   try {
-    await AsyncStorage.removeItem(uid);
+    await AsyncStorage.removeItem(USER_DATA_KEY);
     console.log("User data cleared from AsyncStorage");
   } catch (error) {
     console.error("Error clearing user data:", error);
+  }
+};
+
+export const getLocationGeometry = async (
+  placeId: string
+): Promise<{ lat: number; lng: number }> => {
+  const apiKey = "YOUR_GOOGLE_MAPS_API_KEY"; // Replace with your actual API key
+  const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&key=${apiKey}`;
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+
+    if (data.status === "OK") {
+      const location = data.result.geometry.location;
+      return location; // Return object with lat and lng properties
+    } else {
+      throw new Error("Place details request failed");
+    }
+  } catch (error) {
+    console.error("Error fetching place details:", error);
+    return { lat: 0, lng: 0 };
   }
 };

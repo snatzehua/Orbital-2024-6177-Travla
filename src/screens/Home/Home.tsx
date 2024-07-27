@@ -32,12 +32,11 @@ import {
   getUTCTime,
 } from "../shared/contexts/DateTimeContext";
 import AddButton from "../Trips Screens/AddButton";
-import { addData } from "../shared/SupabaseService";
 
 const Home = () => {
   // Data
   const [refreshing, setRefreshing] = useState(false);
-  const { uid, userData, setUserData } = useUserData();
+  const { userData, setUserData } = useUserData();
   const [currentTrips, setCurrentTrips] = useState<string[]>([]);
   const [accommodation, setAccommodation] = useState<string[]>([]);
   const [events, setEvents] = useState<EventData[]>([]);
@@ -146,7 +145,7 @@ const Home = () => {
           days: updatedDays,
         }),
       };
-      updateUserData(updatedUserData, uid);
+      updateUserData(updatedUserData);
       return updatedUserData;
     });
   };
