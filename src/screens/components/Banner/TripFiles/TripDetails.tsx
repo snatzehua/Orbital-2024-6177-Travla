@@ -17,16 +17,14 @@ import AddButton from "../../../Trips Screens/AddButton";
 import EventBanner from "../EventFiles/EventBanner";
 import BackButton from "../../BackButton/BackButton";
 import AddEvent from "../EventFiles/AddEvent";
-import {
-  getLocationGeometry,
-  updateUserData,
-} from "../../../shared/UserDataService";
+import { updateUserData } from "../../../shared/UserDataService";
 import { useUserData } from "../../../shared/contexts/UserDataContext";
 import AddAccomodation from "../EventFiles/AddAccommodation";
 import CustomButton from "../../CustomButtom/CustomButton";
 import CommonStyles from "../../../shared/CommonStyles";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import SelectTrip from "../../SelectionComponents/SelectTrip";
+import { upsertData } from "../../../shared/SupabaseService";
 
 interface TripDetailsProps {
   tripData: TripData;
@@ -39,7 +37,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
   isVisible,
   onClose,
 }) => {
-  const { userData, setUserData } = useUserData();
+  const { uid, userData, setUserData } = useUserData();
   const events = Array.from(tripData.days.values());
   const dates = Array.from(tripData.days.keys());
   const accommodations = Array.from(tripData.accommodation.values());
@@ -110,6 +108,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
         }),
       };
       updateUserData(updatedUserData);
+      upsertData(uid, userData);
       return updatedUserData;
     });
   };
@@ -135,6 +134,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
         }),
       };
       updateUserData(updatedUserData);
+      upsertData(uid, userData);
       return updatedUserData;
     });
   };
@@ -149,6 +149,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
     });
     userData.trips.set(tripData.title, tripData);
     updateUserData(userData);
+    upsertData(uid, userData);
   };
 
   return (

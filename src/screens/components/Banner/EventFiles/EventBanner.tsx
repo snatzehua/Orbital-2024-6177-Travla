@@ -8,6 +8,7 @@ import { EventData } from "..";
 import { formatTime } from "../../../shared/contexts/DateTimeContext";
 import { useUserData } from "../../../shared/contexts/UserDataContext";
 import { updateUserData } from "../../../shared/UserDataService";
+import { upsertData } from "../../../shared/SupabaseService";
 
 type EventBannerProps = {
   data: EventData;
@@ -21,7 +22,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
   const eventBody = displayEventDetails ? <EventBody data={data} /> : null;
 
   // Extract data from wrapped datapck
-  const { setUserData } = useUserData();
+  const { uid, userData, setUserData } = useUserData();
   const [isEditing, setIsEditing] = useState(false);
   const [isViewing, setIsViewing] = useState(false);
 
@@ -46,6 +47,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
       }
       const updatedTrips = { ...prevUserData, trips: trips };
       updateUserData(updatedTrips);
+      upsertData(uid, userData);
       return updatedTrips;
     });
     setIsEditing(false); // Close the modal after saving
@@ -65,6 +67,7 @@ const EventBanner: React.FC<EventBannerProps> = ({
       }
       const updatedUserData = { ...prevUserData, trips: trips };
       updateUserData(updatedUserData);
+      upsertData(uid, userData);
       return updatedUserData;
     });
     setIsEditing(false); // Close the modal after saving};

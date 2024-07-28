@@ -7,12 +7,13 @@ import { EventData, TripData } from "..";
 
 import EditBanner from "../Base/EditBanner";
 import TripDetails from "../TripFiles/TripDetails";
-import { useUserData } from "../../../shared/UserDataContext";
+import { useUserData } from "../../../shared/contexts/UserDataContext";
 import { updateUserData } from "../../../shared/UserDataService";
 import {
   formatDate,
   formatTime,
 } from "../../../shared/contexts/DateTimeContext";
+import { upsertData } from "../../../shared/SupabaseService";
 
 type BannerProps = {
   data: EventData | TripData;
@@ -24,7 +25,7 @@ const Banner: React.FC<BannerProps> = ({
   displayEventDetails = true,
 }) => {
   // Extract data from wrapped datapck
-  const { setUserData } = useUserData();
+  const { uid, userData, setUserData } = useUserData();
   const [isEditing, setIsEditing] = useState(false);
   const [isViewing, setIsViewing] = useState(false);
 
@@ -74,6 +75,7 @@ const Banner: React.FC<BannerProps> = ({
       }
       const updatedTrips = { ...prevUserData, trips: trips };
       updateUserData(updatedTrips);
+      upsertData(uid, userData);
       return updatedTrips;
     });
     setIsEditing(false); // Close the modal after saving
@@ -97,6 +99,7 @@ const Banner: React.FC<BannerProps> = ({
       }
       const updatedUserData = { ...prevUserData, trips: trips };
       updateUserData(updatedUserData);
+      upsertData(uid, userData);
       return updatedUserData;
     });
     setIsEditing(false); // Close the modal after saving};

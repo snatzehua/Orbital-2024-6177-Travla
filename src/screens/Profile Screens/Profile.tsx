@@ -30,11 +30,15 @@ import {
 } from "../shared/UserDataService";
 import { useUserData } from "../shared/contexts/UserDataContext";
 import CommonStyles from "../shared/CommonStyles";
+import {
+  deleteData,
+  retrieveData,
+  upsertData,
+} from "../shared/SupabaseService";
 
 const Profile = () => {
   // Data
-  const { userData, setUserData } = useUserData();
-  const UID = getAuth().currentUser?.uid;
+  const { uid, userData, setUserData } = useUserData();
   const email = getAuth().currentUser?.email;
   const [displayEventDetailsState, setDisplayEventDetailsState] = useState(
     userData.settings.displayEventDetails
@@ -68,7 +72,30 @@ const Profile = () => {
     }
     navigation.navigate("Login");
   };
-  const handleClearData = async () => {
+  const handleDownload = async () => {
+    Alert.alert(
+      "Confirm Download Data",
+      "Are you sure you want to download account data? This may delete any unsaved data.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Clear",
+          onPress: () => {
+            retrieveData(uid).then((ud) => {
+              if (ud) {
+                setUserData(ud);
+              }
+            });
+          },
+          style: "destructive", // Indicate a destructive action
+        },
+      ]
+    );
+  };
+  const handleClearDataLocal = async () => {
     Alert.alert(
       "Confirm Clear Data",
       "Are you sure you want to clear all your data? This action cannot be undone.",
@@ -82,6 +109,27 @@ const Profile = () => {
           onPress: () => {
             clearUserData();
             setUserData(createEmptyUserData());
+          },
+          style: "destructive", // Indicate a destructive action
+        },
+      ]
+    );
+  };
+  const handleClearDataAll = async () => {
+    Alert.alert(
+      "Confirm Clear Data",
+      "Are you sure you want to clear all your data? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Clear",
+          onPress: () => {
+            clearUserData();
+            setUserData(createEmptyUserData());
+            deleteData(uid);
           },
           style: "destructive", // Indicate a destructive action
         },
@@ -124,6 +172,7 @@ const Profile = () => {
         };
         console.log("Set to:", changedSetting);
         updateUserData(updatedUserData);
+        upsertData(uid, userData);
         return updatedUserData;
       });
   };
@@ -140,6 +189,7 @@ const Profile = () => {
       };
       console.log("Set to:", newCurrency);
       updateUserData(updatedUserData);
+      upsertData(uid, userData);
       return updatedUserData;
     });
   };
@@ -214,7 +264,7 @@ const Profile = () => {
             <View style={styles.component_background}>
               <View style={{ flexDirection: "row" }}>
                 <Text style={styles.settings_header}>UID: </Text>
-                <Text>{UID}</Text>
+                <Text>{uid}</Text>
               </View>
               <View style={{ flexDirection: "row" }}>
                 <Text style={styles.settings_header}>Email: </Text>
@@ -224,6 +274,13 @@ const Profile = () => {
             <CustomButton
               text="Request password reset"
               onPress={handlePasswordResetEmail}
+              containerStyle={styles.logout_container}
+              textStyle={styles.logout_text}
+            />
+            <CustomButton
+              text="Logout"
+              onPress={handleLogout}
+              wrapperStyle={{}}
               containerStyle={styles.logout_container}
               textStyle={styles.logout_text}
             />
@@ -325,20 +382,32 @@ const Profile = () => {
               />
             </View>
             <CustomButton
-              text="Logout"
-              onPress={handleLogout}
+              text="Download Account Data (Hold)"
+              onPress={() => {}}
+              onLongPress={handleDownload}
               wrapperStyle={{}}
               containerStyle={styles.logout_container}
               textStyle={styles.logout_text}
             />
-            <CustomButton
-              text="Clear All Data (Press and Hold)"
-              onPress={() => {}}
-              onLongPress={handleClearData}
-              wrapperStyle={{}}
-              containerStyle={styles.clear_items_container}
-              textStyle={styles.clear_items_text}
-            />
+            <View style={{ flexDirection: "row" }}>
+              <CustomButton
+                text="Clear Local Data (Hold)"
+                onPress={() => {}}
+                onLongPress={handleClearDataLocal}
+                wrapperStyle={{ flex: 1 }}
+                containerStyle={styles.clear_items_container}
+                textStyle={styles.clear_items_text}
+              />
+              <View style={{ width: "3%" }} />
+              <CustomButton
+                text="Clear All Data (Hold)"
+                onPress={() => {}}
+                onLongPress={handleClearDataAll}
+                wrapperStyle={{ flex: 1 }}
+                containerStyle={styles.clear_items_container}
+                textStyle={styles.clear_items_text}
+              />
+            </View>
           </ScrollView>
         </View>
       </SafeAreaView>

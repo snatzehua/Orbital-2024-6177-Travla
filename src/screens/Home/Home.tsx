@@ -32,11 +32,18 @@ import {
   getUTCTime,
 } from "../shared/contexts/DateTimeContext";
 import AddButton from "../Trips Screens/AddButton";
+import {
+  addData,
+  deleteData,
+  retrieveData,
+  upsertData,
+} from "../shared/SupabaseService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Home = () => {
   // Data
   const [refreshing, setRefreshing] = useState(false);
-  const { userData, setUserData } = useUserData();
+  const { uid, userData, setUserData } = useUserData();
   const [currentTrips, setCurrentTrips] = useState<string[]>([]);
   const [accommodation, setAccommodation] = useState<string[]>([]);
   const [events, setEvents] = useState<EventData[]>([]);
@@ -146,6 +153,7 @@ const Home = () => {
         }),
       };
       updateUserData(updatedUserData);
+      upsertData(uid, userData);
       return updatedUserData;
     });
   };

@@ -24,6 +24,7 @@ import AddEvent from "../components/Banner/EventFiles/AddEvent";
 import AddMisc from "../components/Banner/EventFiles/AddMisc";
 import { updateUserData } from "../shared/UserDataService";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { upsertData } from "../shared/SupabaseService";
 
 interface FinancesProps {
   trip: string;
@@ -31,7 +32,7 @@ interface FinancesProps {
 }
 
 const Finances: React.FC<FinancesProps> = ({ trip, toggleFinances }) => {
-  const { exchangeRate, userData, setUserData } = useUserData();
+  const { uid, exchangeRate, userData, setUserData } = useUserData();
   const [viewDimensions, setViewDimensions] = useState({ width: 0, height: 0 });
 
   const [totalCost, setTotalCost] = useState(0);
@@ -173,6 +174,7 @@ const Finances: React.FC<FinancesProps> = ({ trip, toggleFinances }) => {
       const miscArray = tripData.misc;
       miscArray.splice(index, 1);
       updateUserData(userData);
+      upsertData(uid, userData);
       triggerNewRender();
     }
   };
@@ -186,6 +188,7 @@ const Finances: React.FC<FinancesProps> = ({ trip, toggleFinances }) => {
       );
       triggerNewRender();
       updateUserData(userData);
+      upsertData(uid, userData);
     }
   };
 

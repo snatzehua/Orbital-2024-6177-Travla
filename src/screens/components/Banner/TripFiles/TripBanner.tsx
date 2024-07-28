@@ -8,6 +8,7 @@ import { TripData } from "..";
 import { formatDate } from "../../../shared/contexts/DateTimeContext";
 import { useUserData } from "../../../shared/contexts/UserDataContext";
 import { updateUserData } from "../../../shared/UserDataService";
+import { upsertData } from "../../../shared/SupabaseService";
 
 type TripBannerProps = {
   data: TripData;
@@ -15,7 +16,7 @@ type TripBannerProps = {
 
 const TripBanner: React.FC<TripBannerProps> = ({ data }) => {
   // Extract data from wrapped datapck
-  const { setUserData } = useUserData();
+  const { uid, userData, setUserData } = useUserData();
   const [isEditing, setIsEditing] = useState(false);
   const [isViewing, setIsViewing] = useState(false);
 
@@ -32,6 +33,7 @@ const TripBanner: React.FC<TripBannerProps> = ({ data }) => {
       trips.set(data.trip, updatedData);
       const updatedTrips = { ...prevUserData, trips: trips };
       updateUserData(updatedTrips);
+      upsertData(uid, userData);
       return updatedTrips;
     });
     setIsEditing(false); // Close the modal after saving
@@ -42,6 +44,7 @@ const TripBanner: React.FC<TripBannerProps> = ({ data }) => {
       trips.delete(data.trip);
       const updatedUserData = { ...prevUserData, trips: trips };
       updateUserData(updatedUserData);
+      upsertData(uid, userData);
       return updatedUserData;
     });
     setIsEditing(false); // Close the modal after saving};

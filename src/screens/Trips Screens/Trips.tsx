@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -33,6 +33,7 @@ import {
   isWithinDateRange,
   getUTCTime,
 } from "../shared/contexts/DateTimeContext";
+import { upsertData } from "../shared/SupabaseService";
 
 const Trips = () => {
   // Typing for navigation
@@ -46,7 +47,7 @@ const Trips = () => {
 
   // Data
   const { date } = useDate();
-  const { userData, setUserData } = useUserData();
+  const { uid, userData, setUserData } = useUserData();
   const [trips, setTrips] = useState<TripData[]>([]);
   const [currentTrips, setCurrentTrips] = useState<string[]>([]);
 
@@ -101,6 +102,7 @@ const Trips = () => {
         newTrips.set(newTrip.title, newTrip);
         const updatedUserData = { ...prevUserData, trips: newTrips };
         updateUserData(updatedUserData);
+        upsertData(uid, userData);
         return updatedUserData;
       });
     };

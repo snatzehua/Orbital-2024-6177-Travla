@@ -3,7 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const USER_DATA_KEY = "userData";
 
 export interface UserData {
-  uid: string;
   trips: Map<string, TripData>;
   settings: Settings;
 }
@@ -21,11 +20,13 @@ const initialSettings = {
 };
 
 // Create empty UserData
-export const createEmptyUserData: () => UserData = () => ({
-  uid: "",
-  trips: new Map<string, TripData>(),
-  settings: initialSettings,
-});
+export const createEmptyUserData: () => UserData = () => {
+  AsyncStorage.setItem("lastUpdated", new Date().toISOString());
+  return {
+    trips: new Map<string, TripData>(),
+    settings: initialSettings,
+  };
+};
 
 // Get UserData
 export const getUserData = async (): Promise<UserData> => {
@@ -142,6 +143,7 @@ export const updateUserData = async (newUserData: UserData): Promise<void> => {
       2
     ); // Pretty-print with indentation
     await AsyncStorage.setItem(USER_DATA_KEY, jsonData);
+    await AsyncStorage.setItem("lastUpdated", new Date().toISOString());
   } catch (error) {
     console.error("Error updating user data:", error);
   }
@@ -151,29 +153,9 @@ export const updateUserData = async (newUserData: UserData): Promise<void> => {
 export const clearUserData = async () => {
   try {
     await AsyncStorage.removeItem(USER_DATA_KEY);
+    await AsyncStorage.setItem("lastUpdated", new Date().toISOString());
     console.log("User data cleared from AsyncStorage");
   } catch (error) {
     console.error("Error clearing user data:", error);
-  }
-};
-
-export const getLocationGeometry = async (
-  placeId: string
-): Promise<{ lat: number; lng: number }> => {
-  const apiKey = "YOUR_GOOGLE_MAPS_API_KEY"; // Replace with your actual API key
-  const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&key=${apiKey}`;
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-
-    if (data.status === "OK") {
-      const location = data.result.geometry.location;
-      return location; // Return object with lat and lng properties
-    } else {
-      throw new Error("Place details request failed");
-    }
-  } catch (error) {
-    console.error("Error fetching place details:", error);
-    return { lat: 0, lng: 0 };
   }
 };
