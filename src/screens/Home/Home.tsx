@@ -36,6 +36,7 @@ import {
   addData,
   deleteData,
   retrieveData,
+  retrieveLastUpdated,
   upsertData,
 } from "../shared/SupabaseService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -347,7 +348,14 @@ const Home = () => {
           <View style={{ flexDirection: "row", alignItems: "center" }}></View>
           {true ? (
             <View style={{ width: "95%" }}>
-              <AddButton onPressFunction={() => {}} text={"debuggerButton"} />
+              <AddButton
+                onPressFunction={() => {
+                  retrieveLastUpdated(uid).then((value) => {
+                    console.log(value);
+                  });
+                }}
+                text={"debuggerButton"}
+              />
             </View>
           ) : null}
           <MenuBar toggleModal={toggleModal} />

@@ -1,6 +1,22 @@
 import { supabase } from "../../../utils/supabase";
 import { UserData } from "./UserDataService";
 
+export const retrieveLastUpdated = async (
+  uid: string
+): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("travla_users")
+      .select("lastUpdated") // Select the JSON column containing the user data
+      .eq("id", uid) // Filter by the provided uid
+      .single(); // Expect only one row for this user
+    return data?.lastUpdated;
+  } catch (error) {
+    console.error("Unexpected error while retrieving timestamp:", error);
+    return null; // Return null in case of an unexpected error}
+  }
+};
+
 export const retrieveData = async (uid: string): Promise<UserData | null> => {
   try {
     const { data, error } = await supabase
@@ -65,7 +81,6 @@ export const retrieveData = async (uid: string): Promise<UserData | null> => {
         uid: parsedData.uid || "", // Ensure uid is set
         trips: tripsMap,
       };
-      console.log(userData);
 
       return userData;
     }
@@ -110,7 +125,7 @@ export const addData = async (
             accommodation: accomsForJson,
             misc: tripData.misc.map((miscItem) => ({
               ...miscItem,
-              cost: { ...miscItem.cost }, // Deep copy cost
+              cost: { ...miscItem.cost },
             })),
           },
         ];

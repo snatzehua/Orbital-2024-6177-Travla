@@ -74,8 +74,8 @@ const Profile = () => {
   };
   const handleDownload = async () => {
     Alert.alert(
-      "Confirm Download Data",
-      "Are you sure you want to download account data? This may delete any unsaved data.",
+      "Confirm Syncing of Data",
+      "Are you sure you want to manually sync data? This may delete local data.",
       [
         {
           text: "Cancel",
@@ -89,26 +89,6 @@ const Profile = () => {
                 setUserData(ud);
               }
             });
-          },
-          style: "destructive", // Indicate a destructive action
-        },
-      ]
-    );
-  };
-  const handleClearDataLocal = async () => {
-    Alert.alert(
-      "Confirm Clear Data",
-      "Are you sure you want to clear all your data? This action cannot be undone.",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Clear",
-          onPress: () => {
-            clearUserData();
-            setUserData(createEmptyUserData());
           },
           style: "destructive", // Indicate a destructive action
         },
@@ -382,32 +362,21 @@ const Profile = () => {
               />
             </View>
             <CustomButton
-              text="Download Account Data (Hold)"
+              text="Manual Sync (Hold)"
               onPress={() => {}}
               onLongPress={handleDownload}
               wrapperStyle={{}}
               containerStyle={styles.logout_container}
               textStyle={styles.logout_text}
             />
-            <View style={{ flexDirection: "row" }}>
-              <CustomButton
-                text="Clear Local Data (Hold)"
-                onPress={() => {}}
-                onLongPress={handleClearDataLocal}
-                wrapperStyle={{ flex: 1 }}
-                containerStyle={styles.clear_items_container}
-                textStyle={styles.clear_items_text}
-              />
-              <View style={{ width: "3%" }} />
-              <CustomButton
-                text="Clear All Data (Hold)"
-                onPress={() => {}}
-                onLongPress={handleClearDataAll}
-                wrapperStyle={{ flex: 1 }}
-                containerStyle={styles.clear_items_container}
-                textStyle={styles.clear_items_text}
-              />
-            </View>
+            <CustomButton
+              text="Delete Data (Hold)"
+              onPress={() => {}}
+              onLongPress={handleClearDataAll}
+              wrapperStyle={{ flex: 1 }}
+              containerStyle={styles.clear_items_container}
+              textStyle={styles.clear_items_text}
+            />
           </ScrollView>
         </View>
       </SafeAreaView>
