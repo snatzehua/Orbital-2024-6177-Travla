@@ -75,7 +75,7 @@ const Banner: React.FC<BannerProps> = ({
       }
       const updatedTrips = { ...prevUserData, trips: trips };
       updateUserData(updatedTrips);
-      upsertData(uid, userData);
+      upsertData(uid, updatedTrips);
       return updatedTrips;
     });
     setIsEditing(false); // Close the modal after saving
@@ -99,7 +99,7 @@ const Banner: React.FC<BannerProps> = ({
       }
       const updatedUserData = { ...prevUserData, trips: trips };
       updateUserData(updatedUserData);
-      upsertData(uid, userData);
+      upsertData(uid, updatedUserData);
       return updatedUserData;
     });
     setIsEditing(false); // Close the modal after saving};

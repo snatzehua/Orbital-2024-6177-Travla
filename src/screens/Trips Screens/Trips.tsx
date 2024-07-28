@@ -102,7 +102,7 @@ const Trips = () => {
         newTrips.set(newTrip.title, newTrip);
         const updatedUserData = { ...prevUserData, trips: newTrips };
         updateUserData(updatedUserData);
-        upsertData(uid, userData);
+        upsertData(uid, updatedUserData);
         return updatedUserData;
       });
     };

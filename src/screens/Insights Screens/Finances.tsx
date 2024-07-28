@@ -20,7 +20,6 @@ import { useUserData } from "../shared/contexts/UserDataContext";
 import PieChart from "../components/PieChart/PieChart";
 import PieChartLegend from "../components/PieChart/PieChartLegend";
 import AddButton from "../Trips Screens/AddButton";
-import AddEvent from "../components/Banner/EventFiles/AddEvent";
 import AddMisc from "../components/Banner/EventFiles/AddMisc";
 import { updateUserData } from "../shared/UserDataService";
 import { TouchableOpacity } from "react-native-gesture-handler";

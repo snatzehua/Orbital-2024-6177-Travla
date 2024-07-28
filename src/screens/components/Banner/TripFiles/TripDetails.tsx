@@ -108,7 +108,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
         }),
       };
       updateUserData(updatedUserData);
-      upsertData(uid, userData);
+      upsertData(uid, updatedUserData);
       return updatedUserData;
     });
   };
@@ -134,7 +134,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({
         }),
       };
       updateUserData(updatedUserData);
-      upsertData(uid, userData);
+      upsertData(uid, updatedUserData);
       return updatedUserData;
     });
   };

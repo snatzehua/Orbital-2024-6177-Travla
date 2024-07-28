@@ -32,13 +32,7 @@ import {
   getUTCTime,
 } from "../shared/contexts/DateTimeContext";
 import AddButton from "../Trips Screens/AddButton";
-import {
-  addData,
-  deleteData,
-  retrieveData,
-  retrieveLastUpdated,
-  upsertData,
-} from "../shared/SupabaseService";
+import { retrieveLastUpdated, upsertData } from "../shared/SupabaseService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Home = () => {
@@ -154,7 +148,7 @@ const Home = () => {
         }),
       };
       updateUserData(updatedUserData);
-      upsertData(uid, userData);
+      upsertData(uid, updatedUserData);
       return updatedUserData;
     });
   };

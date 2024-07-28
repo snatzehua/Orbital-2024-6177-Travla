@@ -109,7 +109,7 @@ const Profile = () => {
           onPress: () => {
             clearUserData();
             setUserData(createEmptyUserData());
-            deleteData(uid);
+            upsertData(uid, createEmptyUserData());
           },
           style: "destructive", // Indicate a destructive action
         },
@@ -152,7 +152,7 @@ const Profile = () => {
         };
         console.log("Set to:", changedSetting);
         updateUserData(updatedUserData);
-        upsertData(uid, userData);
+        upsertData(uid, updatedUserData);
         return updatedUserData;
       });
   };
@@ -169,7 +169,7 @@ const Profile = () => {
       };
       console.log("Set to:", newCurrency);
       updateUserData(updatedUserData);
-      upsertData(uid, userData);
+      upsertData(uid, updatedUserData);
       return updatedUserData;
     });
   };

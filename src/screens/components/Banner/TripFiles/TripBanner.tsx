@@ -33,7 +33,7 @@ const TripBanner: React.FC<TripBannerProps> = ({ data }) => {
       trips.set(data.trip, updatedData);
       const updatedTrips = { ...prevUserData, trips: trips };
       updateUserData(updatedTrips);
-      upsertData(uid, userData);
+      upsertData(uid, updatedTrips);
       return updatedTrips;
     });
     setIsEditing(false); // Close the modal after saving
@@ -44,7 +44,7 @@ const TripBanner: React.FC<TripBannerProps> = ({ data }) => {
       trips.delete(data.trip);
       const updatedUserData = { ...prevUserData, trips: trips };
       updateUserData(updatedUserData);
-      upsertData(uid, userData);
+      upsertData(uid, updatedUserData);
       return updatedUserData;
     });
     setIsEditing(false); // Close the modal after saving};
