@@ -210,69 +210,39 @@ const Map = () => {
               mapType={"hybrid"}
               showsUserLocation={true}
             >
-              {selectedDay == ""
-                ? days.map((day, index) => (
-                    <Polygon
-                      key={day.toString() + index}
-                      coordinates={[
-                        ...day
-                          .map((event) => {
-                            return {
-                              latitude: event.geometry.lat,
-                              longitude: event.geometry.lng,
-                            };
-                          })
-                          .filter(
-                            (geoemtry) =>
-                              geoemtry.latitude != 0 || geoemtry.longitude != 0
-                          ),
-                        {
-                          latitude: day[0].geometry.lat,
-                          longitude: day[0].geometry.lng,
-                        },
-                      ]}
-                      strokeColor="red"
-                      fillColor="rgba(122,0,0,0.5)"
-                      strokeWidth={2}
-                    ></Polygon>
-                  ))
-                : events
-                    .filter(
-                      (value) =>
-                        value.geometry.lat != 0 || value.geometry.lng != 0
-                    )
-                    .map((value, index) => (
-                      <>
-                        <Marker
-                          title={index + 1 + ". " + value.title}
-                          key={
-                            value.toString() + "marker-" + index + value.title
-                          }
-                          coordinate={{
+              {events
+                .filter(
+                  (value) => value.geometry.lat != 0 || value.geometry.lng != 0
+                )
+                .map((value, index) => (
+                  <>
+                    <Marker
+                      title={index + 1 + ". " + value.title}
+                      key={value.toString() + "marker-" + index + value.title}
+                      coordinate={{
+                        latitude: value.geometry.lat,
+                        longitude: value.geometry.lng,
+                      }}
+                    />
+                    <Polyline
+                      key={"polyline-" + index + value.title}
+                      coordinates={events
+                        .filter(
+                          (value) =>
+                            value.geometry.lat != 0 || value.geometry.lng != 0
+                        )
+                        .map((value) => {
+                          return {
                             latitude: value.geometry.lat,
                             longitude: value.geometry.lng,
-                          }}
-                        />
-                        <Polyline
-                          key={"polyline-" + index + value.title}
-                          coordinates={events
-                            .filter(
-                              (value) =>
-                                value.geometry.lat != 0 ||
-                                value.geometry.lng != 0
-                            )
-                            .map((value) => {
-                              return {
-                                latitude: value.geometry.lat,
-                                longitude: value.geometry.lng,
-                              };
-                            })}
-                          strokeWidth={3}
-                          strokeColor="red"
-                          lineCap={"round"}
-                        />
-                      </>
-                    ))}
+                          };
+                        })}
+                      strokeWidth={3}
+                      strokeColor="red"
+                      lineCap={"round"}
+                    />
+                  </>
+                ))}
             </MapView>
           </View>
         </View>

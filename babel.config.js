@@ -1,12 +1,15 @@
-module.exports = function(api) {
+module.exports = function (api) {
+  const isTest = api.env("test");
   api.cache(true);
   return {
     presets: [
-      'babel-preset-expo'
+      "babel-preset-expo",
+      ["@babel/preset-env", { targets: { node: "current" } }],
+      "@babel/preset-typescript",
     ],
     plugins: [
       // Include reanimated last in plugin order
-      'react-native-reanimated/plugin'
+      "react-native-reanimated/plugin",
     ],
   };
 };

@@ -128,13 +128,21 @@ const Login = () => {
         }}
       >
         <SafeAreaView style={styles.container}>
-          <Image
-            style={styles.logo}
-            source={require("../../../assets/images/logo.png")}
-          />
           <View
             style={{
-              flexGrow: 1,
+              flex: 3,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Image
+              style={styles.logo}
+              source={require("../../../assets/images/logo.png")}
+            />
+          </View>
+          <View
+            style={{
               width: Dimensions.get("window").width,
               alignItems: "center",
               justifyContent: "center",
@@ -176,40 +184,9 @@ const Login = () => {
               }}
             >
               <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
-              <View>
-                <Text
-                  style={{
-                    color: "black",
-                    textAlign: "center",
-                    fontFamily: "Arimo-Regular",
-                    marginHorizontal: "2.5%",
-                  }}
-                >
-                  Or
-                </Text>
-              </View>
-              <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
-            </View>
-            <View style={{ margin: 20 }}>
-              <FontAwesome.Button
-                name="google"
-                color="white"
-                backgroundColor="#558AED"
-                onPress={handleGoogleLogin}
-              >
-                Login with Google
-              </FontAwesome.Button>
-              <View style={{ margin: 5 }}></View>
-              <FontAwesome.Button
-                name="facebook"
-                color="white"
-                backgroundColor="#425E9A"
-                onPress={pressFacebookLoginButton}
-              >
-                Login with Facebook
-              </FontAwesome.Button>
             </View>
           </View>
+          <View style={{ flex: 2 }} />
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={styles.redirect_text}>Don't have an account? </Text>
             <CustomButton
@@ -241,8 +218,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     resizeMode: "contain",
-    width: "50%",
-    height: "20%",
+    width: "60%",
+    height: "100%",
     marginTop: "5%",
   },
   error_container_empty: {

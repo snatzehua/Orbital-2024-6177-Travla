@@ -340,18 +340,6 @@ const Home = () => {
             </ScrollView>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}></View>
-          {true ? (
-            <View style={{ width: "95%" }}>
-              <AddButton
-                onPressFunction={() => {
-                  retrieveLastUpdated(uid).then((value) => {
-                    console.log(value);
-                  });
-                }}
-                text={"debuggerButton"}
-              />
-            </View>
-          ) : null}
           <MenuBar toggleModal={toggleModal} />
         </SafeAreaView>
       </View>
